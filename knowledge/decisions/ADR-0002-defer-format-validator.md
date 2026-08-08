@@ -1,9 +1,25 @@
+---
+type: ADR
+title: Defer a knowledge base format validator
+description: Superseded — conventions were left to review rather than enforced by a ported PowerShell validator.
+tags: [knowledge, tooling, adr]
+status: deprecated
+superseded_by: ADR-0004
+generated: { by: claude-code/2026-08, at: 2026-08-08T22:35:00Z }
+sources:
+  - id: issue-8
+    resource: https://github.com/urario/Yurai/issues/8
+    title: "Issue #8: bootstrap the knowledge base"
+---
+
 # ADR-0002: Defer a knowledge base format validator
 
-- **Status:** Accepted
-- **Date:** 2026-08-08
-- **Requirements:** —
-- **Issue:** [#8](https://github.com/urario/Yurai/issues/8)
+> **Superseded by [ADR-0004](ADR-0004-conformance-check-in-ci.md).** Adopting an external
+> format ([ADR-0003](ADR-0003-adopt-open-knowledge-format.md)) removed the second of the
+> two arguments below: the conventions are no longer Yurai's own guess, so enforcing them
+> no longer risks freezing an unproven rule. The rest of the reasoning survives in
+> ADR-0004, which keeps the deferral but ties it to CI rather than to experience. The
+> text below is left as it was written.
 
 ## Context
 

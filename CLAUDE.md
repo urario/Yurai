@@ -62,7 +62,7 @@ say what you would do instead. Distinguish blocking findings from suggestions.
 | `AGENTS.md` | Collaboration contract (all agents) |
 | `CONTRIBUTING.md` | Contributor-facing guide |
 | `docs/project-execution-plan.md` | Phases, issue map, dependency graph |
-| `knowledge/` | Requirements (`RQ-###`), ADRs, design documents, process conventions |
+| `knowledge/` | OKF v0.2 bundle: requirements (`RQ-###`), ADRs, design documents, process conventions |
 | `src/Yurai/` | Dependency-free `netstandard2.0` library |
 | `tests/Yurai.Tests/` | `net8.0` unit tests |
 | `Yurai.sln` | Library and test solution |

@@ -1,46 +1,43 @@
+---
+okf_version: "0.2"
+---
+
 # Yurai knowledge base
 
 Durable knowledge about Yurai: what the library is required to do, why it is built the
-way it is, and the conventions the project works by. If you need to understand a
-decision that was made before you arrived, it is here or it was not written down.
+way it is, and the conventions the project works by. Issues hold working state, pull
+requests hold changes and their verification, and this bundle holds what stays true after
+both are closed.
 
-Yurai keeps information in three places, and the split is deliberate:
+# Requirements
 
-| Place | Holds | Lifetime |
-|---|---|---|
-| **Issues** | What is being worked on now, and the discussion that shapes it | Until the issue closes |
-| **Pull requests** | What changed, why, and how it was verified | Frozen at merge; read as history |
-| **`knowledge/`** | Requirements, decisions, and conventions that outlive both | Maintained — kept true or explicitly retired |
+* [Requirements registry](requirements/registry.md) - The single registry of `RQ-###` identifiers, with priorities, statuses, and acceptance criteria. Empty until [#12](https://github.com/urario/Yurai/issues/12) fills it.
+* [requirements/](requirements/index.md) - The directory.
 
-A decision that only exists in an issue comment is lost the moment the issue scrolls out
-of view. A decision in `knowledge/` is one a stranger can find. The rules for what goes
-where are in [`process/knowledge-policy.md`](process/knowledge-policy.md).
+# Decisions
 
-## Directories
+* [ADR-0001: A lightweight knowledge base with RQ-ID traceability](decisions/ADR-0001-lightweight-knowledge-base.md) - Requirements are the only identified artifacts, traceability is derived by search, and decision records are immutable.
+* [ADR-0002: Defer a knowledge base format validator](decisions/ADR-0002-defer-format-validator.md) - Superseded by ADR-0004.
+* [ADR-0003: Adopt the Open Knowledge Format for the knowledge base](decisions/ADR-0003-adopt-open-knowledge-format.md) - This bundle is OKF v0.2 rather than a house style.
+* [ADR-0004: Check knowledge base conformance in CI, not with a ported validator](decisions/ADR-0004-conformance-check-in-ci.md) - What gets checked mechanically, and when.
+* [decisions/](decisions/index.md) - The directory, including the ADR template.
 
-| Directory | Contents | Start here |
-|---|---|---|
-| [`requirements/`](requirements/) | The requirements specification — `RQ-###` identifiers, priorities, acceptance criteria | [requirements/index.md](requirements/index.md) |
-| [`decisions/`](decisions/) | Architecture decision records (ADRs) — one decision per file | [decisions/index.md](decisions/index.md) |
-| [`design/`](design/) | Architecture and design documents that span more than one ADR | [design/index.md](design/index.md) |
-| [`process/`](process/) | How the project works: knowledge policy, traceability, testing strategy | [process/knowledge-policy.md](process/knowledge-policy.md) |
+# Design
 
-## Conventions in force
+* [design/](design/index.md) - Architecture documents. Empty until [#17](https://github.com/urario/Yurai/issues/17).
 
-- [Knowledge policy](process/knowledge-policy.md) — what belongs here, file naming,
-  document headers, how a document is changed or retired.
-- [Traceability](process/traceability.md) — the `RQ-###` requirement identifiers and how
-  design, code, and tests refer back to them.
+# Process
 
-## Not here
+* [Knowledge policy](process/knowledge-policy.md) - What belongs in this bundle, how documents are structured, and how they change.
+* [Traceability](process/traceability.md) - The `RQ-###` identifiers, and how design, code, and tests refer back to them.
 
-Collaboration rules, decision rights, and the language policy live in
-[`AGENTS.md`](../AGENTS.md); the contributor-facing guide is
-[`CONTRIBUTING.md`](../CONTRIBUTING.md); phase ordering and the issue map are in
-[`docs/project-execution-plan.md`](../docs/project-execution-plan.md). This knowledge
-base points at them rather than restating them — two copies of a rule become two
-different rules.
+# Elsewhere in the repository
 
-Everything under `knowledge/` is written in English, like the rest of the published
-documentation. Issues and pull requests are Japanese by default
+* [AGENTS.md](../AGENTS.md) - Roles, decision rights, agent-to-agent communication, and the language policy.
+* [CONTRIBUTING.md](../CONTRIBUTING.md) - The contributor-facing guide: how to build, test, and open a pull request.
+* [docs/project-execution-plan.md](../docs/project-execution-plan.md) - Phases, the issue map, and the dependency graph.
+
+This bundle points at those rather than restating them — two copies of a rule become two
+different rules. Everything here is written in English, like the rest of the published
+documentation; issues and pull requests are Japanese by default
 ([AGENTS.md §4](../AGENTS.md#4-language-policy)).

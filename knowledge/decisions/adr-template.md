@@ -1,17 +1,39 @@
+---
+type: Template
+title: ADR template
+description: Skeleton for a new architecture decision record, with the frontmatter and the three sections to fill in.
+tags: [template, adr]
+status: stable
+generated: { by: claude-code/2026-08, at: 2026-08-08T22:49:00Z }
+---
+
+# ADR template
+
+Copy the block below into `knowledge/decisions/ADR-NNNN-short-slug.md`, taking the next
+unused number from [the index](index.md), and fill it in. Delete any section that has
+nothing to say — an empty heading is worse than a missing one.
+
+`status` is what the record will be once the pull request is merged: `stable` for a
+decision the pull request puts in force, `draft` for one opened to collect feedback
+first. The rest of the conventions — numbering, actors, supersession, granularity — are
+in [the knowledge policy](../process/knowledge-policy.md).
+
+````markdown
+---
+type: ADR
+title: Short statement of the decision
+description: One sentence a reader can use to decide whether to open the file.
+tags: [area, adr]
+status: stable
+requirements: [RQ-NNN]
+generated: { by: claude-code/2026-08, at: 2026-08-08T00:00:00Z }
+sources:
+  - id: issue-N
+    resource: https://github.com/urario/Yurai/issues/N
+    title: "Issue #N: what it asked for"
+---
+
 # ADR-NNNN: Short statement of the decision
-
-- **Status:** Proposed
-- **Date:** YYYY-MM-DD
-- **Requirements:** RQ-###, RQ-### (or `—`)
-- **Issue:** [#N](https://github.com/urario/Yurai/issues/N)
-
-<!--
-Copy this file to knowledge/decisions/ADR-NNNN-short-slug.md and fill it in.
-NNNN is the next unused number; check knowledge/decisions/index.md. Delete these
-comments and any section that has nothing to say — an empty heading is worse than a
-missing one. Status is what the record will be once the pull request is merged; see
-knowledge/process/knowledge-policy.md.
--->
 
 ## Context
 
@@ -33,3 +55,8 @@ is two ADRs.
 What follows from this, good and bad. Include the costs accepted — a record with only
 benefits is one where the trade-off was not examined. Note anything this constrains
 later, and what would have to be true to reopen it.
+````
+
+Omit `requirements` entirely when no requirement applies yet, rather than writing an
+empty list. `RQ-NNN` above is a placeholder that deliberately does not match a real
+identifier ([traceability](../process/traceability.md#the-identifier)).

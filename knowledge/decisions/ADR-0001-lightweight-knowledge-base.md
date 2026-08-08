@@ -1,9 +1,17 @@
-# ADR-0001: A lightweight knowledge base with RQ-ID traceability
+---
+type: ADR
+title: A lightweight knowledge base with RQ-ID traceability
+description: Requirements are the only identified artifacts, traceability is derived by search, and decision records are immutable.
+tags: [knowledge, traceability, adr]
+status: stable
+generated: { by: claude-code/2026-08, at: 2026-08-08T22:20:00Z }
+sources:
+  - id: issue-8
+    resource: https://github.com/urario/Yurai/issues/8
+    title: "Issue #8: bootstrap the knowledge base"
+---
 
-- **Status:** Accepted
-- **Date:** 2026-08-08
-- **Requirements:** — (the registry itself arrives with [#12](https://github.com/urario/Yurai/issues/12))
-- **Issue:** [#8](https://github.com/urario/Yurai/issues/8)
+# ADR-0001: A lightweight knowledge base with RQ-ID traceability
 
 ## Context
 

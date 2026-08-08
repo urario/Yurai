@@ -1,3 +1,16 @@
+---
+type: Process
+title: Traceability
+description: How a requirement stays connected to the design, code, and tests that satisfy it.
+tags: [process, requirements, traceability]
+status: stable
+generated: { by: claude-code/2026-08, at: 2026-08-08T22:49:00Z }
+sources:
+  - id: issue-8
+    resource: https://github.com/urario/Yurai/issues/8
+    title: "Issue #8: bootstrap the knowledge base"
+---
+
 # Traceability
 
 How a requirement stays connected to the design, code, and tests that satisfy it.
@@ -50,8 +63,8 @@ original is superseded and two new identifiers are registered; the old entry sta
 
 ## The registry
 
-[`knowledge/requirements/`](../requirements/index.md) holds the single registry of
-requirement identifiers. An identifier that is not in the registry does not exist, and
+[`knowledge/requirements/registry.md`](../requirements/registry.md) is the single
+registry of requirement identifiers. An identifier that is not in the registry does not exist, and
 the registry is the only place an identifier is defined. Each entry carries:
 
 | Field | Values |
@@ -70,7 +83,7 @@ recurring debate; an unwritten one is a suggestion.
 
 | From | How |
 |---|---|
-| **ADR / design document** | The `Requirements:` line in the document header |
+| **ADR / design document** | The `requirements` key in the document's frontmatter |
 | **Pull request** | The requirement identifiers in the description, alongside `Refs #N` |
 | **Test** | `[Trait("RQ", "RQ-NNN")]` on the test that establishes the requirement |
 | **Code** | A comment, only where the connection is not obvious from the surrounding code |
