@@ -4,7 +4,7 @@ title: Git policy
 description: Branch naming, commit message style, and merge conditions for changes to Yurai.
 tags: [process, git, governance]
 status: draft
-generated: { by: claude-code/2.1.226, at: 2026-08-08T00:00:00Z }
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:45:00Z }
 sources:
   - id: issue-4
     resource: https://github.com/urario/Yurai/issues/4
@@ -24,6 +24,7 @@ commits are named, and the concrete conditions a merge checks.
 
 ## Branch naming
 
+When the person or agent opening the branch chooses its name, it is
 `<prefix>/<kebab-case-summary>`, branched from `main`:
 
 | Prefix | For |
@@ -36,6 +37,17 @@ commits are named, and the concrete conditions a merge checks.
 
 `fix/negative-round-digits`, `docs/git-policy`. The prefix says what kind of change is on
 the branch; the summary is a few words, not a restatement of the issue title.
+
+**Platform-assigned branch names are an exception, not a violation.** A hosted agent
+session (for example, Claude Code on the web) creates its working branch before the
+agent sees the task, names it outside the agent's control — `claude/<slug>-<random>`,
+as on this pull request itself — and the agent cannot rename it mid-session without
+losing the session's push target. Such names are accepted as-is; the five prefixes above
+apply whenever the contributor, human or agent, is the one choosing the name. A branch
+name a validator or branch rule would reject on sight is one a *free* choice produced —
+`agent/issue-5-templates` (#41) is the example to not repeat, not `claude/...`. Any
+future automated check on branch names allows both: the five prefixes, and the naming
+scheme of a known hosted-agent platform.
 
 ## Commit messages
 
@@ -51,9 +63,14 @@ imperative mood, no trailing period.
 | `chore` | Maintenance with no behavior change |
 | `refactor` | Restructuring with no behavior change |
 
-The type set mirrors the branch prefixes above; a `fix/` branch is expected to carry
-`fix:` commits, not the other way around — a branch may accumulate a `test:` commit
-fixing its own test before the `fix:` lands, and that is fine.
+Branch prefix and commit type are two different axes, not a mirror of each other: the
+branch prefix names the pull request's overall intent, and the commit type names one
+commit's own. A `fix/` branch commonly carries a `test:` commit that pins down the
+failing case before the `fix:` commit that resolves it, and may pick up a `refactor:`
+commit along the way — none of that is a policy violation, because `refactor` has no
+corresponding branch prefix at all. A branch's prefix is chosen once, when it is opened;
+what it constrains is the pull request's title and scope, not the type of every commit
+inside it.
 
 **Referencing a requirement in a commit body** — a line such as `Refs RQ-NNN` — is part
 of this policy but not active yet: the requirement registry it would point to does not
@@ -71,10 +88,21 @@ A pull request merges when both hold:
   ([AGENTS.md §5](../../AGENTS.md#5-the-pull-request-is-the-quality-gate)). CI itself
   does not exist yet ([#6](https://github.com/urario/Yurai/issues/6)); until it does,
   "green" means the build and test commands in
-  [CONTRIBUTING.md](../../CONTRIBUTING.md#build-and-test) were run locally and reported.
+  [CONTRIBUTING.md](../../CONTRIBUTING.md#build-and-test) were run locally and reported
+  — **for a pull request that changes anything under `src/` or `tests/`.** A pull
+  request that touches neither (documentation, `knowledge/`, this file) reports
+  "not applicable" with the one-line reason instead of running commands that have
+  nothing of the change to build or test. This exemption is the whole exception: a
+  pull request that mixes a documentation change with even one line under `src/` or
+  `tests/` runs the commands.
 - **Review comments are resolved or explicitly accepted.** "Resolved" means addressed by
-  a pushed change; "explicitly accepted" means the author replied with why not, and the
-  reviewer did not press further. A comment that is silently left unanswered is neither.
+  a pushed change. "Explicitly accepted" means a positive, GitHub-visible record that the
+  reviewer agreed not to pursue it further — the reviewer replies saying so and resolves
+  the thread, or, failing that, the maintainer overrides with the reason recorded in the
+  thread. Silence is never acceptance: an unanswered reply from the author, or a thread
+  left unresolved with no reviewer response, blocks merge exactly like an unaddressed
+  comment. The state has to be one a validator could read off GitHub, not one that
+  depends on knowing nobody objected.
 
 The maintainer merges — never the pull request's own author
 ([AGENTS.md §5](../../AGENTS.md#5-the-pull-request-is-the-quality-gate)).
