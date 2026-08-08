@@ -134,6 +134,7 @@ Milestone / GitHub Project は使わず、ラベル+Epic のチェックリス�
 
 - **#3(名称衝突調査)が最優先ブロッカー**。決着まで Phase 2 実装に着手しない。基盤・Phase 1 は名称仮置きで並行可。
 - プロセスは Surveyor リポジトリの運用資産を **OSSライブラリ規模に軽量化** して移植する(RQ-ID・OKF・TDD/ミューテーション・PR品質ゲートは維持、フルの成果物ID体系は採用しない)。
+- **永続的な判断は `knowledge/` に置く**(#8 で構成確立)。Issue=作業状態 / PR=変更差分と検証 / `knowledge/`=Issue と PR を越えて残る要求・判断・規約、という三分割。規約は [`knowledge/process/knowledge-policy.md`](../knowledge/process/knowledge-policy.md)、RQ-ID 運用は [`knowledge/process/traceability.md`](../knowledge/process/traceability.md)。
 - 提案書の制約の正本: 新規性主張は §6.4 の1文まで / 禁止文言 §9.2("show your work"・"audit-ready"・"first/世界初"・"provenance semiring")/ 非目標 §7.2。詳細は #12 の要求仕様書に転記する。
 - 完了条件: 全子Issueが close され、#34 で継続判断が記録されていること。
 

@@ -44,6 +44,9 @@ Two habits matter more than the rest:
 - Don't close `gate` issues, and don't merge — that is the maintainer's call.
 - When you touch the plan's reality (scope, ordering, dependencies), update
   `docs/project-execution-plan.md` in the same pull request.
+- A decision that outlives its issue belongs in [`knowledge/`](knowledge/index.md) — an
+  ADR for a decision, the requirements registry for an `RQ-###`. The rules are in
+  [`knowledge/process/knowledge-policy.md`](knowledge/process/knowledge-policy.md).
 
 ## Reviewing code
 
@@ -59,6 +62,7 @@ say what you would do instead. Distinguish blocking findings from suggestions.
 | `AGENTS.md` | Collaboration contract (all agents) |
 | `CONTRIBUTING.md` | Contributor-facing guide |
 | `docs/project-execution-plan.md` | Phases, issue map, dependency graph |
+| `knowledge/` | Requirements (`RQ-###`), ADRs, design documents, process conventions |
 | `src/Yurai/` | Dependency-free `netstandard2.0` library |
 | `tests/Yurai.Tests/` | `net8.0` unit tests |
 | `Yurai.sln` | Library and test solution |

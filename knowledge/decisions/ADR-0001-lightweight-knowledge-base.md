@@ -1,0 +1,97 @@
+# ADR-0001: A lightweight knowledge base with RQ-ID traceability
+
+- **Status:** Accepted
+- **Date:** 2026-08-08
+- **Requirements:** — (the registry itself arrives with [#12](https://github.com/urario/Yurai/issues/12))
+- **Issue:** [#8](https://github.com/urario/Yurai/issues/8)
+
+## Context
+
+Yurai is developed by a maintainer working with two AI agents that never talk to each
+other: everything one knows, the other has to read off GitHub
+([AGENTS.md §3](../../AGENTS.md#3-agents-communicate-through-github-never-directly)).
+That makes written records load-bearing rather than ceremonial. An agent picking up
+[#17](https://github.com/urario/Yurai/issues/17) six weeks from now sees the repository
+and the issue tracker, and nothing else.
+
+Issues and pull requests alone do not carry that weight. An issue is a working surface
+and stops being read once it closes; a pull request describes one change and is frozen
+the moment it merges. Neither answers "why is the API shaped like this" for someone who
+arrives later.
+
+The process assets being adapted here come from a larger internal project (Surveyor),
+which identifies every artifact class — design, implementation, unit test, integration
+test, traceability record — and validates the result with a script. That system is built
+for a much bigger surface than a dependency-free `netstandard2.0` library with a
+deliberately small public API. Yurai's constraints cut the other way: the whole project
+is meant to be understandable in an afternoon, and process that outweighs the code it
+governs would contradict what the library is trying to be.
+
+So the question is not whether to write things down. It is how little structure is
+enough to keep design decisions findable and requirements connected to the tests that
+prove them.
+
+## Decision
+
+Yurai keeps a `knowledge/` directory with four subdirectories — `requirements/`,
+`decisions/`, `design/`, `process/` — described by
+[`knowledge/index.md`](../index.md) and governed by
+[the knowledge policy](../process/knowledge-policy.md). Information is split three ways:
+issues hold working state, pull requests hold changes and their verification, and
+`knowledge/` holds what stays true after both are closed.
+
+Four choices inside that, each of which had a heavier alternative:
+
+**Requirements are the only identified artifacts.** `RQ-###` identifies a requirement;
+design documents, modules, and test cases have no identifiers of their own. They refer
+to requirements instead, by the mechanism in
+[traceability](../process/traceability.md). The full artifact-identifier system
+(`DES`/`IMP`/`UT`/`IT`/`TRC`) is not adopted. It buys precise cross-referencing at the
+cost of an identifier on every artifact and a discipline to keep them consistent; at
+this size, the pull request and the ADR already say what those identifiers would say,
+and a scheme nobody maintains is worse than no scheme.
+
+**Traceability is derived, not maintained.** No hand-written matrix. The link from a
+requirement to the test that establishes it is a `[Trait("RQ", "RQ-###")]` in the test,
+found by search or by `dotnet test --filter`. A matrix is a second source of truth that
+is only correct on the day it is written.
+
+**Decisions are recorded one per file, and are never rewritten.** An ADR that no longer
+holds is superseded by a new one and keeps its text. The abandoned reasoning is the part
+future readers need most — it is what tells them whether the context has changed.
+
+**No format validator is added now.** The conventions in the knowledge policy are
+enforced by review rather than by a script. Porting Surveyor's `Validate-Okf.ps1` would
+add a PowerShell dependency to a project whose toolchain is otherwise plain
+cross-platform `dotnet`, and would enforce conventions that have not yet been used
+enough to know whether they are the right ones. This is a deferral, not a rejection: if
+drift shows up in review once several documents exist, a check runs cheaply in CI
+([#6](https://github.com/urario/Yurai/issues/6)) and the maintainer can reopen it.
+
+## Consequences
+
+Design rationale gets a home that survives issue closure, and a newcomer has one
+entry point instead of an issue archive to read. Requirements connect to tests through a
+single convention that costs one attribute per test.
+
+The costs are real and accepted:
+
+- **Coverage is only as good as the tagging.** Nothing forces a test to carry its
+  requirement trait, so a P0 requirement can look untested when it is merely untagged.
+  The gate reviews ([#29](https://github.com/urario/Yurai/issues/29)) are where that is
+  caught, which means it is caught late rather than continuously.
+- **Judgement is left to review.** Without a validator, a document with a malformed
+  header or a missing status reaches `main` if no reviewer notices. This is the deferral
+  above, working as intended, and it is the first thing to revisit if it starts costing
+  more than it saves.
+- **Cross-referencing is coarser** than an identifier-per-artifact scheme would give.
+  Asking "which code satisfies RQ-014" is answered by reading the tests tagged with it,
+  not by a lookup.
+- **`knowledge/` is now a maintenance obligation.** A stale knowledge base is worse than
+  none, because it is believed. The policy's rule — the pull request that changes
+  reality updates the document in the same pull request — is what keeps that from
+  happening, and it only works if reviewers hold it.
+
+The residual risk named in [#8](https://github.com/urario/Yurai/issues/8) stands: this
+may prove too thin. The Phase 2 gate review is where that gets examined against how the
+project actually ran, with the heavier options above still available one ADR at a time.
