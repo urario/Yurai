@@ -102,7 +102,8 @@ Reply in the language of the thread you are in.
 
 Nothing reaches `main` except through a pull request.
 
-- No direct commits or pushes to `main` (branch protection: #4).
+- No direct commits or pushes to `main`. The rule holds now; branch protection will
+  enforce it mechanically once configured (#4).
 - One pull request does one thing, and links its issue (`Refs #N` / `Closes #N`).
 - Once CI exists (#6), all required checks pass **before merge**. Not before review —
   a draft pull request with red or absent CI is a legitimate way to ask for design

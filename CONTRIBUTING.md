@@ -28,7 +28,8 @@ English and you will get an English answer.
 
 ## Pull requests
 
-1. Branch from `main`. `main` is protected; all changes arrive by pull request.
+1. Branch from `main`. Every change arrives by pull request — no direct pushes, and
+   branch protection will enforce that once it is configured (#4).
 2. Keep it to one concern. Several small pull requests review faster than one large one.
 3. Link the issue: `Refs #123`, or `Closes #123` when the pull request completes it.
 4. Write tests. Yurai is developed test-first — a change in behavior comes with a change
@@ -50,7 +51,8 @@ missing is welcome; one that quietly narrows the scope is not.
   dependency needs to argue for it in the issue first.
 - Comments explain *why*. The code already says what.
 
-Formatting is enforced in CI; run the formatter locally before pushing.
+Once CI is configured (#6) formatting is enforced there, so run the formatter locally
+before pushing — until then, match the style of the surrounding code.
 
 ## Developed with AI agents
 
