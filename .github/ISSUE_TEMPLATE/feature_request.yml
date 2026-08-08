@@ -1,0 +1,67 @@
+name: "機能要望 / Feature request"
+description: "新しい機能や改善を提案します / Suggest a feature or improvement"
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ご提案ありがとうございます。日本語または英語で記入してください。
+        Thanks for your proposal. Japanese and English are both welcome.
+
+        このフォームから作成した Issue には `enhancement` ラベルが自動で付きます。
+        Issues created with this form automatically receive the `enhancement` label.
+
+        **非目標 / Explicit non-goals**
+
+        Yurai は Sensitivity（感度分析）や Attribution（寄与額の算出）を目的としません。これらを前提とした機能要望は、Yurai の対象範囲とは分けて検討します。
+        Yurai does not aim to provide sensitivity analysis or attribution/contribution-amount calculation. Requests that depend on those capabilities are evaluated separately from Yurai's intended scope.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "解決したい問題 / Problem to solve"
+      description: "機能ではなく、利用者が直面している問題から説明してください。 / Start with the user problem rather than the proposed feature."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "提案内容 / Proposed solution"
+      description: "望ましい振る舞いと利用例を記載してください。 / Describe the desired behavior and an example use case."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "代替案 / Alternatives considered"
+      description: "検討した代替手段や現在の回避策を記載してください。 / Describe alternatives or current workarounds."
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope_impact
+    attributes:
+      label: "対象範囲・互換性への影響 / Scope and compatibility impact"
+      description: "公開 API、依存関係、性能、互換性への想定影響を記載してください。 / Note expected effects on the public API, dependencies, performance, or compatibility."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: non_goals
+    attributes:
+      label: "非目標の確認 / Non-goal acknowledgement"
+      options:
+        - label: "この提案は Sensitivity（感度分析）または Attribution（寄与額の算出）の実装を前提としていません。 / This proposal does not assume implementation of sensitivity analysis or attribution/contribution-amount calculation."
+          required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "補足 / Additional context"
+      description: "関連 Issue、資料、サンプルなどがあれば記載してください。 / Add related issues, references, or examples."
+    validations:
+      required: false

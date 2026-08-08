@@ -1,0 +1,49 @@
+name: "質問 / Question"
+description: "使い方や仕様について質問します / Ask about usage or behavior"
+title: "[Question]: "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ご質問ありがとうございます。日本語または英語で記入してください。
+        Thanks for your question. Japanese and English are both welcome.
+
+        このフォームから作成した Issue には `question` ラベルが自動で付きます。
+        Issues created with this form automatically receive the `question` label.
+
+        セキュリティ上の問題は公開 Issue に記載せず、リポジトリの Security Advisory から非公開で報告してください。
+        Do not disclose security vulnerabilities in a public issue. Report them privately through the repository's Security Advisory page.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: "質問 / Question"
+      description: "知りたいことを具体的に記載してください。 / State what you want to know as specifically as possible."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "背景・目的 / Context and goal"
+      description: "何を実現しようとしているかを記載してください。 / Explain what you are trying to accomplish."
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: "試したこと / What you tried"
+      description: "確認した資料、試したコード、得られた結果を記載してください。 / Include documentation consulted, code tried, and results."
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "補足 / Additional context"
+      description: "関連 Issue、コード、ログなどがあれば記載してください。 / Add related issues, code, or logs."
+    validations:
+      required: false
