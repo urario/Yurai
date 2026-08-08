@@ -12,6 +12,7 @@ behind it still holds.
 | ID | Decision | Status | Date |
 |---|---|---|---|
 | [ADR-0001](ADR-0001-lightweight-knowledge-base.md) | A lightweight knowledge base with RQ-ID traceability | Accepted | 2026-08-08 |
+| [ADR-0002](ADR-0002-defer-format-validator.md) | Defer a knowledge base format validator | Accepted | 2026-08-08 |
 
 Add a row when you add a record. This table is the index; the files are the record.
 
@@ -24,6 +25,13 @@ Add a row when you add a record. This table is the index; the files are the reco
    an ADR without a rejected alternative usually records a habit rather than a decision.
 3. Open a pull request that links the issue, and add the row above in the same pull
    request.
+
+**One decision per record**, and the test for whether you have one is supersession: if
+part of a record could plausibly be reversed while the rest stands, that part is its own
+ADR. ADR-0001 and ADR-0002 came out of a single pull request and were split on exactly
+that basis — the tooling question will be revisited long before the structure is. Several
+aspects of one decision may share a record when removing any of them would break the
+others; several decisions that merely arrived together may not.
 
 `Status` in the pull request is the status the record will have once merged; the
 maintainer's merge is the acceptance. Which decisions are the maintainer's is

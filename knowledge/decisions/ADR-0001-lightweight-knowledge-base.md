@@ -40,7 +40,9 @@ Yurai keeps a `knowledge/` directory with four subdirectories — `requirements/
 issues hold working state, pull requests hold changes and their verification, and
 `knowledge/` holds what stays true after both are closed.
 
-Four choices inside that, each of which had a heavier alternative:
+Three choices inside that, each of which had a heavier alternative. They are recorded
+together because they are one structural decision seen from three sides — take away any
+one of them and the other two stop making sense:
 
 **Requirements are the only identified artifacts.** `RQ-###` identifies a requirement;
 design documents, modules, and test cases have no identifiers of their own. They refer
@@ -52,21 +54,18 @@ this size, the pull request and the ADR already say what those identifiers would
 and a scheme nobody maintains is worse than no scheme.
 
 **Traceability is derived, not maintained.** No hand-written matrix. The link from a
-requirement to the test that establishes it is a `[Trait("RQ", "RQ-###")]` in the test,
-found by search or by `dotnet test --filter`. A matrix is a second source of truth that
-is only correct on the day it is written.
+requirement to the test that establishes it is a requirement trait on the test, found by
+search or by `dotnet test --filter`. A matrix is a second source of truth that is only
+correct on the day it is written.
 
 **Decisions are recorded one per file, and are never rewritten.** An ADR that no longer
 holds is superseded by a new one and keeps its text. The abandoned reasoning is the part
 future readers need most — it is what tells them whether the context has changed.
 
-**No format validator is added now.** The conventions in the knowledge policy are
-enforced by review rather than by a script. Porting Surveyor's `Validate-Okf.ps1` would
-add a PowerShell dependency to a project whose toolchain is otherwise plain
-cross-platform `dotnet`, and would enforce conventions that have not yet been used
-enough to know whether they are the right ones. This is a deferral, not a rejection: if
-drift shows up in review once several documents exist, a check runs cheaply in CI
-([#6](https://github.com/urario/Yurai/issues/6)) and the maintainer can reopen it.
+Whether these conventions are also enforced by a script is a separate question, decided
+separately in [ADR-0002](ADR-0002-defer-format-validator.md) — it is the part of this
+design most likely to change on its own, and binding it to the structure above would
+mean superseding the structure to revisit the tooling.
 
 ## Consequences
 
@@ -80,13 +79,14 @@ The costs are real and accepted:
   requirement trait, so a P0 requirement can look untested when it is merely untagged.
   The gate reviews ([#29](https://github.com/urario/Yurai/issues/29)) are where that is
   caught, which means it is caught late rather than continuously.
-- **Judgement is left to review.** Without a validator, a document with a malformed
-  header or a missing status reaches `main` if no reviewer notices. This is the deferral
-  above, working as intended, and it is the first thing to revisit if it starts costing
-  more than it saves.
 - **Cross-referencing is coarser** than an identifier-per-artifact scheme would give.
-  Asking "which code satisfies RQ-014" is answered by reading the tests tagged with it,
-  not by a lookup.
+  Asking which code satisfies a given requirement is answered by reading the tests
+  tagged with it, not by a lookup.
+- **Identifiers only work if nothing counterfeits them.** Because a search for
+  `RQ-` followed by three digits is the retrieval mechanism, an example identifier in a
+  document is indistinguishable from a real reference. The placeholder convention in
+  [traceability](../process/traceability.md#the-identifier) exists for that reason and
+  has to hold in every document written from here on.
 - **`knowledge/` is now a maintenance obligation.** A stale knowledge base is worse than
   none, because it is believed. The policy's rule — the pull request that changes
   reality updates the document in the same pull request — is what keeps that from

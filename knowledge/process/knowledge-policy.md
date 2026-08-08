@@ -49,23 +49,30 @@ closed, it belongs in `knowledge/`.**
 
 **File names** are lowercase kebab-case, ending in `.md`. ADRs are the exception: they
 carry their identifier so it survives grep and file listings —
-`ADR-0007-round-half-away-from-zero.md`.
+`ADR-NNNN-round-half-away-from-zero.md`, with `NNNN` replaced by the next unused number.
 
 **Every document starts with an H1 title.** ADRs, design documents, and the requirements
 registry then carry a short metadata list, because for those the status, the date, and
 the requirements served are part of the content:
 
 ```markdown
-# ADR-0007: Rounding mode for Round(digits, reason)
+# ADR-NNNN: Rounding mode for Round(digits, reason)
 
 - **Status:** Accepted
 - **Date:** 2026-09-01
-- **Requirements:** RQ-014, RQ-015
+- **Requirements:** RQ-NNN, RQ-MMM
 - **Issue:** [#18](https://github.com/urario/Yurai/issues/18)
 ```
 
+`ADR-NNNN`, `RQ-NNN`, and `RQ-MMM` above are placeholders, deliberately written so that
+they do not match a real identifier — see
+[traceability](traceability.md#the-identifier). The rule holds for both identifier
+schemes and in every document: a plausible-looking identifier in an example is a record
+that does not exist, and a search cannot tell the difference between it and a genuine
+reference.
+
 `Requirements` lists the `RQ-###` identifiers the document serves, or `—` when none
-apply yet (see [traceability](traceability.md)). `Status` is meaningful for ADRs; a
+apply yet. `Status` is meaningful for ADRs; a
 document whose only state is "current" — this policy, the directory indexes — omits it
 and the metadata list with it.
 
@@ -115,6 +122,6 @@ edited on `main` directly.
   wrong within a month and misleading thereafter. Traceability is derived by search —
   see [traceability](traceability.md).
 - **No format validator, for now.** The conventions above are checked by review. A
-  script that enforces them is worth adding only if drift actually appears; the question
-  is recorded in [ADR-0001](../decisions/ADR-0001-lightweight-knowledge-base.md) and is
-  the maintainer's to reopen.
+  script that enforces them is worth adding only if drift actually appears; the
+  reasoning, and what would make it worth revisiting, is in
+  [ADR-0002](../decisions/ADR-0002-defer-format-validator.md).
