@@ -3,8 +3,8 @@ type: ADR
 title: Adopt the Open Knowledge Format for the knowledge base
 description: knowledge/ is an OKF v0.2 bundle rather than a house style, conforming at the required level and adopting the optional families selectively.
 tags: [knowledge, okf, format, adr]
-status: stable
-generated: { by: claude-code/2026-08, at: 2026-08-08T22:49:00Z }
+status: draft
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: okf-spec
     resource: https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md
@@ -54,8 +54,9 @@ explanation they used to carry moved into the documents they link to.
 
 **Adopt the optional families where they say something true.** `status` (whose
 `draft`/`stable`/`deprecated` vocabulary maps onto an ADR's proposed, accepted, and
-superseded states), `generated` with the actor convention, `tags`, `description`, and
-`sources` — which is where the issue a document came from now lives.
+superseded states, and which describes the branch a reader is on rather than the state
+the pull request hopes to reach), `generated` with the actor convention, `tags`,
+`description`, and `sources` — which is where the issue a document came from now lives.
 
 **Leave out the families that would assert something false or unused.** `verified` is not
 written in advance, because the maintainer's merge is the confirmation and it happens
@@ -69,8 +70,17 @@ the policy excludes.
 resolve against the repository root and break for every human reader on GitHub. This is a
 choice inside the format, not a deviation from it.
 
-Two alternatives were rejected. **Keeping the house style** costs nothing today and gives
-up interoperability permanently, while re-deriving a vocabulary that already exists.
+**What this buys, stated narrowly.** OKF standardises the container and the metadata
+vocabulary: a consumer knows where frontmatter is, that `type` exists, and what `status`
+and `generated` mean. It does not standardise meaning. `type` values are producer-defined
+and registered nowhere, links carry no relationship type, and `requirements` and
+`superseded_by` are Yurai extensions. So the gain is structural — less bespoke parsing
+for any agent or tool that reads this bundle, and less vocabulary Yurai has to invent —
+while the semantics of a Yurai requirement or a Yurai decision stay Yurai's to own and to
+argue about.
+
+Two alternatives were rejected. **Keeping the house style** costs nothing today and keeps
+every reader on a bespoke parse, while re-deriving a vocabulary that already exists.
 **Borrowing the vocabulary without conforming** — frontmatter but essay indexes, say —
 pays most of the cost for none of the guarantee, since a consumer can then rely on
 nothing. Deferring the whole thing until [#12](https://github.com/urario/Yurai/issues/12)
@@ -81,8 +91,10 @@ nine documents convert in one pull request, and several dozen do not.
 
 An agent can now filter this bundle by `type`, `status`, or `tags` without bespoke
 parsing, and a reader gets a one-line `description` before opening anything. The
-conventions are specified elsewhere and versioned, so arguing about them is no longer
-Yurai's job.
+structural conventions are specified and versioned elsewhere, so the shape of a document
+is one fewer thing for Yurai to design and defend — the format is young, so the value
+today is a vendor-neutral convention to stand on rather than an ecosystem of tools
+already waiting to read it.
 
 The costs:
 

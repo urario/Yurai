@@ -1,9 +1,13 @@
 # Architecture decision records
 
-* [ADR-0001: A lightweight knowledge base with RQ-ID traceability](ADR-0001-lightweight-knowledge-base.md) - Accepted. Requirements are the only identified artifacts, traceability is derived by search, and decision records are immutable.
+* [ADR-0001: A lightweight knowledge base with RQ-ID traceability](ADR-0001-lightweight-knowledge-base.md) - Requirements are the only identified artifacts, traceability is derived by search, and decision records are immutable.
 * [ADR-0002: Defer a knowledge base format validator](ADR-0002-defer-format-validator.md) - Superseded by ADR-0004. Conventions were left to review rather than enforced by a ported PowerShell validator.
-* [ADR-0003: Adopt the Open Knowledge Format for the knowledge base](ADR-0003-adopt-open-knowledge-format.md) - Accepted. `knowledge/` is an OKF v0.2 bundle rather than a house style.
-* [ADR-0004: Check knowledge base conformance in CI, not with a ported validator](ADR-0004-conformance-check-in-ci.md) - Accepted. The deferral now ends when CI lands rather than when the conventions have proven themselves.
+* [ADR-0003: Adopt the Open Knowledge Format for the knowledge base](ADR-0003-adopt-open-knowledge-format.md) - `knowledge/` is an OKF v0.2 bundle rather than a house style.
+* [ADR-0004: Check knowledge base conformance in CI, not with a ported validator](ADR-0004-conformance-check-in-ci.md) - What gets checked mechanically once CI lands, and what stays with review.
+
+Each record's current state is its `status` in frontmatter, not a word repeated here — a
+status copied into a listing is wrong the first time it changes. A supersession is the
+exception: it never flips back, and a reader scanning this list needs to see it.
 
 # Writing one
 

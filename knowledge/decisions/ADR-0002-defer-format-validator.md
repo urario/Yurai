@@ -5,7 +5,7 @@ description: Superseded — conventions were left to review rather than enforced
 tags: [knowledge, tooling, adr]
 status: deprecated
 superseded_by: ADR-0004
-generated: { by: claude-code/2026-08, at: 2026-08-08T22:35:00Z }
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:01:00Z }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8

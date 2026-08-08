@@ -3,8 +3,8 @@ type: Process
 title: Knowledge policy
 description: What belongs in the Yurai knowledge bundle, how its documents are structured, and how they change.
 tags: [process, knowledge, okf]
-status: stable
-generated: { by: claude-code/2026-08, at: 2026-08-08T22:49:00Z }
+status: draft
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -82,9 +82,9 @@ type: ADR
 title: "Rounding mode for Round(digits, reason)"
 description: One sentence a reader can use to decide whether to open the file.
 tags: [rounding, decimal]
-status: stable
+status: draft
 requirements: [RQ-NNN, RQ-MMM]
-generated: { by: claude-code/2026-08, at: 2026-09-01T10:00:00Z }
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: issue-18
     resource: https://github.com/urario/Yurai/issues/18
@@ -117,15 +117,27 @@ reference.
 | `stable` | Ready for consumption (the default when absent) | Accepted — decided and in force |
 | `deprecated` | Kept for links and history, no longer current | Superseded — `superseded_by` names the replacement |
 
+It describes the document **as it stands on the branch you are reading**, never the state
+it is expected to reach — see [Status and lifecycle](#status-and-lifecycle) for what that
+means in practice.
+
 **Producer keys.** OKF tolerates additional fields, and Yurai defines two: `requirements`
 lists the `RQ-###` identifiers a document serves, and `superseded_by` names the record
 that replaced this one. Omit `requirements` rather than writing an empty list when none
 apply yet.
 
-**Actors** follow the OKF convention: `claude-code/<YYYY-MM>` and `codex/<YYYY-MM>` for
-the agents, `human:<github-id>` for a person, `process:<id>` for automation. The month
-is the version — the agents are continuously updated products, and pinning a model
-version in a document that outlives it would be precision without meaning.
+**Actors** follow the OKF convention: `human:<github-id>` for a person, `process:<id>`
+for automation, and `<producer>/<version>` for an agent — `claude-code/2.1.226`,
+`codex/<version>` — taking the version from the tool that actually wrote the document
+(`claude --version` and its equivalents). Where no version can be read, fall back to
+`<producer>/<YYYY-MM>`, which is honest about being approximate. The model behind the
+tool is not recorded: it changes faster than the documents do, and a document is not
+improved by a version string nobody can act on.
+
+**`generated.at` is the last meaningful change, not the birthday.** OKF defines it that
+way, and a consumer uses it to tell a recent edit from a stale fact. A pull request that
+changes what a document says — including adding a supersession note to a record it is
+retiring — moves the timestamp with it. Fixing a typo or a link does not.
 
 **`verified` is not written in advance.** The maintainer's merge is what confirms a
 document, and that happens after the file is written; asserting it beforehand would be
@@ -171,11 +183,20 @@ whom, and a hand-written history would be the change narration this policy exclu
 
 ## Status and lifecycle
 
-**The maintainer's merge is the acceptance.** The `status` written in a pull request is
-the status the document will have once merged — so an ADR that the pull request intends
-to put in force is written `stable`, and one opened to collect feedback before a decision
-is written `draft` in a draft pull request. Which decisions are the maintainer's to make
-is [AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides).
+**A document in an open pull request is `draft`.** The maintainer's approval is what
+accepts it, and that happens after the file is written — so until then `draft`, "not yet
+reviewed", is simply what is true. When the maintainer approves, the author pushes one
+more commit raising the approved documents to `stable`, and that is the commit that gets
+merged. Which decisions are the maintainer's to make is
+[AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides).
+
+**Retirement moves early, acceptance moves late.** A record that something in the same
+pull request supersedes is set to `deprecated` with `superseded_by` immediately, even
+while its replacement is still `draft`. The asymmetry is deliberate: `deprecated`
+under-claims — it warns a reader off a record that is on its way out — while an early
+`stable` over-claims, telling a reader that something was reviewed when it was not.
+Metadata that machines read before they read the prose should fail toward claiming too
+little, which is the same reason `verified` is left absent.
 
 **A decision is never edited into a different decision.** Correct a typo freely; when the
 decision itself changes, write a new ADR, set the old one to `deprecated` with

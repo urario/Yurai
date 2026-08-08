@@ -3,8 +3,8 @@ type: Template
 title: ADR template
 description: Skeleton for a new architecture decision record, with the frontmatter and the three sections to fill in.
 tags: [template, adr]
-status: stable
-generated: { by: claude-code/2026-08, at: 2026-08-08T22:49:00Z }
+status: draft
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 ---
 
 # ADR template
@@ -13,10 +13,11 @@ Copy the block below into `knowledge/decisions/ADR-NNNN-short-slug.md`, taking t
 unused number from [the index](index.md), and fill it in. Delete any section that has
 nothing to say — an empty heading is worse than a missing one.
 
-`status` is what the record will be once the pull request is merged: `stable` for a
-decision the pull request puts in force, `draft` for one opened to collect feedback
-first. The rest of the conventions — numbering, actors, supersession, granularity — are
-in [the knowledge policy](../process/knowledge-policy.md).
+`status` stays `draft` for as long as the pull request is open — nobody has reviewed the
+record yet, and that is exactly what `draft` means. When the maintainer approves, one
+more commit raises it to `stable`, and that commit is the one that merges. The rest of
+the conventions — numbering, actors, supersession, granularity — are in
+[the knowledge policy](../process/knowledge-policy.md).
 
 ````markdown
 ---
@@ -24,9 +25,9 @@ type: ADR
 title: Short statement of the decision
 description: One sentence a reader can use to decide whether to open the file.
 tags: [area, adr]
-status: stable
+status: draft
 requirements: [RQ-NNN]
-generated: { by: claude-code/2026-08, at: 2026-08-08T00:00:00Z }
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: issue-N
     resource: https://github.com/urario/Yurai/issues/N

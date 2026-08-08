@@ -3,8 +3,8 @@ type: Process
 title: Traceability
 description: How a requirement stays connected to the design, code, and tests that satisfy it.
 tags: [process, requirements, traceability]
-status: stable
-generated: { by: claude-code/2026-08, at: 2026-08-08T22:49:00Z }
+status: draft
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -64,8 +64,8 @@ original is superseded and two new identifiers are registered; the old entry sta
 ## The registry
 
 [`knowledge/requirements/registry.md`](../requirements/registry.md) is the single
-registry of requirement identifiers. An identifier that is not in the registry does not exist, and
-the registry is the only place an identifier is defined. Each entry carries:
+registry of requirement identifiers. An identifier that is not in the registry does not
+exist, and the registry is the only place an identifier is defined. Each entry carries:
 
 | Field | Values |
 |---|---|
@@ -130,10 +130,10 @@ state of it:
 
 ```shell
 # Which requirements are referenced by tests?
-grep -rho 'RQ-[0-9]\{3\}' tests/ | sort -u
+git grep -hoE 'RQ-[0-9]{3}' -- tests/ | sort -u
 
 # Everywhere one requirement is referenced (substitute the registered identifier)
-grep -rn 'RQ-NNN' knowledge/ src/ tests/
+git grep -n 'RQ-NNN'
 ```
 
 A P0 requirement missing from the first list is either untested or untagged. Both are
@@ -144,8 +144,14 @@ checked: every hit has to be a registered identifier, and while the registry is 
 there should be no hits at all.
 
 ```shell
-grep -rn 'RQ-[0-9]\{3\}' --include='*.md' --include='*.cs' --include='*.csproj' .
+git grep -nE 'RQ-[0-9]{3}'
 ```
+
+`git grep` rather than `grep -r` with a list of extensions, because the invariant is
+stated over the repository and a search that has to enumerate file types stops matching
+that claim the first time an identifier lands in a `.yml`, a `.props`, or a shell script.
+Searching tracked files is the same scope the invariant is about, and it skips `.git` and
+build output without being told to.
 
 ## The limits of this
 

@@ -4,7 +4,7 @@ title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
 status: draft
-generated: { by: claude-code/2026-08, at: 2026-08-08T22:49:00Z }
+generated: { by: claude-code/2.1.226, at: 2026-08-08T23:01:00Z }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
