@@ -1,17 +1,27 @@
 <Project>
+  <!-- Explicitly listed packages are reviewed build-time exceptions and must not carry runtime assets. -->
   <Target
-    Name="RejectExternalRuntimeDependencies"
-    BeforeTargets="CollectPackageReferences;ResolveProjectReferences"
+    Name="RejectExternalRuntimePackageReferences"
+    BeforeTargets="CollectPackageReferences"
     Condition="'$(EnforceZeroDependencies)' == 'true'">
     <ItemGroup>
       <_ExternalPackageReference
         Include="@(PackageReference)"
+        Exclude="@(ZeroDependencyAllowedPackage)"
         Condition="'%(PackageReference.IsImplicitlyDefined)' != 'true'" />
     </ItemGroup>
 
     <Error
       Condition="'@(_ExternalPackageReference)' != ''"
       Text="Yurai must not declare PackageReference items. The runtime library is BCL-only." />
+  </Target>
+
+  <!-- netstandard2.0 compatibility shims belong as internal source files, not as package dependencies. -->
+  <!-- FrameworkReference and Reference are intentionally outside this check because SDK-provided framework assets resolve later. -->
+  <Target
+    Name="RejectExternalRuntimeProjectReferences"
+    BeforeTargets="ResolveProjectReferences"
+    Condition="'$(EnforceZeroDependencies)' == 'true'">
     <Error
       Condition="'@(ProjectReference)' != ''"
       Text="Yurai must not declare ProjectReference items. The runtime library is BCL-only." />
