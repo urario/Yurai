@@ -1,0 +1,19 @@
+<Project>
+  <Target
+    Name="RejectExternalRuntimeDependencies"
+    BeforeTargets="CollectPackageReferences;ResolveProjectReferences"
+    Condition="'$(EnforceZeroDependencies)' == 'true'">
+    <ItemGroup>
+      <_ExternalPackageReference
+        Include="@(PackageReference)"
+        Condition="'%(PackageReference.IsImplicitlyDefined)' != 'true'" />
+    </ItemGroup>
+
+    <Error
+      Condition="'@(_ExternalPackageReference)' != ''"
+      Text="Yurai must not declare PackageReference items. The runtime library is BCL-only." />
+    <Error
+      Condition="'@(ProjectReference)' != ''"
+      Text="Yurai must not declare ProjectReference items. The runtime library is BCL-only." />
+  </Target>
+</Project>
