@@ -59,9 +59,20 @@ say what you would do instead. Distinguish blocking findings from suggestions.
 | `AGENTS.md` | Collaboration contract (all agents) |
 | `CONTRIBUTING.md` | Contributor-facing guide |
 | `docs/project-execution-plan.md` | Phases, issue map, dependency graph |
+| `src/Yurai/` | Dependency-free `netstandard2.0` library |
+| `tests/Yurai.Tests/` | `net8.0` unit tests |
+| `Yurai.sln` | Library and test solution |
 
-Build and test commands do not exist yet — the solution skeleton arrives with #2 and CI
-with #6. Update this section then.
+## Build and test
+
+```shell
+dotnet restore Yurai.sln
+dotnet build Yurai.sln --configuration Release --no-restore
+dotnet test Yurai.sln --configuration Release --no-build
+dotnet format Yurai.sln --verify-no-changes --no-restore
+```
+
+CI arrives with #6. Until then, run these checks locally before opening a pull request.
 
 ## How the project describes itself
 

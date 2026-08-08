@@ -44,6 +44,18 @@ English and you will get an English answer.
 Say what you left out. A pull request that solves 80% of an issue and says which 20% is
 missing is welcome; one that quietly narrows the scope is not.
 
+## Build and test
+
+Install .NET SDK 8.0.100 or any later stable SDK. `global.json` keeps C# at version 12
+and accepts a later major SDK when it is the only installed compatible SDK.
+
+```shell
+dotnet restore Yurai.sln
+dotnet build Yurai.sln --configuration Release --no-restore
+dotnet test Yurai.sln --configuration Release --no-build
+dotnet format Yurai.sln --verify-no-changes --no-restore
+```
+
 ## Code style
 
 - .NET / C# conventions, English identifiers and comments.
