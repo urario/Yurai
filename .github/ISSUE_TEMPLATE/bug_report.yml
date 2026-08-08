@@ -1,0 +1,81 @@
+name: "バグ報告 / Bug report"
+description: "不具合を報告します / Report a reproducible problem"
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ご報告ありがとうございます。日本語または英語で記入してください。
+        Thanks for taking the time to report a problem. Japanese and English are both welcome.
+
+        このフォームから作成した Issue には `bug` ラベルが自動で付きます。
+        Issues created with this form automatically receive the `bug` label.
+
+        セキュリティ上の問題は公開 Issue に記載せず、リポジトリの Security Advisory から非公開で報告してください。
+        Do not disclose security vulnerabilities in a public issue. Report them privately through the repository's Security Advisory page.
+
+  - type: input
+    id: version
+    attributes:
+      label: "Yurai バージョン / Yurai version"
+      description: "使用しているパッケージまたはコミットを記載してください。 / Provide the package version or commit."
+      placeholder: "0.1.0 or commit SHA"
+    validations:
+      required: true
+
+  - type: input
+    id: target_framework
+    attributes:
+      label: "ターゲットフレームワーク / Target framework"
+      placeholder: "net8.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "実行環境 / Environment"
+      description: "OS、.NET SDK/runtime、その他の関連情報を記載してください。 / Include the OS, .NET SDK/runtime, and other relevant details."
+      placeholder: |
+        OS: Windows 11
+        .NET SDK: 8.0.x
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "再現手順・最小コード / Reproduction steps and minimal code"
+      description: "計算結果の問題では、入力値を正確に記載してください。 / For calculation issues, include the exact input values."
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "期待する結果 / Expected behavior"
+      description: "期待値と、その根拠があれば記載してください。 / Include the exact expected value and its basis when applicable."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "実際の結果 / Actual behavior"
+      description: "実際の値、例外、スタックトレースを記載してください。 / Include the actual value, exception, or stack trace."
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "補足 / Additional context"
+      description: "ログ、スクリーンショット、回避策などがあれば記載してください。 / Add logs, screenshots, or workarounds if available."
+    validations:
+      required: false
