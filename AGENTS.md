@@ -9,30 +9,52 @@ here starts costing more than it protects, raise it with the maintainer and cut 
 
 ## 1. Actors and responsibilities
 
-| Actor | Owns | Does not own |
+| Actor | Owns | Not their default lane |
 |---|---|---|
-| **Human** (maintainer) | Design decisions, priorities, acceptance, closing gate issues, merging | Producing the first draft of anything |
-| **Claude Code** | Requirements analysis, architecture and design, ADRs, design review, code review, knowledge management, documentation | Final decisions; being the default implementer |
-| **Codex** | Test-first implementation, verification, benchmarks, preparing pull requests | Final decisions; unilaterally changing architecture or public API |
+| **Human** (maintainer) | Reserved decisions (§2), priorities, acceptance, closing gate issues, merging | Producing first drafts — nothing should be waiting on the maintainer to write one |
+| **Claude Code** | Requirements analysis, architecture and design, ADRs, design review, code review, knowledge management, documentation | Reserved decisions (§2); being the default implementer |
+| **Codex** | Test-first implementation, verification, benchmarks, preparing pull requests | Reserved decisions (§2); changing architecture or public API on its own initiative |
 
-The lanes are defaults, not fences. The maintainer may hand any task to any actor;
-what never moves is who decides.
+The third column is default responsibility, not permission — it says what a role is not
+*expected* to do, not what it is forbidden to do. The maintainer may write a draft,
+Claude Code may implement, Codex may propose a design; whoever does it says so in the
+pull request. The lanes are defaults, not fences. What never moves is who decides.
 
-## 2. AI proposes, the human decides
+## 2. Reserved decisions: AI proposes, the human decides
 
-Agents do not settle open questions on their own. When a decision is needed:
+Not every question is the maintainer's. Routing all of them there makes one person the
+serial bottleneck for work that has already been approved, which is the opposite of
+what human-in-the-loop is for. What matters is *which* decisions are reserved.
+
+**Reserved — stop and ask.** Before:
+
+- changing the public API surface (new type or member, changed signature or semantics);
+- adding or upgrading a runtime dependency, or changing the target framework;
+- architectural changes — anything an ADR records, or should;
+- changing requirements, scope, or the phase ordering in the execution plan;
+- anything with a security or licensing dimension;
+- naming, versioning, and release timing.
+
+**Not reserved — decide and proceed.** Everything else inside an approved issue or ADR:
+internal structure, test design and coverage choices, private naming, refactoring,
+wording. These are reversible and they are visible in review, so record the reasoning in
+the pull request and keep moving. Getting one wrong costs a review comment, not a release.
+
+When a decision *is* reserved, present it rather than pre-empt it:
 
 1. State the question and why it matters now.
 2. Give the realistic options with their trade-offs.
 3. Give a recommendation and the reason for it.
-4. Stop and wait for the maintainer.
+4. Stop, set `owner:human`, and wait.
 
-Decisions that reach beyond a single pull request — public API shape, dependencies,
-naming, scope, release timing — are recorded (ADR or issue comment) so the next agent
-inherits the reasoning instead of re-deriving it.
+**Reversibility is the test.** If undoing the choice later would mean a breaking change,
+a rewrite, or a retracted release, it is reserved. When you genuinely cannot tell which
+side of the line you are on, treat it as reserved — but do the rest of the work first
+and ask about the one thing you are actually blocked on, not the whole task.
 
-If a decision is already recorded, follow it. Reopen it by proposal, not by quietly
-implementing something else.
+Reserved decisions are recorded (ADR or issue comment) so the next agent inherits the
+reasoning instead of re-deriving it. If a decision is already recorded, follow it.
+Reopen it by proposal, not by quietly implementing something else.
 
 ## 3. Agents communicate through GitHub, never directly
 
@@ -82,9 +104,15 @@ Nothing reaches `main` except through a pull request.
 
 - No direct commits or pushes to `main` (branch protection: #4).
 - One pull request does one thing, and links its issue (`Refs #N` / `Closes #N`).
-- CI must be green before review is requested (#6).
+- Once CI exists (#6), all required checks pass **before merge**. Not before review —
+  a draft pull request with red or absent CI is a legitimate way to ask for design
+  feedback early, and blocking that only makes the feedback arrive later.
 - Implementation is test-first; a pull request that changes behavior changes tests (#7).
-- Review is required. An AI review is useful input; it is not the merge decision.
+- **The author does not review their own work.** Anything non-trivial, and every change
+  to the public API, gets a review from someone other than whoever wrote it — in
+  practice Codex implements, Claude Code reviews, the maintainer merges. A typo or a
+  broken link does not need the ceremony.
+- An AI review is input, not the merge decision.
 - **The maintainer merges.** Agents prepare pull requests and respond to review; they
   do not merge their own work.
 - Issues labelled `gate` are closed by the maintainer only.

@@ -2,8 +2,11 @@
 
 Operating instructions for Claude Code in this repository.
 
-**Read [`AGENTS.md`](AGENTS.md) first** — it is the canonical collaboration contract
-and applies to every agent. This file adds only what is specific to Claude Code.
+@AGENTS.md
+
+The line above imports [`AGENTS.md`](AGENTS.md) into context at startup — it is the
+canonical collaboration contract and it binds every agent, so it is loaded rather than
+merely linked. This file adds only what is specific to Claude Code.
 
 ## The project
 
@@ -25,8 +28,10 @@ keyboard when the maintainer asks you to, and say so in the pull request when yo
 
 Two habits matter more than the rest:
 
-- **Propose, do not decide.** Options, trade-offs, a recommendation — then stop. See
-  AGENTS.md §2.
+- **Know which decisions are yours.** On a reserved decision (AGENTS.md §2) give
+  options, trade-offs, and a recommendation — then stop. On everything else inside an
+  approved issue, decide, proceed, and record why in the pull request. Escalating a
+  reversible detail is a failure mode too.
 - **Write for a stranger.** Codex and future-you read GitHub, not this session. An
   issue comment that assumes context you have and they don't is a dropped handoff.
 
@@ -58,9 +63,16 @@ say what you would do instead. Distinguish blocking findings from suggestions.
 Build and test commands do not exist yet — the solution skeleton arrives with #2 and CI
 with #6. Update this section then.
 
-## Prose the project does not use
+## How the project describes itself
 
-The proposal fixes the vocabulary for how Yurai is described. Do not write, in the
-README, docs, or issue prose: "show your work", "audit-ready", "first" / "world's
-first", "provenance semiring". Novelty claims are limited to a single sentence, held in
-the requirements specification (#12). This applies to English and Japanese alike.
+The proposal fixes the vocabulary for describing Yurai. Two different rules, in the
+README, docs, and issue prose alike, in English and Japanese:
+
+- **Banned phrases.** Do not write "show your work", "audit-ready", or "provenance
+  semiring" — as phrases, anywhere.
+- **No unsupported novelty claims.** Do not claim Yurai is "the first" or "the world's
+  first" anything, or imply it. This is about the claim, not the word: `test-first`,
+  `issue first`, and "the first example in the README" are all fine.
+
+Novelty claims are limited to a single sentence, held in the requirements specification
+(#12).

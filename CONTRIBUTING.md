@@ -33,7 +33,9 @@ English and you will get an English answer.
 3. Link the issue: `Refs #123`, or `Closes #123` when the pull request completes it.
 4. Write tests. Yurai is developed test-first — a change in behavior comes with a change
    in tests.
-5. Make CI green before asking for review.
+5. Required checks must pass before merge — not before review. Open a draft pull
+   request and ask for feedback whenever it is useful, red CI and all. (CI itself
+   arrives with #6.)
 6. Expect review comments, including from AI reviewers. Push fixes to the same branch;
    reply to anything you disagree with rather than silently skipping it.
 7. A maintainer merges. Please don't merge your own pull request.
