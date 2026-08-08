@@ -13,6 +13,12 @@ arrives without one may duplicate work already in flight.
 Small, obvious fixes (typos, broken links, a failing test) can go straight to a pull
 request.
 
+If you are about to propose something that changes the design, check
+[`knowledge/`](knowledge/index.md) first — the requirements, the architecture decision
+records, and the conventions the project works by are there. Knowing that a question was
+already decided, and why, saves you writing a pull request that gets turned down for a
+reason nobody had told you.
+
 ## Language
 
 | Artifact | Language |

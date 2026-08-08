@@ -63,7 +63,8 @@ GitHub artifacts:
 
 | Purpose | Where it goes |
 |---|---|
-| Requirements, design, decisions | Issue body and comments |
+| Requirements, design, decisions — while they are being worked out | Issue body and comments |
+| Requirements, design, decisions — once settled | [`knowledge/`](knowledge/index.md) — the ADR or requirement outlives the issue |
 | Handoff of work | Issue comment stating what is done and what the next actor needs |
 | Implementation | Pull request |
 | Feedback on implementation | Pull request review comments |
@@ -139,12 +140,12 @@ and the pull request gate principle.
 
 Defined elsewhere:
 
-| Topic | Issue |
+| Topic | Defined in |
 |---|---|
 | Git branching policy and branch protection | #4 |
 | Issue and pull request templates | #5 |
 | Testing strategy and quality gate thresholds | #7 |
-| Knowledge management structure | #8 |
+| Knowledge management structure | [`knowledge/process/knowledge-policy.md`](knowledge/process/knowledge-policy.md) (#8) |
 | Claude Code agents and skills | #10 |
 | Codex skills and operational detail | #11 |
 
