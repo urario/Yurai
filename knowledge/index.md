@@ -30,6 +30,7 @@ both are closed.
 
 * [Knowledge policy](process/knowledge-policy.md) - What belongs in this bundle, how documents are structured, and how they change.
 * [Traceability](process/traceability.md) - The `RQ-###` identifiers, and how design, code, and tests refer back to them.
+* [Git policy](process/git-policy.md) - Branch naming, commit message style, and merge conditions.
 
 # Elsewhere in the repository
 

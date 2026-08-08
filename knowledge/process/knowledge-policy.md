@@ -46,8 +46,8 @@ closed, it belongs in `knowledge/`.**
   made it necessary and the consequences accepted along with it.
 - **Design** — architecture documents in `design/` that describe structure spanning
   several decisions, when an ADR is the wrong shape for it.
-- **Process conventions** — in `process/`: this policy, traceability, and the testing
-  and quality strategy ([#7](https://github.com/urario/Yurai/issues/7)).
+- **Process conventions** — in `process/`: this policy, traceability, git policy, and
+  the testing and quality strategy ([#7](https://github.com/urario/Yurai/issues/7)).
 
 ## What does not belong here
 
