@@ -97,6 +97,10 @@ A pull request merges when both hold:
   comment. The state has to be one a validator could read off GitHub, not one that
   depends on knowing nobody objected.
 
+What those checks consist of, and the review-judged conditions that sit alongside them,
+are in the [testing and quality strategy](testing-and-quality.md#the-quality-gate)'s gate
+table.
+
 The maintainer merges — never the pull request's own author
 ([AGENTS.md §5](../../AGENTS.md#5-the-pull-request-is-the-quality-gate)).
 

@@ -39,7 +39,9 @@ English and you will get an English answer.
 2. Keep it to one concern. Several small pull requests review faster than one large one.
 3. Link the issue: `Refs #123`, or `Closes #123` when the pull request completes it.
 4. Write tests. Yurai is developed test-first — a change in behavior comes with a change
-   in tests.
+   in tests, and the pull request shows that the test came first. What counts as showing
+   it is in the
+   [testing and quality strategy](knowledge/process/testing-and-quality.md#what-counts-as-evidence).
 5. Required checks must pass before merge — not before review. Open a draft pull
    request and ask for feedback whenever it is useful, red CI and all.
 6. Expect review comments, including from AI reviewers. Push fixes to the same branch;

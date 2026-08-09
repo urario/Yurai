@@ -20,6 +20,7 @@ both are closed.
 * [ADR-0002: Defer a knowledge base format validator](decisions/ADR-0002-defer-format-validator.md) - Superseded by ADR-0004.
 * [ADR-0003: Adopt the Open Knowledge Format for the knowledge base](decisions/ADR-0003-adopt-open-knowledge-format.md) - This bundle is OKF v0.2 rather than a house style.
 * [ADR-0004: Check knowledge base conformance in CI, not with a ported validator](decisions/ADR-0004-conformance-check-in-ci.md) - What gets checked mechanically, and when.
+* [ADR-0005: Use CsCheck for property-based testing](decisions/ADR-0005-property-based-testing-library.md) - A C#, dependency-free library, chosen over FsCheck so the test toolchain stays in one language and pins nothing.
 * [decisions/](decisions/index.md) - The directory, including the ADR template.
 
 # Design
@@ -31,6 +32,7 @@ both are closed.
 * [Knowledge policy](process/knowledge-policy.md) - What belongs in this bundle, how documents are structured, and how they change.
 * [Traceability](process/traceability.md) - The `RQ-###` identifiers, and how design, code, and tests refer back to them.
 * [Git policy](process/git-policy.md) - Branch naming, commit message style, and merge conditions.
+* [Testing and quality strategy](process/testing-and-quality.md) - Test-first evidence, example and property tests, mutation testing, and the quality gate table.
 
 # Elsewhere in the repository
 

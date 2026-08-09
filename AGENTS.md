@@ -120,7 +120,8 @@ Nothing reaches `main` except through a pull request.
 - Issues labelled `gate` are closed by the maintainer only.
 
 The detailed gate definition — coverage, mutation score, benchmark thresholds — lives
-in the testing and quality strategy (#7), not here.
+in the [testing and quality strategy](knowledge/process/testing-and-quality.md), not
+here.
 
 ## 6. Working agreements
 
@@ -144,7 +145,7 @@ Defined elsewhere:
 |---|---|
 | Git branching policy and branch protection | #4 |
 | Issue and pull request templates | #5 |
-| Testing strategy and quality gate thresholds | #7 |
+| Testing strategy and quality gate thresholds | [`knowledge/process/testing-and-quality.md`](knowledge/process/testing-and-quality.md) (#7) |
 | Knowledge management structure | [`knowledge/process/knowledge-policy.md`](knowledge/process/knowledge-policy.md) (#8) |
 | Claude Code agents and skills | #10 |
 | Codex skills and operational detail | #11 |
