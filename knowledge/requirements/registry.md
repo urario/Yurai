@@ -104,8 +104,10 @@ holds.
 
 ## Essential requirements
 
-What Yurai is, independent of any release. These are phrased against the underlying
-value type; the MVP instantiates them for `decimal` (RQ-023).
+What Yurai is, independent of any release — the proposal's six P0 requirements, R1–R6.
+Where they concern values (RQ-001, RQ-005) they are phrased against the underlying value
+type, which the MVP instantiates as `decimal` (RQ-023); the rest concern the library's
+behavior, its packaging, or how it is documented, and have no value type at all.
 
 ### RQ-001 — Value fidelity (R1)
 
@@ -205,6 +207,16 @@ value type; the MVP instantiates them for `decimal` (RQ-023).
     enforced mechanically (`EnforceZeroDependencies`, CI, and per-PR review).
   - Changing either constraint is a reserved decision
     ([AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides)).
+- **Constraints and notes**: The property that must hold is reach without cost —
+  usable from any .NET codebase, `netstandard2.0` included, with nothing pulled in
+  behind it. `netstandard2.0` is how the proposal delivers that, and it is a P0
+  requirement in its own right (§8 R4), so it is registered as one. What this
+  requirement does *not* decide is whether a later release also builds for a newer
+  target alongside `netstandard2.0` — that is the
+  [#18](https://github.com/urario/Yurai/issues/18) Q4 question, left open by RQ-028 and
+  neither answered nor foreclosed here. What is settled is that dropping
+  `netstandard2.0`, or taking a runtime dependency, is not on the table without a
+  maintainer decision.
 - **Source**: §8 R4; [#2](https://github.com/urario/Yurai/issues/2),
   [#24](https://github.com/urario/Yurai/issues/24).
 
@@ -250,6 +262,11 @@ What v1.0 does, derived from §7.1. The underlying value type throughout the MVP
 `decimal` (RQ-023). API names cited from §5.2 are illustrations of the proposal's
 intent; their binding shape is fixed by [#17](https://github.com/urario/Yurai/issues/17)
 and [#18](https://github.com/urario/Yurai/issues/18).
+
+Some entries here express properties Yurai would have in any release — immutable
+evidence (RQ-011) and queryable dependencies (RQ-014) are what make derivation evidence
+evidence at all. They are grouped here because §7.1 lists them as MVP scope, not because
+they expire with v1.0. What the MVP bounds is the value type they are instantiated for.
 
 ### RQ-007 — Named inputs and named intermediate results
 
@@ -464,8 +481,10 @@ re-proposed every few months. Each carries a **scope** stating how permanent it 
   revisit it without changing Yurai's identity.
 - **MVP-bounded** — out of v1.0 deliberately, with the future explicitly held open.
 
-All nine §7.2 non-goals hold for v1.0 regardless of scope label; the label says what
-it would take to ever change the answer.
+All eight §7.2 non-goals hold for v1.0 regardless of scope label; the label says what
+it would take to ever change the answer. **The labels are this specification's
+addition**, not §7.2's wording — each is derived from the proposal section cited in the
+requirement's *Why*, and reclassifying one is a maintainer decision.
 
 ### RQ-016 — Non-goal: symbolic algebra
 
