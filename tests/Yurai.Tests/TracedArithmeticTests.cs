@@ -34,6 +34,7 @@ public sealed class TracedArithmeticTests
         AssertDecimalBitsEqual(expected, result.Value);
         var node = Assert.IsType<BinaryOperationEvidenceNode>(result.Root);
         Assert.Equal(Enum.Parse<BinaryOperationKind>(operation), node.Operation);
+        Assert.Equal(SelectedOperand.None, node.SelectedOperand);
         Assert.Same(originalLeftRoot, node.Left);
         Assert.Same(originalRightRoot, node.Right);
         Assert.Same(originalLeftRoot, left.Root);
@@ -100,6 +101,101 @@ public sealed class TracedArithmeticTests
         Assert.Throws<InvalidOperationException>(() => { _ = Apply(operation, uninitialized, initialized); });
         Assert.Throws<InvalidOperationException>(() => { _ = Apply(operation, initialized, uninitialized); });
     }
+
+    [Theory]
+    [InlineData("Add", 1.25, 2.5)]
+    [InlineData("Subtract", 1.25, 2.5)]
+    [InlineData("Multiply", 1.25, 2.5)]
+    [InlineData("Divide", 5.0, 2.5)]
+    [Trait("RQ", "RQ-001")]
+    [Trait("RQ", "RQ-009")]
+    public void MixedOperatorsMatchDecimalAndRecordThePlainOperand(
+        string operation,
+        decimal tracedValue,
+        decimal plainValue)
+    {
+        TracedValue traced = YuraiApi.Of(tracedValue, "Traced");
+
+        TracedValue leftResult = ApplyMixed(operation, traced, plainValue);
+        TracedValue rightResult = ApplyMixed(operation, plainValue, traced);
+
+        AssertDecimalBitsEqual(Apply(operation, tracedValue, plainValue), leftResult.Value);
+        AssertDecimalBitsEqual(Apply(operation, plainValue, tracedValue), rightResult.Value);
+        AssertAnonymousInput(leftResult.Root, plainValue, expectedSide: SelectedOperand.Right);
+        AssertAnonymousInput(rightResult.Root, plainValue, expectedSide: SelectedOperand.Left);
+        Assert.Same(traced.Root, Assert.IsType<BinaryOperationEvidenceNode>(leftResult.Root).Left);
+        Assert.Same(traced.Root, Assert.IsType<BinaryOperationEvidenceNode>(rightResult.Root).Right);
+    }
+
+    [Fact]
+    [Trait("RQ", "RQ-001")]
+    [Trait("RQ", "RQ-008")]
+    public void MinAndMaxMatchDecimalAndRecordTheSelectedOperand()
+    {
+        TracedValue left = YuraiApi.Of(2m, "Left");
+        TracedValue right = YuraiApi.Of(3m, "Right");
+
+        TracedValue min = YuraiApi.Min(left, right);
+        TracedValue max = YuraiApi.Max(left, right);
+
+        Assert.Equal(Math.Min(2m, 3m), min.Value);
+        Assert.Equal(Math.Max(2m, 3m), max.Value);
+        Assert.Equal(SelectedOperand.Left, Assert.IsType<BinaryOperationEvidenceNode>(min.Root).SelectedOperand);
+        Assert.Equal(SelectedOperand.Right, Assert.IsType<BinaryOperationEvidenceNode>(max.Root).SelectedOperand);
+        Assert.Same(left.Root, Assert.IsType<BinaryOperationEvidenceNode>(min.Root).Left);
+        Assert.Same(right.Root, Assert.IsType<BinaryOperationEvidenceNode>(min.Root).Right);
+        Assert.Same(left.Root, Assert.IsType<BinaryOperationEvidenceNode>(max.Root).Left);
+        Assert.Same(right.Root, Assert.IsType<BinaryOperationEvidenceNode>(max.Root).Right);
+    }
+
+    [Fact]
+    [Trait("RQ", "RQ-008")]
+    public void MinAndMaxSelectTheLeftOperandWhenValuesAreEqual()
+    {
+        TracedValue left = YuraiApi.Of(2.00m, "Left");
+        TracedValue right = YuraiApi.Of(2.00m, "Right");
+
+        Assert.Equal(SelectedOperand.Left, Assert.IsType<BinaryOperationEvidenceNode>(YuraiApi.Min(left, right).Root).SelectedOperand);
+        Assert.Equal(SelectedOperand.Left, Assert.IsType<BinaryOperationEvidenceNode>(YuraiApi.Max(left, right).Root).SelectedOperand);
+    }
+
+    [Fact]
+    public void MinAndMaxRejectDefaultOperands()
+    {
+        TracedValue initialized = YuraiApi.Of(1m);
+        TracedValue uninitialized = default;
+
+        Assert.Throws<InvalidOperationException>(() => YuraiApi.Min(uninitialized, initialized));
+        Assert.Throws<InvalidOperationException>(() => YuraiApi.Min(initialized, uninitialized));
+        Assert.Throws<InvalidOperationException>(() => YuraiApi.Max(uninitialized, initialized));
+        Assert.Throws<InvalidOperationException>(() => YuraiApi.Max(initialized, uninitialized));
+    }
+
+    private static void AssertAnonymousInput(EvidenceNode root, decimal expectedValue, SelectedOperand expectedSide)
+    {
+        BinaryOperationEvidenceNode operation = Assert.IsType<BinaryOperationEvidenceNode>(root);
+        InputEvidenceNode input = Assert.IsType<InputEvidenceNode>(expectedSide == SelectedOperand.Left ? operation.Left : operation.Right);
+        Assert.Null(input.Name);
+        AssertDecimalBitsEqual(expectedValue, input.Value);
+    }
+
+    internal static TracedValue ApplyMixed(string operation, TracedValue traced, decimal plain) => operation switch
+    {
+        "Add" => traced + plain,
+        "Subtract" => traced - plain,
+        "Multiply" => traced * plain,
+        "Divide" => traced / plain,
+        _ => throw new ArgumentOutOfRangeException(nameof(operation)),
+    };
+
+    internal static TracedValue ApplyMixed(string operation, decimal plain, TracedValue traced) => operation switch
+    {
+        "Add" => plain + traced,
+        "Subtract" => plain - traced,
+        "Multiply" => plain * traced,
+        "Divide" => plain / traced,
+        _ => throw new ArgumentOutOfRangeException(nameof(operation)),
+    };
 
     internal static TracedValue Apply(string operation, TracedValue left, TracedValue right) =>
         operation switch

@@ -25,4 +25,35 @@ public static class Yurai
         string validName = NameValidation.Validate(name);
         return new Traced(new InputEvidenceNode(value, validName));
     }
+
+    /// <summary>
+    /// Returns the smaller traced value and records the selected operand.
+    /// </summary>
+    public static Traced Min(Traced left, Traced right)
+        => CreateSelection(left, right, BinaryOperationKind.Min);
+
+    /// <summary>
+    /// Returns the larger traced value and records the selected operand.
+    /// </summary>
+    public static Traced Max(Traced left, Traced right)
+        => CreateSelection(left, right, BinaryOperationKind.Max);
+
+    private static Traced CreateSelection(Traced left, Traced right, BinaryOperationKind operation)
+    {
+        EvidenceNode leftRoot = left.Root;
+        EvidenceNode rightRoot = right.Root;
+        bool leftSelected = operation == BinaryOperationKind.Min
+            ? leftRoot.Value <= rightRoot.Value
+            : leftRoot.Value >= rightRoot.Value;
+        decimal value = operation == BinaryOperationKind.Min
+            ? Math.Min(leftRoot.Value, rightRoot.Value)
+            : Math.Max(leftRoot.Value, rightRoot.Value);
+
+        // Keep native Min/Max as the value oracle; leftSelected records the deterministic
+        // evidence choice for numerically equal operands, including signed-zero cases.
+        SelectedOperand selected = leftSelected
+            ? SelectedOperand.Left
+            : SelectedOperand.Right;
+        return new Traced(new BinaryOperationEvidenceNode(value, operation, leftRoot, rightRoot, selected));
+    }
 }

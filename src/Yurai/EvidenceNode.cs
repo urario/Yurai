@@ -36,6 +36,15 @@ internal enum BinaryOperationKind
     Subtract,
     Multiply,
     Divide,
+    Min,
+    Max,
+}
+
+internal enum SelectedOperand
+{
+    None,
+    Left,
+    Right,
 }
 
 internal sealed class BinaryOperationEvidenceNode : EvidenceNode
@@ -44,12 +53,14 @@ internal sealed class BinaryOperationEvidenceNode : EvidenceNode
         decimal value,
         BinaryOperationKind operation,
         EvidenceNode left,
-        EvidenceNode right)
+        EvidenceNode right,
+        SelectedOperand selectedOperand = SelectedOperand.None)
         : base(value)
     {
         Operation = operation;
         Left = left ?? throw new ArgumentNullException(nameof(left));
         Right = right ?? throw new ArgumentNullException(nameof(right));
+        SelectedOperand = selectedOperand;
     }
 
     internal BinaryOperationKind Operation { get; }
@@ -57,6 +68,8 @@ internal sealed class BinaryOperationEvidenceNode : EvidenceNode
     internal EvidenceNode Left { get; }
 
     internal EvidenceNode Right { get; }
+
+    internal SelectedOperand SelectedOperand { get; }
 
     internal override int ChildCount => 2;
 

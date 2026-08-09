@@ -50,8 +50,27 @@ public readonly struct Traced
     {
         EvidenceNode leftRoot = left.GetRoot();
         EvidenceNode rightRoot = right.GetRoot();
-        decimal value = leftRoot.Value + rightRoot.Value;
-        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Add, leftRoot, rightRoot));
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Add, (leftValue, rightValue) => leftValue + rightValue);
+    }
+
+    /// <summary>
+    /// Adds a decimal value to a traced value using native decimal arithmetic.
+    /// </summary>
+    public static Traced operator +(Traced left, decimal right)
+    {
+        EvidenceNode leftRoot = left.GetRoot();
+        EvidenceNode rightRoot = new InputEvidenceNode(right, null);
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Add, (leftValue, rightValue) => leftValue + rightValue);
+    }
+
+    /// <summary>
+    /// Adds a traced value to a decimal value using native decimal arithmetic.
+    /// </summary>
+    public static Traced operator +(decimal left, Traced right)
+    {
+        EvidenceNode leftRoot = new InputEvidenceNode(left, null);
+        EvidenceNode rightRoot = right.GetRoot();
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Add, (leftValue, rightValue) => leftValue + rightValue);
     }
 
     /// <summary>
@@ -63,8 +82,21 @@ public readonly struct Traced
     {
         EvidenceNode leftRoot = left.GetRoot();
         EvidenceNode rightRoot = right.GetRoot();
-        decimal value = leftRoot.Value - rightRoot.Value;
-        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Subtract, leftRoot, rightRoot));
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Subtract, (leftValue, rightValue) => leftValue - rightValue);
+    }
+
+    public static Traced operator -(Traced left, decimal right)
+    {
+        EvidenceNode leftRoot = left.GetRoot();
+        EvidenceNode rightRoot = new InputEvidenceNode(right, null);
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Subtract, (leftValue, rightValue) => leftValue - rightValue);
+    }
+
+    public static Traced operator -(decimal left, Traced right)
+    {
+        EvidenceNode leftRoot = new InputEvidenceNode(left, null);
+        EvidenceNode rightRoot = right.GetRoot();
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Subtract, (leftValue, rightValue) => leftValue - rightValue);
     }
 
     /// <summary>
@@ -76,8 +108,21 @@ public readonly struct Traced
     {
         EvidenceNode leftRoot = left.GetRoot();
         EvidenceNode rightRoot = right.GetRoot();
-        decimal value = leftRoot.Value * rightRoot.Value;
-        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Multiply, leftRoot, rightRoot));
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Multiply, (leftValue, rightValue) => leftValue * rightValue);
+    }
+
+    public static Traced operator *(Traced left, decimal right)
+    {
+        EvidenceNode leftRoot = left.GetRoot();
+        EvidenceNode rightRoot = new InputEvidenceNode(right, null);
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Multiply, (leftValue, rightValue) => leftValue * rightValue);
+    }
+
+    public static Traced operator *(decimal left, Traced right)
+    {
+        EvidenceNode leftRoot = new InputEvidenceNode(left, null);
+        EvidenceNode rightRoot = right.GetRoot();
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Multiply, (leftValue, rightValue) => leftValue * rightValue);
     }
 
     /// <summary>
@@ -90,8 +135,21 @@ public readonly struct Traced
     {
         EvidenceNode leftRoot = left.GetRoot();
         EvidenceNode rightRoot = right.GetRoot();
-        decimal value = leftRoot.Value / rightRoot.Value;
-        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Divide, leftRoot, rightRoot));
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Divide, (leftValue, rightValue) => leftValue / rightValue);
+    }
+
+    public static Traced operator /(Traced left, decimal right)
+    {
+        EvidenceNode leftRoot = left.GetRoot();
+        EvidenceNode rightRoot = new InputEvidenceNode(right, null);
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Divide, (leftValue, rightValue) => leftValue / rightValue);
+    }
+
+    public static Traced operator /(decimal left, Traced right)
+    {
+        EvidenceNode leftRoot = new InputEvidenceNode(left, null);
+        EvidenceNode rightRoot = right.GetRoot();
+        return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Divide, (leftValue, rightValue) => leftValue / rightValue);
     }
 
     /// <summary>
@@ -104,4 +162,14 @@ public readonly struct Traced
 
     private EvidenceNode GetRoot() => root
         ?? throw new InvalidOperationException("The traced value is uninitialized.");
+
+    private static Traced CreateBinary(
+        EvidenceNode left,
+        EvidenceNode right,
+        BinaryOperationKind operation,
+        Func<decimal, decimal, decimal> evaluate)
+    {
+        decimal value = evaluate(left.Value, right.Value);
+        return new Traced(new BinaryOperationEvidenceNode(value, operation, left, right));
+    }
 }
