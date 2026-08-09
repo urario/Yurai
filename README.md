@@ -2,6 +2,9 @@
 
 **Yurai is a lightweight computation-lineage library for explainable domain calculations in .NET.**
 
+*The name comes from the Japanese word 由来 (yurai), "origin" — how something came to be.
+Fitting, since that is exactly what the library keeps attached to every value it touches.*
+
 ```csharp
 var basePrice = Yurai.Of(1000m, "BasePrice");
 var discount = Yurai.Of(0.10m, "MemberDiscount");
