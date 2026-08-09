@@ -25,4 +25,32 @@ public static class Yurai
         string validName = NameValidation.Validate(name);
         return new Traced(new InputEvidenceNode(value, validName));
     }
+
+    /// <summary>
+    /// Returns the smaller traced value and records the selected operand.
+    /// </summary>
+    public static Traced Min(Traced left, Traced right)
+    {
+        EvidenceNode leftRoot = left.Root;
+        EvidenceNode rightRoot = right.Root;
+        decimal value = Math.Min(leftRoot.Value, rightRoot.Value);
+        SelectedOperand selected = leftRoot.Value <= rightRoot.Value
+            ? SelectedOperand.Left
+            : SelectedOperand.Right;
+        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Min, leftRoot, rightRoot, selected));
+    }
+
+    /// <summary>
+    /// Returns the larger traced value and records the selected operand.
+    /// </summary>
+    public static Traced Max(Traced left, Traced right)
+    {
+        EvidenceNode leftRoot = left.Root;
+        EvidenceNode rightRoot = right.Root;
+        decimal value = Math.Max(leftRoot.Value, rightRoot.Value);
+        SelectedOperand selected = leftRoot.Value >= rightRoot.Value
+            ? SelectedOperand.Left
+            : SelectedOperand.Right;
+        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Max, leftRoot, rightRoot, selected));
+    }
 }
