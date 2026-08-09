@@ -25,8 +25,10 @@ public sealed class PublicApiTests
 
         Assert.True(facade.IsAbstract && facade.IsSealed);
         Assert.Empty(facade.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
-        Assert.Equal(2, methods.Length);
-        Assert.All(methods, method => Assert.Equal("Of", method.Name));
+        Assert.Equal(4, methods.Length);
+        Assert.Equal(2, methods.Count(method => method.Name == "Of"));
+        Assert.Equal(1, methods.Count(method => method.Name == "Min"));
+        Assert.Equal(1, methods.Count(method => method.Name == "Max"));
         Assert.Contains(methods, method => HasParameters(method, typeof(decimal)));
         Assert.Contains(methods, method => HasParameters(method, typeof(decimal), typeof(string)));
         Assert.All(methods, method => Assert.Equal(typeof(TracedValue), method.ReturnType));
@@ -45,7 +47,15 @@ public sealed class PublicApiTests
         Assert.True(carrier.IsValueType);
         Assert.True(carrier.IsSealed);
         Assert.Empty(carrier.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
-        Assert.Equal(["As", "ToString", "get_Value", "op_Addition", "op_Division", "op_Multiply", "op_Subtraction"], methodNames);
+        Assert.Equal(
+            [
+                "As", "ToString", "get_Value",
+                "op_Addition", "op_Addition", "op_Addition",
+                "op_Division", "op_Division", "op_Division",
+                "op_Multiply", "op_Multiply", "op_Multiply",
+                "op_Subtraction", "op_Subtraction", "op_Subtraction",
+            ],
+            methodNames);
         Assert.Equal(typeof(decimal), carrier.GetProperty("Value")?.PropertyType);
         Assert.Null(carrier.GetMethod("op_Implicit", BindingFlags.Public | BindingFlags.Static));
         Assert.Null(carrier.GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static));
