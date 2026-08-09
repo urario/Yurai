@@ -59,9 +59,9 @@ public sealed class EvidenceGraphTests
         var nullRoundChild = Assert.Throws<ArgumentNullException>(
             () => new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, "Reason", null!));
         var nullBranchName = Assert.Throws<ArgumentNullException>(
-            () => new BranchEvidenceNode(input, null!, true, BranchSelection.Then));
+            () => new BranchEvidenceNode(input, null!, true));
         var nullBranchChild = Assert.Throws<ArgumentNullException>(
-            () => new BranchEvidenceNode(null!, "Decision", true, BranchSelection.Then));
+            () => new BranchEvidenceNode(null!, "Decision", true));
 
         Assert.Equal("child", named.ParamName);
         Assert.Equal("left", left.ParamName);
@@ -78,7 +78,7 @@ public sealed class EvidenceGraphTests
         var input = new InputEvidenceNode(1m, null);
         var named = new NamedEvidenceNode(input, "Name");
         var rounded = new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, "Reason", input);
-        var branch = new BranchEvidenceNode(input, "Decision", true, BranchSelection.Then);
+        var branch = new BranchEvidenceNode(input, "Decision", true);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => { input.GetChild(0); });
         Assert.Throws<ArgumentOutOfRangeException>(() => { named.GetChild(-1); });

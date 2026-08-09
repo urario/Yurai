@@ -135,6 +135,25 @@ public sealed class TracedConditionalTests
     }
 
     [Fact]
+    [Trait("RQ", "RQ-005")]
+    public void BranchResultComposesWithDownstreamOperations()
+    {
+        TracedValue input = YuraiApi.Of(10.005m, "Input");
+
+        TracedValue result = YuraiApi
+            .If(true, () => input, () => YuraiApi.Of(0m), "Decision")
+            .Round(2, "Round to currency units")
+            .As("Total");
+
+        TracedArithmeticTests.AssertDecimalBitsEqual(10.00m, result.Value);
+        var named = Assert.IsType<NamedEvidenceNode>(result.Root);
+        var rounded = Assert.IsType<RoundEvidenceNode>(named.Child);
+        var branch = Assert.IsType<BranchEvidenceNode>(rounded.Child);
+        Assert.Same(input.Root, branch.Child);
+        TracedArithmeticTests.AssertDecimalBitsEqual(input.Value, branch.Value);
+    }
+
+    [Fact]
     public void PlainBooleanConditionDoesNotCreateAControlDependency()
     {
         TracedValue conditionOnly = YuraiApi.Of(5m, "ConditionOnly");

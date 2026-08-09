@@ -40,6 +40,7 @@ public static class Yurai
 
     /// <summary>
     /// Evaluates one conditional alternative and records the branch that produced the result.
+    /// The unselected alternative is never invoked, so exception and side-effect behavior matches a native conditional.
     /// </summary>
     /// <param name="condition">The plain Boolean condition used to select an alternative.</param>
     /// <param name="whenTrue">The alternative evaluated when <paramref name="condition"/> is <see langword="true"/>.</param>
@@ -73,11 +74,8 @@ public static class Yurai
         string validBranchName = ArgumentValidation.Validate(branchName, nameof(branchName));
         Traced selected = condition ? whenTrue() : whenFalse();
         EvidenceNode selectedRoot = selected.Root;
-        BranchSelection selectedBranch = condition
-            ? BranchSelection.Then
-            : BranchSelection.Else;
 
-        return new Traced(new BranchEvidenceNode(selectedRoot, validBranchName, condition, selectedBranch));
+        return new Traced(new BranchEvidenceNode(selectedRoot, validBranchName, condition));
     }
 
     private static Traced CreateSelection(Traced left, Traced right, BinaryOperationKind operation)

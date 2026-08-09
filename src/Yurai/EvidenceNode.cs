@@ -123,21 +123,21 @@ internal sealed class BranchEvidenceNode : EvidenceNode
     internal BranchEvidenceNode(
         EvidenceNode child,
         string decisionName,
-        bool condition,
-        BranchSelection selectedBranch)
+        bool condition)
         : base((child ?? throw new ArgumentNullException(nameof(child))).Value)
     {
         Child = child;
         DecisionName = decisionName ?? throw new ArgumentNullException(nameof(decisionName));
         Condition = condition;
-        SelectedBranch = selectedBranch;
     }
 
     internal string DecisionName { get; }
 
     internal bool Condition { get; }
 
-    internal BranchSelection SelectedBranch { get; }
+    internal BranchSelection SelectedBranch => Condition
+        ? BranchSelection.Then
+        : BranchSelection.Else;
 
     internal EvidenceNode Child { get; }
 

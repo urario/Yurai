@@ -82,7 +82,7 @@ NetPay = 257343
           SocialInsuranceRate = 0.152345
     IncomeTax = 39336
       Round(digits: 0, reason: "Round income tax to whole currency units") = 39336
-        If(name: "TaxableIncomeAtMost200000", branch: "else")
+        If(name: "TaxableIncomeAtMost200000", branch: "else") = 39335.80
           If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.80
             TaxableIncome = 296679
   <reference to GrossPay = 350000>
