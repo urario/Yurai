@@ -1,0 +1,20 @@
+{
+  "stryker-config": {
+    "solution": "../../Yurai.sln",
+    "project": "Yurai.csproj",
+    "mutate": [
+      "**/*.cs"
+    ],
+    "reporters": [
+      "html",
+      "json",
+      "progress"
+    ],
+    "report-file-name": "mutation-report",
+    "thresholds": {
+      "high": 80,
+      "low": 70,
+      "break": 0
+    }
+  }
+}
