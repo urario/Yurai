@@ -4,7 +4,7 @@ title: Git policy
 description: Branch naming, commit message style, and merge conditions for changes to Yurai.
 tags: [process, git, governance]
 status: draft
-generated: { by: claude-code/2.1.226, at: 2026-08-08T23:45:00Z }
+generated: { by: codex/2026-08, at: 2026-08-09T09:11:32+09:00 }
 sources:
   - id: issue-4
     resource: https://github.com/urario/Yurai/issues/4
@@ -85,16 +85,9 @@ A pull request merges when both hold:
 
 - **CI is green.** Required checks pass before merge, not before review — a draft pull
   request with red or absent CI is a legitimate way to ask for early feedback
-  ([AGENTS.md §5](../../AGENTS.md#5-the-pull-request-is-the-quality-gate)). CI itself
-  does not exist yet ([#6](https://github.com/urario/Yurai/issues/6)); until it does,
-  "green" means the build and test commands in
-  [CONTRIBUTING.md](../../CONTRIBUTING.md#build-and-test) were run locally and reported
-  — **for a pull request that changes anything under `src/` or `tests/`.** A pull
-  request that touches neither (documentation, `knowledge/`, this file) reports
-  "not applicable" with the one-line reason instead of running commands that have
-  nothing of the change to build or test. This exemption is the whole exception: a
-  pull request that mixes a documentation change with even one line under `src/` or
-  `tests/` runs the commands.
+  ([AGENTS.md §5](../../AGENTS.md#5-the-pull-request-is-the-quality-gate)). The
+  `.NET build, test, format` and `Knowledge base (OKF)` checks run for every pull request
+  targeting `main` and every push to `main`; both must pass.
 - **Review comments are resolved or explicitly accepted.** "Resolved" means addressed by
   a pushed change. "Explicitly accepted" means a positive, GitHub-visible record that the
   reviewer agreed not to pursue it further — the reviewer replies saying so and resolves
@@ -117,7 +110,7 @@ policy document cannot itself flip a repository setting. Until it is configured,
 [AGENTS.md §1](../../AGENTS.md#1-actors-and-responsibilities), not by a technical
 control.
 
-Required-check selection for branch protection — which CI checks are required, and how
-many approving reviews — is deferred until [#6](https://github.com/urario/Yurai/issues/6)
-gives branch protection something to require; configuring it against a repository with no
-CI would just require nothing.
+Selecting the two CI checks above as required branch-protection checks, and choosing how
+many approving reviews are required, remains a maintainer follow-up under
+[#4](https://github.com/urario/Yurai/issues/4). Their displayed job names are kept stable
+so branch protection can refer to them reliably.

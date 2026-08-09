@@ -4,7 +4,7 @@ title: Knowledge policy
 description: What belongs in the Yurai knowledge bundle, how its documents are structured, and how they change.
 tags: [process, knowledge, okf]
 status: draft
-generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
+generated: { by: codex/2026-08, at: 2026-08-09T09:11:32+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -228,6 +228,6 @@ edited on `main` directly.
 - **No hand-maintained traceability matrix.** A matrix that has to be updated by hand is
   wrong within a month and misleading thereafter. Traceability is derived by search —
   see [traceability](traceability.md).
-- **No conformance check until CI exists.** The conventions above are checked by review
-  for now. What is checked mechanically once CI arrives, and why waiting is the cheaper
-  order, is in [ADR-0004](../decisions/ADR-0004-conformance-check-in-ci.md).
+- **No general-purpose OKF linter.** CI checks only the four mechanical invariants chosen
+  in [ADR-0004](../decisions/ADR-0004-conformance-check-in-ci.md); usefulness,
+  completeness, and consistency remain review judgements.
