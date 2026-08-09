@@ -48,16 +48,21 @@ Console.WriteLine(socialInsurance.DependsOn("SocialInsuranceRate"));
 Console.WriteLine(socialInsurance.Trace("SocialInsuranceRate"));
 ```
 
+The arithmetic checkpoints intentionally preserve the native `decimal` scale
+of the unrounded intermediate values. The trailing zeros are part of this
+sample's expected numeric evidence; the final rendering policy remains design
+work.
+
 The arithmetic checkpoints are:
 
 | Result | Value |
 | --- | ---: |
 | `OvertimePay` | `50,000` |
 | `GrossPay` | `350,000` |
-| Social insurance before rounding | `53,320.75` |
+| Social insurance before rounding | `53,320.750000` |
 | `SocialInsurance` | `53,321` |
 | `TaxableIncome` | `296,679` |
-| Income tax before rounding | `39,335.8` |
+| Income tax before rounding | `39,335.80` |
 | `IncomeTax` | `39,336` |
 | `NetPay` | `257,343` |
 
@@ -71,13 +76,13 @@ NetPay = 257343
   TotalDeductions = 92657
     SocialInsurance = 53321
       Round(digits: 0, reason: "Round social insurance to whole currency units") = 53321
-        Multiply = 53320.75
+        Multiply = 53320.750000
           GrossPay = 350000
           SocialInsuranceRate = 0.152345
     IncomeTax = 39336
       Round(digits: 0, reason: "Round income tax to whole currency units") = 39336
         If(name: "TaxableIncomeAtMost200000", branch: "else")
-          If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.8
+          If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.80
             TaxableIncome = 296679
   GrossPay = 350000
 ```
