@@ -4,7 +4,7 @@ title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
 status: draft
-generated: { by: claude-code/2.1.226, at: 2026-08-09T05:30:00Z }
+generated: { by: claude-code/2.1.226, at: 2026-08-09T05:45:00Z }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -51,7 +51,8 @@ Two phrasing rules hold throughout:
   computations over some value type; in the MVP that type is `decimal` and no other
   (RQ-023). Where a requirement is essential to Yurai it names the underlying type;
   where it is an MVP bound it names `decimal`. Keeping the two apart is itself a
-  requirement (RQ-028).
+  requirement, checked now (RQ-029) so that a future extension (RQ-028) stays realistic
+  rather than merely promised.
 
 The identifier rules — three digits, never reused, split by supersession — are in
 [traceability](../process/traceability.md).
@@ -86,8 +87,9 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-024 | Banned phrases and replacement vocabulary | P0 | Draft | Vocabulary scan of prose and diffs (gate #29) |
 | RQ-025 | Novelty claim ceiling: the single proposal §6.4 sentence | P0 | Draft | README and documentation review (#15, gate #29) |
 | RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Draft | Deferred; tests when a post-MVP issue implements it |
-| RQ-027 | JSON export schema documented and versioned | P1 | Draft | Schema document review (#24, decision #18 Q5) |
-| RQ-028 | Value-type extensibility stays open | P2 | Draft | Review of requirements, design, and API wording (#17, #18 Q4, gate #29) |
+| RQ-027 | JSON export schema documented, versioned if declared stable | P1 | Draft | Schema document review (#24, decision #18 Q5) |
+| RQ-028 | Value-type extensibility may be pursued later | P2 | Draft | No v1.0 criteria; registered as an open possibility |
+| RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Draft | Review of requirements, design, and API wording (#17, #18, this registry) |
 
 - **Priority** — `P0` must ship in v1.0; `P1` and `P2` are wanted but do not block a
   release.
@@ -197,18 +199,19 @@ behavior, its packaging, or how it is documented, and have no value type at all.
 - **What**: The shipped library targets `netstandard2.0` and has no runtime package
   dependencies — BCL only. This includes serialization: the machine-readable export
   (RQ-013) is implemented without `System.Text.Json` or any other package.
-- **Why / user value**: Yurai must be droppable into any .NET codebase — including
-  legacy .NET Framework applications where domain calculations actually live — without
-  a version conflict, a transitive dependency, or a supply-chain review. A lineage
-  library that brings its own dependency tree fails the audit conversation it was
-  bought for.
+- **Why / user value**: Yurai must be droppable into any .NET codebase that can
+  consume a `netstandard2.0` package — which reaches .NET Framework 4.6.1+, .NET Core
+  2.0+, and every .NET version since, including the legacy applications where domain
+  calculations actually live — without a version conflict, a transitive dependency, or
+  a supply-chain review. A lineage library that brings its own dependency tree fails
+  the audit conversation it was bought for.
 - **Acceptance criteria**:
   - `src/Yurai/` builds for `netstandard2.0` with zero `PackageReference` entries;
     enforced mechanically (`EnforceZeroDependencies`, CI, and per-PR review).
   - Changing either constraint is a reserved decision
     ([AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides)).
 - **Constraints and notes**: The property that must hold is reach without cost —
-  usable from any .NET codebase, `netstandard2.0` included, with nothing pulled in
+  usable from any .NET target compatible with `netstandard2.0`, with nothing pulled in
   behind it. `netstandard2.0` is how the proposal delivers that, and it is a P0
   requirement in its own right (§8 R4), so it is registered as one. What this
   requirement does *not* decide is whether a later release also builds for a newer
@@ -308,7 +311,7 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
     selected side ([#20](https://github.com/urario/Yurai/issues/20)).
 - **Constraints and notes**: Min/Max assume a total order on the underlying value type.
   `decimal` has one; floating-point NaN and domain value objects may not. Recorded as
-  a type assumption under RQ-028.
+  a type assumption under RQ-029.
 - **Source**: §5.2, §7.1; [#19](https://github.com/urario/Yurai/issues/19),
   [#20](https://github.com/urario/Yurai/issues/20).
 
@@ -331,7 +334,7 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
 - **Constraints and notes**: What "a plain value of the underlying type" means at the
   call site depends on the language's literal and conversion rules for that type;
   `decimal` literals are exact, floating-point literals are not. Recorded as a type
-  assumption under RQ-028.
+  assumption under RQ-029.
 - **Source**: §5.3 (mixed operations allowed; literal side recorded as an anonymous
   input node), §7.1; [#20](https://github.com/urario/Yurai/issues/20).
 
@@ -354,9 +357,9 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
   - The default midpoint-rounding treatment is fixed by the design
     ([#17](https://github.com/urario/Yurai/issues/17)), not silently assumed.
 - **Constraints and notes**: Digits-based rounding is real-number semantics. Integer
-  types do not round; domain value objects may round by their own rules. If types
-  beyond `decimal` are adopted (RQ-028), the shape of this operation is an open
-  question to revisit — not one to answer now.
+  types do not round; domain value objects may round by their own rules — recorded as
+  a type assumption under RQ-029. If types beyond `decimal` are adopted (RQ-028), the
+  shape of this operation is an open question to revisit — not one to answer now.
 - **Source**: §5.2 (rounding policy kept as evidence), §7.1;
   [#21](https://github.com/urario/Yurai/issues/21).
 
@@ -406,7 +409,7 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
 - **Constraints and notes**: The proposal's §2.3 output sketch is illustrative, not a
   fixed format. Rendering numbers as text is culture- and type-dependent; the MVP may
   fix one culture and format, with configurability deferred to RQ-026. Recorded as a
-  type assumption under RQ-028.
+  type assumption under RQ-029.
 - **Source**: §2.3, §7.1, §10; [#23](https://github.com/urario/Yurai/issues/23).
 
 ### RQ-013 — Machine-readable derivation export
@@ -422,9 +425,17 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
   tooling. JSON is the least-common-denominator exit that makes the evidence usable
   outside .NET.
 - **Acceptance criteria**:
-  - Every evidence element kind serializes; the structure round-trips (parseable and
-    structurally faithful to the evidence), and string escaping is correct
+  - Every evidence element kind serializes into the export
     ([#24](https://github.com/urario/Yurai/issues/24)).
+  - The output parses as valid JSON with a standard parser, and walking the parsed
+    structure — nodes, the references between them, values, rounding reasons, branch
+    names — is verified equivalent to walking the evidence it was produced from.
+    (Yurai has no JSON import API — that would be a new public member and its own
+    reserved decision — so this is export-then-compare, not export-then-reimport;
+    "round-trip" in earlier drafts of this requirement meant the same thing but read
+    as promising a deserializer that does not exist.)
+  - String escaping is correct — characters requiring escape in JSON strings survive
+    the parse-and-compare check above unchanged.
   - Implemented dependency-free (RQ-004).
   - Documentation states the §9.1 boundary: material for an audit trail, not one.
 - **Constraints and notes**: How values are represented in JSON is type-sensitive:
@@ -466,6 +477,13 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
     deferring something, or a maintainer decision to raise the bound (reserved).
   - Every public API addition or change is a reserved decision
     ([AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides)).
+- **Constraints and notes**: This requirement does not itself define what counts as
+  one "member" — whether an overload, an operator, or a property accessor counts
+  separately is a counting rule, not a requirement, and different rules would move the
+  count without changing the actual surface. The counting rule is fixed once, by the
+  [#17](https://github.com/urario/Yurai/issues/17) architecture design; the gate
+  review ([#29](https://github.com/urario/Yurai/issues/29)) counts against that rule
+  rather than each reviewer's own reading.
 - **Source**: §5.2, §5.3; [#17](https://github.com/urario/Yurai/issues/17),
   [#29](https://github.com/urario/Yurai/issues/29).
 
@@ -578,12 +596,16 @@ requirement's *Why*, and reclassifying one is a maintainer decision.
 
 ### RQ-023 — MVP non-goal: value types other than decimal
 
-- **Priority**: P0 · **Scope**: MVP-bounded — see RQ-028
-- **What**: In v1.0, the underlying value type is `decimal` and no other: no integer,
-  floating-point, or user-defined value types, and no generic abstraction over value
-  types. **This bounds the MVP; it does not define the library.** Yurai is a
-  computation-lineage library whose first shipped value type is `decimal` — not a
-  `decimal` library.
+- **Priority**: P0 · **Scope**: MVP-bounded — see RQ-028, RQ-029
+- **What**: In v1.0, the *public API surface* supports `decimal` and no other value
+  type: no public entry point accepts or produces an integer, floating-point, or
+  user-defined value type in place of `decimal`, and the public surface exposes no
+  generic abstraction over value types. **This bounds what v1.0 exposes; it does not
+  define the library, and it does not constrain internal implementation** — whether
+  the implementation behind that surface uses a generic abstraction internally is an
+  [#17](https://github.com/urario/Yurai/issues/17)/[#18](https://github.com/urario/Yurai/issues/18)
+  design decision, not fixed here (RQ-029). Yurai is a computation-lineage library
+  whose first shipped value type is `decimal` — not a `decimal` library.
 - **Why**: The MVP's user is doing money and rate arithmetic, where `decimal` is the
   correct and idiomatic .NET type — one type covers the entire first audience.
   Every additional type multiplies the fidelity obligation (RQ-001 must be restated
@@ -625,8 +647,17 @@ and are checked at the gate ([#29](https://github.com/urario/Yurai/issues/29)).
   speak in. The replacements say what Yurai actually does; consistent vocabulary is
   what lets users repeat the claim accurately.
 - **Acceptance criteria**:
-  - No occurrence in README, documentation, XML doc comments, or repository prose;
-    scanned in review and at the gate ([#29](https://github.com/urario/Yurai/issues/29)).
+  - No occurrence in README, published documentation, or XML doc comments, where the
+    phrase would describe what Yurai offers or does. This canonical list (this
+    section), its restatement in
+    [CLAUDE.md](../../CLAUDE.md#how-the-project-describes-itself), and discussion that
+    quotes a phrase in order to flag or forbid it (an issue or review comment pointing
+    at a violation) are the named exceptions — they mention a banned phrase to prohibit
+    it, not to describe Yurai, so a mechanical scan for bare occurrence would otherwise
+    flag the rule for stating itself.
+  - Machine check: `git grep` for each phrase, run over the repository excluding
+    `knowledge/requirements/registry.md` and `CLAUDE.md`, returns nothing. Run in
+    review and at the gate ([#29](https://github.com/urario/Yurai/issues/29)).
   - The operative statement of this rule for day-to-day work is
     [CLAUDE.md](../../CLAUDE.md#how-the-project-describes-itself), which follows this
     registry.
@@ -662,7 +693,11 @@ and are checked at the gate ([#29](https://github.com/urario/Yurai/issues/29)).
 
 ## Post-MVP requirements
 
-Wanted, registered now so design work keeps them reachable; none blocks v1.0.
+Wanted, registered now so design work keeps them reachable — with one exception.
+RQ-026 and RQ-028 are deferred: nothing about them blocks v1.0. **RQ-029 is not
+deferred** — it is a present-tense wording and decision-review constraint that applies
+to this registry and to every requirements or design pull request from now on, grouped
+here because it exists to keep RQ-028 reachable rather than because it waits for v1.0.
 
 ### RQ-026 — Configurable explanation output
 
@@ -677,61 +712,98 @@ Wanted, registered now so design work keeps them reachable; none blocks v1.0.
   proposal's sketch of that seam ([#23](https://github.com/urario/Yurai/issues/23)).
 - **Source**: §8 (P1); [#23](https://github.com/urario/Yurai/issues/23).
 
-### RQ-027 — JSON export schema documented and versioned
+### RQ-027 — JSON export schema documented, versioned if declared stable
 
 - **Priority**: P1
-- **What**: The JSON export (RQ-013) has a documented schema carrying a version, so a
-  consumer can build against it and detect change.
+- **What**: The JSON export (RQ-013) has a documented schema, unconditionally. Whether
+  that schema is a stable API — and, if so, whether it carries a version from the
+  first release — is the [#18](https://github.com/urario/Yurai/issues/18) Q5 decision;
+  this requirement does not take a side on Q5, and is satisfied by documentation that
+  states the outcome plainly, whichever way Q5 goes.
 - **Why / user value**: RQ-013's value is programs outside the process consuming the
   evidence; an undocumented shape makes every consumer reverse-engineer it and breaks
-  them silently when it changes.
+  them silently when it changes. Documentation is worth having regardless of whether
+  the shape is promised stable yet.
 - **Acceptance criteria**:
   - A schema document (English) is merged alongside the export implementation
-    ([#24](https://github.com/urario/Yurai/issues/24)).
-  - Whether the schema is a stable API — and versioned from the first release — is
-    the [#18](https://github.com/urario/Yurai/issues/18) Q5 decision; this requirement
-    holds whichever way that decision goes.
+    ([#24](https://github.com/urario/Yurai/issues/24)), independent of Q5.
+  - If Q5 designates the schema a stable API, the document states its version from
+    v1.0 onward and how it will change.
+  - If Q5 does not, the document says explicitly that the schema is not (yet) a
+    stable API and may change without notice.
 - **Source**: §8 (P1); [#24](https://github.com/urario/Yurai/issues/24),
   [#18](https://github.com/urario/Yurai/issues/18).
 
-### RQ-028 — Value-type extensibility stays open
+### RQ-028 — Value-type extensibility may be pursued later
 
 - **Priority**: P2
 - **What**: Yurai's model — named inputs, arithmetic composition, recorded decisions,
-  immutable shared evidence, explanation, export, and queries — is not inherently
-  specific to `decimal`, and extending it to other value types (integers, floating
-  point, domain value objects) must remain *possible*. Until that extension is
-  actually designed, no requirement, design, or public API decision may foreclose it
-  where a type-neutral alternative costs nothing now.
-
-  Explicitly **not** required now: generic math support, multi-targeting beyond
-  `netstandard2.0`, or any concrete extension architecture. Those are the
-  [#18](https://github.com/urario/Yurai/issues/18) Q4 decision, reserved for when a
-  second value type is actually pursued ("the minimum judgement that does not close
-  the door" — §8 P2).
+  immutable shared evidence, explanation, export, and queries — may in the future
+  extend to value types other than `decimal`: integers, floating point, or domain
+  value objects. Whether, when, and how that happens — generic math support,
+  multi-targeting beyond `netstandard2.0`, or a concrete extension architecture — is
+  undecided, is not designed, and is not required by v1.0. Those choices are the
+  [#18](https://github.com/urario/Yurai/issues/18) Q4 decision, for whenever a second
+  value type is actually pursued.
 - **Why / user value**: Domain calculations are not only money: quantities, indexes,
-  and typed domain values ask the same "why this value" question. Locking the
-  library's identity to `decimal` at the requirements level would make the eventual
-  answer a rewrite instead of an extension — the cheapest moment to keep a door open
-  is before anything is built into it.
+  and typed domain values ask the same "why this value" question. Registering the
+  possibility now, even fully unresolved, means a future proposal to pursue it is
+  evaluated as a scoping decision against a known intent, rather than rediscovered
+  from scratch and re-argued against RQ-023 as if it were a new idea.
 - **Acceptance criteria**:
-  - Requirements and design documents phrase Yurai's concepts against "the underlying
-    value type", naming `decimal` only where the MVP bound (RQ-023) or a genuinely
-    type-specific behavior (RQ-001's fidelity definition) is meant. Reviewed on this
-    registry and on the [#17](https://github.com/urario/Yurai/issues/17) design.
-  - The known type-sensitive assumptions stay recorded where they arise, so a future
-    extension inherits its worklist: fidelity semantics per type (RQ-001), total order
-    for Min/Max (RQ-008), literal conversion at mixed-operation call sites (RQ-009),
-    the shape of rounding (RQ-010), value formatting in output (RQ-012), and JSON
-    value representation (RQ-013).
+  - No acceptance criteria here bind v1.0 — this requirement is satisfied by
+    remaining an open, registered possibility, not by any implementation.
+  - What actually keeps the extension realistic — that today's requirements, design,
+    and API wording do not close it off for free — is a separate, present-tense
+    requirement, checked now: RQ-029.
+- **Constraints and notes**: This is the P2, future-facing half of the type-
+  extensibility topic; RQ-029 is its P0, present-tense half. The two are deliberately
+  separate requirements, not one requirement with a mixed priority, because "may be
+  pursued later" and "must not be accidentally foreclosed now" are checked at
+  different times by different reviews.
+- **Source**: §8 (P2), §13 Q4; [#18](https://github.com/urario/Yurai/issues/18).
+
+### RQ-029 — Type-neutral wording, unless a reason is recorded
+
+- **Priority**: P0
+- **What**: Wherever a requirement, an architecture decision, or a public API choice
+  can be stated in a way that is neutral to the underlying value type at no cost, it
+  is stated that way — `decimal` is named only where the MVP bound (RQ-023) or a
+  genuinely type-specific behavior (RQ-001's fidelity definition, and the other
+  type-sensitive assumptions below) requires it. Where a decision does lock in
+  `decimal`-specific behavior beyond the MVP bound, the design record
+  ([#17](https://github.com/urario/Yurai/issues/17),
+  [#18](https://github.com/urario/Yurai/issues/18)) states why a type-neutral
+  alternative was not viable.
+- **Why / user value**: This is what keeps RQ-028's future possible without building
+  toward it now — the door stays open by how today's requirements and design are
+  worded, not by a promise to reopen it later. Enforcing it as a review-time habit
+  costs nothing extra; deferring it to whenever a second type is actually pursued
+  would mean re-deriving, after the fact, which past decisions were accidental
+  narrowing and which were deliberate.
+- **Acceptance criteria**:
+  - This registry, the [#17](https://github.com/urario/Yurai/issues/17) architecture
+    design, and the [#18](https://github.com/urario/Yurai/issues/18) ADR are checked
+    against this rule before being accepted or merged; a `decimal`-specific term or
+    decision with no recorded reason is a blocking review finding, not a suggestion.
+  - The type-sensitive assumptions already catalogued — fidelity semantics (RQ-001),
+    total order for Min/Max (RQ-008), literal conversion at mixed-operation call
+    sites (RQ-009), the shape of rounding (RQ-010), value formatting in output
+    (RQ-012), and JSON value representation (RQ-013) — are the standing checklist
+    this review runs against.
   - Public API naming does not encode `decimal` where the concept is type-neutral,
     unless the [#17](https://github.com/urario/Yurai/issues/17)/[#18](https://github.com/urario/Yurai/issues/18)
     design records a reason.
-- **Constraints and notes**: This requirement constrains *wording and decision
-  hygiene* now; it promises no implementation and no timeline. It is the positive
+  - Unlike RQ-028, this requirement is checked now, at every requirements and design
+    pull request — it does not wait for a second value type to be pursued.
+- **Constraints and notes**: This requirement commits to nothing about shipping,
+  designing, or sketching support for a second value type — that remains RQ-028, P2,
+  undecided. It commits only to not spending today's wording and decisions in a way
+  that would make RQ-028 harder later for no present benefit. It is the positive
   counterpart of RQ-023: v1.0 ships `decimal` only, and the library stays defined by
   its model rather than by that first type.
-- **Source**: §8 (P2), §13 Q4; [#18](https://github.com/urario/Yurai/issues/18).
+- **Source**: §8 (P2), §13 Q4; [#17](https://github.com/urario/Yurai/issues/17),
+  [#18](https://github.com/urario/Yurai/issues/18).
 
 ## The proposal
 
