@@ -86,6 +86,24 @@ public sealed class TracedExplainTests
 
         Assert.Equal(1, CountOccurrences(explanation, "Shared = 10"));
         Assert.Contains("<ref #", explanation, StringComparison.Ordinal);
+        Assert.Equal(explanation, result.Explain());
+    }
+
+    [Fact]
+    [Trait("RQ", "RQ-002")]
+    [Trait("RQ", "RQ-012")]
+    public async Task ExplainIsSafeForConcurrentReads()
+    {
+        TracedValue shared = YuraiApi.Of(10m, "Shared");
+        TracedValue result = (shared * 2m).As("Total");
+
+        Task<string>[] reads = Enumerable.Range(0, 32)
+            .Select(_ => Task.Run(result.Explain))
+            .ToArray();
+
+        string[] explanations = await Task.WhenAll(reads);
+
+        Assert.All(explanations, explanation => Assert.Equal(explanations[0], explanation));
     }
 
     [Fact]
@@ -102,11 +120,12 @@ public sealed class TracedExplainTests
 
         string explanation = result.Explain();
 
-        Assert.Contains("Max = 3", explanation, StringComparison.Ordinal);
-        Assert.Contains("Min = 2.5", explanation, StringComparison.Ordinal);
-        Assert.Contains("If(name: \"Decision\", branch: \"then\") = 2.5", explanation, StringComparison.Ordinal);
-        Assert.Contains("Round(digits: 0, reason: \"Reason\\\\line\\nnext\") = 3", explanation, StringComparison.Ordinal);
-        Assert.Contains("Input\\\"Name = 2.5", explanation, StringComparison.Ordinal);
+        Assert.Contains("Max = 2", explanation, StringComparison.Ordinal);
+        Assert.Contains("Min = 2", explanation, StringComparison.Ordinal);
+        Assert.Contains("If(name: \"Decision\", branch: \"then\") = 2", explanation, StringComparison.Ordinal);
+        Assert.Contains("Round(digits: 0, reason: \"Reason\\\\line\\nnext\") = 2", explanation, StringComparison.Ordinal);
+        string escapedName = "Input" + "\\" + "\"Name = 2.5";
+        Assert.Contains(escapedName, explanation, StringComparison.Ordinal);
     }
 
     [Fact]

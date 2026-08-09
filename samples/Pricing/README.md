@@ -46,8 +46,26 @@ Total = 990
 
 This output fixes the information that the explanation must communicate: the final
 value, named inputs and intermediate values, arithmetic operations, rounding parameters,
-and the rounding reason. Exact punctuation, indentation, and number formatting remain
-design work.
+and the rounding reason. The implementation uses invariant formatting, two-space
+indentation, and document-local references for shared nodes. The final MVP framing is:
+
+```text
+Result
+  990
+Derivation
+  Total = 990
+    Round(digits: 0, reason: "Round to whole currency unit") = 990
+      Multiply = 990.0000
+        DiscountedPrice = 900.00
+          Multiply = 900.00
+            BasePrice = 1000
+            Subtract = 0.90
+              1
+              MemberDiscount = 0.10
+        Add = 1.10
+          1
+          TaxRate = 0.10
+```
 
 The literals in `1 - discount` and `1 + taxRate` are shown by invariant-formatted value
 without a generated name. The midpoint rounding mode is `ToEven`; it does not affect

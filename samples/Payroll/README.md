@@ -69,23 +69,26 @@ The arithmetic checkpoints are:
 
 ## Expected explanation
 
-The exact punctuation and indentation remain design work. The explanation must
-make the following facts visible:
+The implementation uses invariant formatting, two-space indentation, and document-local
+references. The explanation must make the following facts visible:
 
 ```text
-NetPay = 257343
-  TotalDeductions = 92657
-    SocialInsurance = 53321
-      Round(digits: 0, reason: "Round social insurance to whole currency units") = 53321
-        Multiply = 53320.750000
-          GrossPay = 350000
-          SocialInsuranceRate = 0.152345
-    IncomeTax = 39336
-      Round(digits: 0, reason: "Round income tax to whole currency units") = 39336
-        If(name: "TaxableIncomeAtMost200000", branch: "else") = 39335.80
-          If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.80
-            TaxableIncome = 296679
-  <reference to GrossPay = 350000>
+Result
+  257343
+Derivation
+  NetPay = 257343
+    TotalDeductions = 92657
+      SocialInsurance = 53321
+        Round(digits: 0, reason: "Round social insurance to whole currency units") = 53321
+          Multiply = 53320.750000
+            GrossPay = 350000
+            SocialInsuranceRate = 0.152345
+      IncomeTax = 39336
+        Round(digits: 0, reason: "Round income tax to whole currency units") = 39336
+          If(name: "TaxableIncomeAtMost200000", branch: "else") = 39335.80
+            If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.80
+              TaxableIncome = 296679
+    <ref #6>
 ```
 
 The outer income-tax condition is false and the nested condition is true for
@@ -95,7 +98,7 @@ tax calculation. Unselected alternatives are neither evaluated nor displayed.
 `GrossPay` is expanded under `SocialInsurance` and then encountered again as the final
 subtraction's other operand. The second occurrence above is a reference, not a second
 expansion. Text and JSON use the same deterministic document-local numeric identity;
-the exact text token is fixed with the text-format contract.
+the text token is `<ref #N>`.
 
 The conditions in this sketch read `taxableIncome.Value` before calling `Yurai.If`.
 That produces a plain `bool`, so v1 intentionally does not retain a dependency edge
