@@ -3,7 +3,7 @@ type: Process
 title: Testing and quality strategy
 description: How Yurai is tested — test-first, example tests, property tests, mutation testing — and what has to be true before a pull request merges.
 tags: [process, testing, quality, tdd, mutation, property-based]
-status: draft
+status: stable
 generated: { by: claude-code/2.1.226, at: 2026-08-09T00:41:34Z }
 sources:
   - id: issue-7
@@ -103,10 +103,10 @@ that.
 
 ## Property-based testing
 
-The library is chosen in
-[ADR-0005](../decisions/ADR-0005-property-based-testing-library.md); until that record
-reaches `stable` the choice is a proposal awaiting the maintainer, and the conventions
-below are written to hold whichever library is picked. The tooling itself lands in
+The library is CsCheck, decided in
+[ADR-0005](../decisions/ADR-0005-property-based-testing-library.md). The conventions below
+are written to hold whichever library is in use, so that a change of library is a change
+to one record rather than to this document. The tooling itself lands in
 [#9](https://github.com/urario/Yurai/issues/9).
 
 **A property states a law, and its name states the law.** `AdditionMatchesDecimal`, not
@@ -154,7 +154,7 @@ unfinished branch is noise. It runs in the [deep lane](#two-lanes).
 **Thresholds.** Stryker reads three: `high` and `low` colour the report, `break` fails
 the run.
 
-| Setting | Value now | Value being proposed for the P0 gate |
+| Setting | Value now | At the P0 gate |
 |---|---|---|
 | `break` | `0` — the run never fails | Set by the maintainer at [#29](https://github.com/urario/Yurai/issues/29) |
 | `low` | `70` | `70` |

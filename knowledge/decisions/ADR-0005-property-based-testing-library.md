@@ -3,7 +3,7 @@ type: ADR
 title: Use CsCheck for property-based testing
 description: A C#, dependency-free property-based testing library, chosen over FsCheck so the test toolchain stays in one language and pins nothing.
 tags: [testing, property-based, tooling, adr]
-status: draft
+status: stable
 generated: { by: claude-code/2.1.226, at: 2026-08-09T00:41:34Z }
 sources:
   - id: issue-7
@@ -49,8 +49,10 @@ consumer. What is at stake is the test project's ergonomics and its freedom to m
   time, so the run's output is the only route back to the failing case.
 
 Choosing a dependency is the maintainer's decision
-([AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides)), and
-this record stays `draft` until they make it.
+([AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides)). This
+record was written as a recommendation and approved on
+[#43](https://github.com/urario/Yurai/pull/43); what follows is the decision, not a
+proposal.
 
 ## Decision
 
