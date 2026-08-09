@@ -70,10 +70,8 @@ public readonly struct Traced
     /// <returns>
     /// The evaluated result followed by its derivation. The output uses invariant culture;
     /// a shared evidence node is expanded once and later occurrences are rendered as references.
+    /// An uninitialized value returns <c>Uninitialized Traced</c>.
     /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// The value is an uninitialized <see cref="Traced"/> instance.
-    /// </exception>
     public string Explain() => root is null
         ? "Uninitialized Traced"
         : ExplainFormatter.Render(root);

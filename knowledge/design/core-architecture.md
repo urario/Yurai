@@ -233,6 +233,31 @@ afterwards. Q14 uses one deterministic document-local numeric identity mapping f
 and JSON. The text token and JSON field spelling remain representation contracts, but
 neither may introduce a different identity model.
 
+The traversal kernel therefore owns root-first, left-to-right visitation, reference
+identity, first-encounter numeric IDs, depth, and revisit detection. Representation
+adapters consume that shared traversal result. The closed node family exposes an internal
+visitor seam so adding a node kind requires every representation adapter to handle it at
+compile time; adapters still own the content they produce for each kind.
+
+#### 3.6.1 MVP Explain text contract
+
+`Explain()` emits `Result`, the invariant decimal result indented by two spaces,
+`Derivation`, and then the complete evidence tree. Each derivation depth adds two spaces,
+and every node kind has one line containing its domain name or operation metadata and
+invariant decimal value. Output uses `\n` regardless of platform and has no trailing
+newline.
+
+Names remain unquoted to keep domain vocabulary prominent. Literal line breaks, tabs,
+and control characters in names use backslash escapes; quote and backslash characters
+remain literal because they have no delimiter role there. Round reasons and branch names
+are quoted, so quote, backslash, line-break, tab, and control characters are escaped.
+
+Only nodes encountered more than once display their document-local ID. Their first
+expanded line starts with `[#N]`; each later occurrence is the complete line `<ref #N>`.
+IDs are assigned to all distinct nodes on first encounter, so the displayed numbers may
+have gaps and are not stable across calls or graph revisions. An uninitialized carrier
+returns the deterministic diagnostic `Uninitialized Traced`.
+
 ### 3.7 Value-type extension policy
 
 The MVP implementation remains concrete where semantics genuinely are concrete:
@@ -424,8 +449,9 @@ structure; it remains a release-gate requirement outside this architecture.
 - **Name ambiguity:** Q9 preserves all duplicate matches, so result cardinality and
   deterministic path ordering must be explicit in the query signatures and tests.
 - **Large-output risk:** structural sharing bounds graph storage but text and JSON can
-  still be large. Iterative traversal prevents stack failure; RQ-026 and issue #27
-  address usability and measured cost.
+  still be large. Iterative traversal prevents stack failure, but full two-space
+  indentation makes a depth-*D* chain's text size `O(D^2)`. RQ-026 and issue #27 address
+  depth limiting, usability, and measured cost.
 - **Hand-written JSON risk:** escaping and exact decimal representation are correctness
   hotspots. Parse-and-compare tests and mutation review are mandatory seams.
 - **Future-type risk:** decimal assumptions are isolated but not eliminated. A new type

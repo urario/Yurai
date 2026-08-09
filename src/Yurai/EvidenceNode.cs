@@ -1,5 +1,18 @@
 namespace Yurai;
 
+internal interface IEvidenceNodeVisitor
+{
+    void Visit(InputEvidenceNode node);
+
+    void Visit(BinaryOperationEvidenceNode node);
+
+    void Visit(RoundEvidenceNode node);
+
+    void Visit(BranchEvidenceNode node);
+
+    void Visit(NamedEvidenceNode node);
+}
+
 internal abstract class EvidenceNode
 {
     protected EvidenceNode(decimal value)
@@ -12,6 +25,8 @@ internal abstract class EvidenceNode
     internal abstract int ChildCount { get; }
 
     internal abstract EvidenceNode GetChild(int index);
+
+    internal abstract void Accept(IEvidenceNodeVisitor visitor);
 }
 
 internal sealed class InputEvidenceNode : EvidenceNode
@@ -28,6 +43,8 @@ internal sealed class InputEvidenceNode : EvidenceNode
 
     internal override EvidenceNode GetChild(int index) =>
         throw new ArgumentOutOfRangeException(nameof(index));
+
+    internal override void Accept(IEvidenceNodeVisitor visitor) => visitor.Visit(this);
 }
 
 internal enum BinaryOperationKind
@@ -79,6 +96,8 @@ internal sealed class BinaryOperationEvidenceNode : EvidenceNode
         1 => Right,
         _ => throw new ArgumentOutOfRangeException(nameof(index)),
     };
+
+    internal override void Accept(IEvidenceNodeVisitor visitor) => visitor.Visit(this);
 }
 
 internal sealed class RoundEvidenceNode : EvidenceNode
@@ -110,6 +129,8 @@ internal sealed class RoundEvidenceNode : EvidenceNode
     internal override EvidenceNode GetChild(int index) => index == 0
         ? Child
         : throw new ArgumentOutOfRangeException(nameof(index));
+
+    internal override void Accept(IEvidenceNodeVisitor visitor) => visitor.Visit(this);
 }
 
 internal enum BranchSelection
@@ -146,6 +167,8 @@ internal sealed class BranchEvidenceNode : EvidenceNode
     internal override EvidenceNode GetChild(int index) => index == 0
         ? Child
         : throw new ArgumentOutOfRangeException(nameof(index));
+
+    internal override void Accept(IEvidenceNodeVisitor visitor) => visitor.Visit(this);
 }
 
 internal sealed class NamedEvidenceNode : EvidenceNode
@@ -166,4 +189,6 @@ internal sealed class NamedEvidenceNode : EvidenceNode
     internal override EvidenceNode GetChild(int index) => index == 0
         ? Child
         : throw new ArgumentOutOfRangeException(nameof(index));
+
+    internal override void Accept(IEvidenceNodeVisitor visitor) => visitor.Visit(this);
 }
