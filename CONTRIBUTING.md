@@ -41,8 +41,7 @@ English and you will get an English answer.
 4. Write tests. Yurai is developed test-first — a change in behavior comes with a change
    in tests.
 5. Required checks must pass before merge — not before review. Open a draft pull
-   request and ask for feedback whenever it is useful, red CI and all. (CI itself
-   arrives with #6.)
+   request and ask for feedback whenever it is useful, red CI and all.
 6. Expect review comments, including from AI reviewers. Push fixes to the same branch;
    reply to anything you disagree with rather than silently skipping it.
 7. A maintainer merges. Please don't merge your own pull request.
@@ -58,7 +57,7 @@ and accepts a later major SDK when it is the only installed compatible SDK.
 ```shell
 dotnet restore Yurai.sln
 dotnet build Yurai.sln --configuration Release --no-restore
-dotnet test Yurai.sln --configuration Release --no-build
+dotnet test Yurai.sln --configuration Release --no-build --no-restore
 dotnet format Yurai.sln --verify-no-changes --no-restore
 ```
 
@@ -69,8 +68,8 @@ dotnet format Yurai.sln --verify-no-changes --no-restore
   dependency needs to argue for it in the issue first.
 - Comments explain *why*. The code already says what.
 
-Once CI is configured (#6) formatting is enforced there, so run the formatter locally
-before pushing — until then, match the style of the surrounding code.
+CI enforces formatting, so run the formatter locally before pushing and match the style
+of the surrounding code.
 
 ## Developed with AI agents
 

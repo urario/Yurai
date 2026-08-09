@@ -1,0 +1,196 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dotnet:
+    name: .NET build, test, format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET from global.json
+        uses: actions/setup-dotnet@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Yurai.sln
+
+      - name: Build
+        run: dotnet build Yurai.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Yurai.sln --configuration Release --no-build --no-restore
+
+      - name: Verify formatting
+        run: dotnet format Yurai.sln --verify-no-changes --no-restore
+
+  knowledge:
+    name: Knowledge base (OKF)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate OKF knowledge tree
+        shell: bash
+        run: |
+          ruby -rpsych -rdate <<'RUBY'
+          frontmatter_pattern = /\A---\r?\n(?<yaml>.*?)\r?\n---(?:\r?\n|\z)/m
+          string_tag = "tag:yaml.org,2002:str"
+          scanner = Psych::ScalarScanner.new(Psych::ClassLoader::Restricted.new(%w[Date Time], []))
+
+          parse_mapping = lambda do |yaml, path|
+            stream = Psych.parse_stream(yaml)
+            document = stream.children.one? ? stream.children.first : nil
+            mapping = document&.root
+            abort "#{path}: frontmatter must be one YAML mapping" unless mapping.is_a?(Psych::Nodes::Mapping)
+            mapping
+          rescue Psych::SyntaxError => error
+            abort "#{path}: invalid YAML frontmatter: #{error.problem}"
+          end
+
+          collect_anchors = lambda do |root|
+            anchors = {}
+            visit = lambda do |node|
+              anchor = node.respond_to?(:anchor) ? node.anchor : nil
+              anchors[anchor] = node if anchor && !node.is_a?(Psych::Nodes::Alias)
+              Array(node.children).each { |child| visit.call(child) }
+            end
+            visit.call(root)
+            anchors
+          end
+
+          scalar_string = lambda do |node, anchors, visited = []|
+            if node.is_a?(Psych::Nodes::Alias)
+              next nil if visited.include?(node.anchor)
+              next scalar_string.call(anchors[node.anchor], anchors, visited + [node.anchor])
+            end
+            next nil unless node.is_a?(Psych::Nodes::Scalar)
+            next nil if node.tag && node.tag != string_tag
+            next node.value if node.quoted || node.tag == string_tag
+
+            value = scanner.tokenize(node.value)
+            value.is_a?(String) ? value : nil
+          end
+
+          mapping_pairs = ->(mapping) { mapping.children.each_slice(2).to_a }
+          read = ->(path) { File.read(path, encoding: "UTF-8") }
+          lines = ->(path) { read.call(path).lines(chomp: true).map { |line| line.delete_suffix("\r") } }
+
+          Dir.glob("knowledge/**/*.md").sort.each do |path|
+            next if %w[index.md log.md].include?(File.basename(path))
+
+            match = read.call(path).match(frontmatter_pattern)
+            abort "#{path}: missing or unterminated YAML frontmatter" unless match
+            mapping = parse_mapping.call(match[:yaml], path)
+            anchors = collect_anchors.call(mapping)
+            type_nodes = mapping_pairs.call(mapping).filter_map do |key, value|
+              value if scalar_string.call(key, anchors) == "type"
+            end
+            abort "#{path}: type must occur exactly once" unless type_nodes.one?
+            type = scalar_string.call(type_nodes.first, anchors)
+            abort "#{path}: type must be a non-empty string" unless type && !type.strip.empty?
+          end
+
+          root_index = "knowledge/index.md"
+          root_match = read.call(root_index).match(frontmatter_pattern)
+          abort "#{root_index}: missing or unterminated YAML frontmatter" unless root_match
+          root_mapping = parse_mapping.call(root_match[:yaml], root_index)
+          root_anchors = collect_anchors.call(root_mapping)
+          root_pairs = mapping_pairs.call(root_mapping)
+          root_keys = root_pairs.map { |key, _value| scalar_string.call(key, root_anchors) }
+          version = scalar_string.call(root_pairs.first&.last, root_anchors)
+          unless root_keys == ["okf_version"] && version == "0.2"
+            abort "#{root_index}: frontmatter must contain only okf_version: 0.2"
+          end
+
+          Dir.glob("knowledge/**/{index,log}.md").sort.each do |path|
+            next if path == root_index
+            abort "#{path}: reserved files must not contain frontmatter" if read.call(path).start_with?("---\n", "---\r\n")
+          end
+
+          Dir.glob("knowledge/**/index.md").sort.each do |path|
+            below_heading = false
+            found_entry = lines.call(path).any? do |line|
+              below_heading = true if line.match?(/^#+\s+/)
+              below_heading && line.match?(/^\s*[*+-]\s+\[[^\]]+\]\([^)]+\)/)
+            end
+            abort "#{path}: expected a heading with a link entry beneath it" unless found_entry
+          end
+
+          Dir.glob("knowledge/**/log.md").sort.each do |path|
+            content = lines.call(path)
+            abort "#{path}: expected a level-one title" unless content.any? { |line| line.match?(/^#\s+[^#]/) }
+            groups = content.each_index.filter_map do |index|
+              next unless content[index].start_with?("## ")
+              text = content[index].delete_prefix("## ")
+              date = Date.iso8601(text)
+              abort "#{path}: invalid date heading #{text.inspect}" unless date.iso8601 == text
+              [index, date]
+            rescue Date::Error
+              abort "#{path}: invalid date heading #{text.inspect}"
+            end
+            abort "#{path}: expected a YYYY-MM-DD heading" if groups.empty?
+            dates = groups.map(&:last)
+            abort "#{path}: date headings must be newest first" unless dates == dates.sort.reverse
+            groups.each_with_index do |(index, date), group_index|
+              following_index = groups.fetch(group_index + 1, [content.length]).first
+              entries = content[(index + 1)...following_index]
+              abort "#{path}: #{date} needs a list entry" unless entries.any? { |line| line.match?(/^\s*[*+-]\s+\S/) }
+            end
+          end
+          RUBY
+
+      - name: Reject phantom requirement identifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          all_ids="$(mktemp)"
+          registered_ids="$(mktemp)"
+          phantom_ids="$(mktemp)"
+          trap 'rm -f "$all_ids" "$registered_ids" "$phantom_ids"' EXIT
+
+          git_grep_ids() {
+            set +e
+            git grep -h -E -o 'RQ-[0-9]{3}' -- "$@"
+            status=$?
+            set -e
+            if ((status > 1)); then
+              exit "$status"
+            fi
+            return 0
+          }
+
+          git_grep_ids . | sort -u > "$all_ids"
+          sed -nE '/^## Registry$/,/^## / s/^\|[[:space:]]*(RQ-[0-9]{3})[[:space:]]*\|.*/\1/p' \
+            knowledge/requirements/registry.md | sort -u > "$registered_ids"
+          comm -23 "$all_ids" "$registered_ids" > "$phantom_ids"
+
+          if [[ -s "$phantom_ids" ]]; then
+            echo "Unregistered requirement identifiers:" >&2
+            cat "$phantom_ids" >&2
+            exit 1
+          fi
