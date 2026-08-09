@@ -56,30 +56,49 @@ public sealed class TracedArithmeticTests
         Assert.Equal(0m, right.Value);
     }
 
-    [Fact]
+    [Theory]
+    [InlineData("Add")]
+    [InlineData("Subtract")]
+    [InlineData("Multiply")]
     [Trait("RQ", "RQ-001")]
-    public void OverflowMatchesDecimalExceptionAndLeavesOperandsUsable()
+    public void OverflowMatchesDecimalExceptionAndLeavesOperandsUsable(string operation)
     {
-        TracedValue left = YuraiApi.Of(decimal.MaxValue, "Left");
-        TracedValue right = YuraiApi.Of(1m, "Right");
+        decimal leftValue = operation == "Subtract" ? decimal.MinValue : decimal.MaxValue;
+        decimal rightValue = operation == "Multiply" ? 2m : 1m;
+        TracedValue left = YuraiApi.Of(leftValue, "Left");
+        TracedValue right = YuraiApi.Of(rightValue, "Right");
         decimal one = 1m;
+        decimal two = 2m;
 
-        Exception native = Assert.Throws<OverflowException>(() => { _ = decimal.MaxValue + one; });
-        Exception traced = Assert.Throws<OverflowException>(() => { _ = left + right; });
+        Exception native = Assert.Throws<OverflowException>(() =>
+        {
+            _ = operation switch
+            {
+                "Add" => decimal.MaxValue + one,
+                "Subtract" => decimal.MinValue - one,
+                "Multiply" => decimal.MaxValue * two,
+                _ => throw new ArgumentOutOfRangeException(nameof(operation)),
+            };
+        });
+        Exception traced = Assert.Throws<OverflowException>(() => { _ = Apply(operation, left, right); });
 
         Assert.Equal(native.GetType(), traced.GetType());
-        Assert.Equal(decimal.MaxValue, left.Value);
-        Assert.Equal(1m, right.Value);
+        Assert.Equal(leftValue, left.Value);
+        Assert.Equal(rightValue, right.Value);
     }
 
-    [Fact]
-    public void OperatorsRejectDefaultOperandsFromLeftToRight()
+    [Theory]
+    [InlineData("Add")]
+    [InlineData("Subtract")]
+    [InlineData("Multiply")]
+    [InlineData("Divide")]
+    public void OperatorsRejectDefaultOperandsFromLeftToRight(string operation)
     {
         TracedValue initialized = YuraiApi.Of(1m);
         TracedValue uninitialized = default;
 
-        Assert.Throws<InvalidOperationException>(() => { _ = uninitialized + initialized; });
-        Assert.Throws<InvalidOperationException>(() => { _ = initialized + uninitialized; });
+        Assert.Throws<InvalidOperationException>(() => { _ = Apply(operation, uninitialized, initialized); });
+        Assert.Throws<InvalidOperationException>(() => { _ = Apply(operation, initialized, uninitialized); });
     }
 
     internal static TracedValue Apply(string operation, TracedValue left, TracedValue right) =>
