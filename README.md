@@ -71,6 +71,8 @@ log, not a diagnostic trail, and not a statement about how much any input matter
   values also combine with plain `decimal` values on either side (`traced * 1.1m`). Bringing
   a calculation under Yurai means naming its inputs and taking the result back out at the
   boundary — the arithmetic expression itself does not have to be rewritten into a DSL.
+  Mixed arithmetic uses explicit overloads; an implicit numeric conversion does not opt a
+  plain value into tracing at an invisible call site.
 - **Rounding as a recorded decision.** `Round(digits, reason)` keeps the stated reason next
   to the step that changed the number — usually the most contested step in a money
   calculation.
@@ -118,6 +120,14 @@ public decimal CalculateTotal(Order order)
 
 Isolating the calculation that has to be explained is a design decision, not a workaround:
 the traced region stays small enough to read, and everything around it keeps its own types.
+
+Boolean conditions are another explicit boundary in the current v1 design. Reading
+`.Value` and evaluating a comparison produces a plain `bool`; if that boolean is passed to
+`Yurai.If`, Yurai cannot recover which traced input decided it. An input used only by the
+condition therefore does not appear in v1 `DependsOn` or `Trace`. Q13 in
+[#18](https://github.com/urario/Yurai/issues/18) fixes this as a documented boundary:
+dependency queries cover recorded value derivation, not condition-only control
+dependency. A future traced-predicate API would be a separate capability.
 
 ## Related work
 

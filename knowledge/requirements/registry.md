@@ -4,7 +4,7 @@ title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
 status: draft
-generated: { by: claude-code/2.1.226, at: 2026-08-09T05:45:00Z }
+generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -21,6 +21,9 @@ sources:
   - id: issue-29
     resource: https://github.com/urario/Yurai/issues/29
     title: "Issue #29: Phase 2 gate — P0 requirements R1-R6 review"
+  - id: pr-54
+    resource: https://github.com/urario/Yurai/pull/54
+    title: "Pull request #54: Yurai core architecture review"
   - id: execution-plan
     resource: ../../docs/project-execution-plan.md
     title: "Yurai project execution plan"
@@ -75,7 +78,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-012 | Human-readable derivation output | P0 | Draft | Output tests against sample expectations (#23) |
 | RQ-013 | Machine-readable derivation export | P0 | Draft | Serialization tests, all node kinds (#24) |
 | RQ-014 | Programmatic dependency queries | P0 | Draft | Path-query tests on shared structures (#25) |
-| RQ-015 | Public API surface of at most 20 members | P0 | Draft | Surface count at gate review (#29) |
+| RQ-015 | Minimal, coherent, and explicit public API | P0 | Draft | Purpose and surface review (#17, gate #29) |
 | RQ-016 | Non-goal: symbolic algebra | P0 | Draft | Design review against non-goals (gate #29) |
 | RQ-017 | Non-goal: sensitivity analysis and automatic differentiation | P0 | Draft | Design review against non-goals (gate #29) |
 | RQ-018 | Non-goal: attribution | P0 | Draft | Design review against non-goals (gate #29) |
@@ -87,7 +90,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-024 | Banned phrases and replacement vocabulary | P0 | Draft | Vocabulary scan of prose and diffs (gate #29) |
 | RQ-025 | Novelty claim ceiling: the single proposal §6.4 sentence | P0 | Draft | README and documentation review (#15, gate #29) |
 | RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Draft | Deferred; tests when a post-MVP issue implements it |
-| RQ-027 | JSON export schema documented, versioned if declared stable | P1 | Draft | Schema document review (#24, decision #18 Q5) |
+| RQ-027 | JSON export schema documented and versioned as a stable contract | P1 | Draft | Schema document review (#24, ADR-0013) |
 | RQ-028 | Value-type extensibility may be pursued later | P2 | Draft | No v1.0 criteria; registered as an open possibility |
 | RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Draft | Review of requirements, design, and API wording (#17, #18, this registry) |
 
@@ -215,9 +218,9 @@ behavior, its packaging, or how it is documented, and have no value type at all.
   behind it. `netstandard2.0` is how the proposal delivers that, and it is a P0
   requirement in its own right (§8 R4), so it is registered as one. What this
   requirement does *not* decide is whether a later release also builds for a newer
-  target alongside `netstandard2.0` — that is the
-  [#18](https://github.com/urario/Yurai/issues/18) Q4 question, left open by RQ-028 and
-  neither answered nor foreclosed here. What is settled is that dropping
+  target alongside `netstandard2.0`. The
+  [#18](https://github.com/urario/Yurai/issues/18) Q4 decision defers that change until a
+  second value type is approved while preserving inexpensive internal options. Dropping
   `netstandard2.0`, or taking a runtime dependency, is not on the table without a
   maintainer decision.
 - **Source**: §8 R4; [#2](https://github.com/urario/Yurai/issues/2),
@@ -238,9 +241,10 @@ behavior, its packaging, or how it is documented, and have no value type at all.
     and for nested conditionals ([#22](https://github.com/urario/Yurai/issues/22)).
   - The branch name appears in the human-readable output (RQ-012) and the
     machine-readable export (RQ-013).
-- **Constraints and notes**: The API shape (lazy or eager alternatives, short-circuit
-  behavior versus what is recorded) is decided in
-  [#18](https://github.com/urario/Yurai/issues/18) Q3, not fixed here.
+- **Constraints and notes**: The [#18](https://github.com/urario/Yurai/issues/18) Q3
+  decision uses lazy alternatives, evaluates the selected delegate exactly once, and
+  neither evaluates nor records the unselected alternative. Q13 limits condition
+  dependency to the plain-boolean boundary documented in ADR-0011.
 - **Source**: §5.2, §8 R5; [#22](https://github.com/urario/Yurai/issues/22).
 
 ### RQ-006 — Related work stated in the README (R6)
@@ -438,11 +442,11 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
     the parse-and-compare check above unchanged.
   - Implemented dependency-free (RQ-004).
   - Documentation states the §9.1 boundary: material for an audit trail, not one.
-- **Constraints and notes**: How values are represented in JSON is type-sensitive:
-  `decimal` must not lose precision to a binary float representation, and future types
-  raise their own questions (`double` NaN/Infinity have no JSON literal). Schema
-  stability and versioning are RQ-027 and the
-  [#18](https://github.com/urario/Yurai/issues/18) Q5 decision.
+- **Constraints and notes**: How values are represented in JSON is type-sensitive.
+  ADR-0014 encodes `decimal` as invariant text so it cannot lose precision or scale to a
+  binary float representation. Future types raise their own questions (`double`
+  NaN/Infinity have no JSON literal). ADR-0013 makes schema stability and versioning a
+  public compatibility contract.
 - **Source**: §5.2, §7.1, §9.1; [#24](https://github.com/urario/Yurai/issues/24).
 
 ### RQ-014 — Programmatic dependency queries
@@ -463,29 +467,44 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
     returns a dependency path only.
 - **Source**: §4, §5.2, §7.1; [#25](https://github.com/urario/Yurai/issues/25).
 
-### RQ-015 — Public API surface of at most 20 members
+### RQ-015 — Minimal, coherent, and explicit public API
 
 - **Priority**: P0
-- **What**: The public API surface of the shipped library stays at or below 20
-  members, and public names are written out in full — no abbreviated aliases (§5.3).
+- **What**: The shipped public API contains only operations that deliver a registered
+  user capability or the value-type behavior needed to use those operations safely.
+  Each capability has one coherent, unsurprising route; public names are written out in
+  full, with no abbreviated aliases (§5.3), and implicit conversions do not blur the
+  boundary between plain and traced values.
 - **Why / user value**: A surface a developer can hold in their head in one sitting is
-  what makes the five-minute promise (RQ-002) honest, and small surfaces stay
-  compatible: every member not added is a breaking change that can never happen.
+  what makes the five-minute promise (RQ-002) honest. The original proposal's
+  20-member ceiling was a proxy for that outcome, but a raw metadata count rewards
+  unsafe compression — for example, replacing explicit mixed-arithmetic overloads with
+  an implicit conversion solely to reduce the count. Users benefit from an explicit
+  traced boundary and one predictable spelling per operation, not from a smaller
+  reflection result at the cost of overload surprises.
 - **Acceptance criteria**:
-  - The count is taken and recorded at the gate
-    ([#29](https://github.com/urario/Yurai/issues/29)); exceeding it means removing or
-    deferring something, or a maintainer decision to raise the bound (reserved).
+  - The architecture keeps a public-surface inventory that maps every public type and
+    logical operation to a registered requirement or necessary .NET value behavior.
+    Anything with no such justification is removed or deferred.
+  - The Phase 2 gate records both the number of logical operations and the raw number
+    of declared public CLR members for transparency, but neither number is a standalone
+    pass/fail ceiling. Review checks that overloads implement one documented operation,
+    not unrelated behavior hidden under one count entry.
+  - No abbreviated alias, duplicate route to the same capability, public evidence-model
+    type, or implicit numeric conversion is introduced merely to make the API appear
+    smaller. Mixed operations remain natural C# while the plain/traced boundary stays
+    explicit.
   - Every public API addition or change is a reserved decision
     ([AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides)).
-- **Constraints and notes**: This requirement does not itself define what counts as
-  one "member" — whether an overload, an operator, or a property accessor counts
-  separately is a counting rule, not a requirement, and different rules would move the
-  count without changing the actual surface. The counting rule is fixed once, by the
-  [#17](https://github.com/urario/Yurai/issues/17) architecture design; the gate
-  review ([#29](https://github.com/urario/Yurai/issues/29)) counts against that rule
-  rather than each reviewer's own reading.
+- **Constraints and notes**: The requirement remains measurable without an arbitrary
+  ceiling: the inventory, requirement mapping, two published counts, and review of
+  redundant or surprising routes are concrete gate evidence. Because this requirement
+  was still `Draft`, the maintainer-approved review of
+  [PR #54](https://github.com/urario/Yurai/pull/54) replaces the proposal's numeric
+  proxy before implementation rather than superseding an accepted release contract.
 - **Source**: §5.2, §5.3; [#17](https://github.com/urario/Yurai/issues/17),
-  [#29](https://github.com/urario/Yurai/issues/29).
+  [#29](https://github.com/urario/Yurai/issues/29),
+  [PR #54](https://github.com/urario/Yurai/pull/54).
 
 ## Non-goals
 
@@ -616,8 +635,9 @@ requirement's *Why*, and reclassifying one is a maintainer decision.
   - The v1.0 public surface exposes `decimal` as the only underlying value type.
   - Documentation describes the `decimal` bound as the MVP's scope, not as Yurai's
     definition — the distinction this section states.
-  - The extension question is kept open per RQ-028 and decided, when its time comes,
-    through [#18](https://github.com/urario/Yurai/issues/18) Q4.
+  - The extension mechanism remains open per RQ-028. ADR-0009 defers multi-targeting and
+    generic numeric design until a second value type is approved, while requiring cheap
+    option-preserving boundaries now.
 - **Source**: §7.2, §8 (P2), §13 Q4; [#18](https://github.com/urario/Yurai/issues/18).
 
 ## Documentation and positioning constraints
@@ -715,22 +735,18 @@ here because it exists to keep RQ-028 reachable rather than because it waits for
 ### RQ-027 — JSON export schema documented, versioned if declared stable
 
 - **Priority**: P1
-- **What**: The JSON export (RQ-013) has a documented schema, unconditionally. Whether
-  that schema is a stable API — and, if so, whether it carries a version from the
-  first release — is the [#18](https://github.com/urario/Yurai/issues/18) Q5 decision;
-  this requirement does not take a side on Q5, and is satisfied by documentation that
-  states the outcome plainly, whichever way Q5 goes.
+- **What**: The JSON export (RQ-013) has a documented, versioned stable schema from its
+  first release, as decided by [#18](https://github.com/urario/Yurai/issues/18) Q5 and
+  recorded in ADR-0013.
 - **Why / user value**: RQ-013's value is programs outside the process consuming the
   evidence; an undocumented shape makes every consumer reverse-engineer it and breaks
   them silently when it changes. Documentation is worth having regardless of whether
   the shape is promised stable yet.
 - **Acceptance criteria**:
   - A schema document (English) is merged alongside the export implementation
-    ([#24](https://github.com/urario/Yurai/issues/24)), independent of Q5.
-  - If Q5 designates the schema a stable API, the document states its version from
-    v1.0 onward and how it will change.
-  - If Q5 does not, the document says explicitly that the schema is not (yet) a
-    stable API and may change without notice.
+    ([#24](https://github.com/urario/Yurai/issues/24)).
+  - The document states the schema version from v1.0 onward and distinguishes compatible
+    evolution from changes that require a new version.
 - **Source**: §8 (P1); [#24](https://github.com/urario/Yurai/issues/24),
   [#18](https://github.com/urario/Yurai/issues/18).
 
@@ -740,11 +756,10 @@ here because it exists to keep RQ-028 reachable rather than because it waits for
 - **What**: Yurai's model — named inputs, arithmetic composition, recorded decisions,
   immutable shared evidence, explanation, export, and queries — may in the future
   extend to value types other than `decimal`: integers, floating point, or domain
-  value objects. Whether, when, and how that happens — generic math support,
-  multi-targeting beyond `netstandard2.0`, or a concrete extension architecture — is
-  undecided, is not designed, and is not required by v1.0. Those choices are the
-  [#18](https://github.com/urario/Yurai/issues/18) Q4 decision, for whenever a second
-  value type is actually pursued.
+  value objects. Whether and when that happens remains undecided and is not required by
+  v1.0. ADR-0009 also defers how it happens — generic math, multi-targeting beyond
+  `netstandard2.0`, or another extension architecture — until a second value type is
+  approved, while preserving inexpensive internal options now.
 - **Why / user value**: Domain calculations are not only money: quantities, indexes,
   and typed domain values ask the same "why this value" question. Registering the
   possibility now, even fully unresolved, means a future proposal to pursue it is

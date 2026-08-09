@@ -49,7 +49,6 @@ value, named inputs and intermediate values, arithmetic operations, rounding par
 and the rounding reason. Exact punctuation, indentation, and number formatting remain
 design work.
 
-The literals in `1 - discount` and `1 + taxRate` are shown by value without a generated
-name. Their final display convention is the open Q2 decision in issue #18. The midpoint
-rounding mode also remains to be made explicit in issue #17; it does not affect this
-example because `990.0000` is already integral.
+The literals in `1 - discount` and `1 + taxRate` are shown by invariant-formatted value
+without a generated name. The midpoint rounding mode is `ToEven`; it does not affect
+this example because `990.0000` is already integral.
