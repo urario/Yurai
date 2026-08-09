@@ -2,16 +2,10 @@
 
 **Yurai is a lightweight computation-lineage library for explainable domain calculations in .NET.**
 
-> **Status: pre-release.** The library is not implemented or published yet. The code below is
-> the intended shape of the API; its final form and the exact explanation output are being
-> designed in [#17](https://github.com/urario/Yurai/issues/17) and
-> [#18](https://github.com/urario/Yurai/issues/18).
-
 ```csharp
 var basePrice = Yurai.Of(1000m, "BasePrice");
 var discount = Yurai.Of(0.10m, "MemberDiscount");
 var taxRate = Yurai.Of(0.10m, "TaxRate");
-
 var total = (basePrice * (1 - discount) * (1 + taxRate))
     .Round(0, "Round to whole currency unit")
     .As("Total");
@@ -36,6 +30,11 @@ Total = 990
 `total` is a value you can keep using — `total.Value` is `990m`, exactly what the same
 expression produces without Yurai. What Yurai adds is that the value carries the evidence of
 how it was reached, and that evidence can be printed, exported as JSON, or queried in code.
+
+> **Status: pre-release.** The library is not implemented or published yet. The code above is
+> the intended shape of the API; its final form and the exact explanation output are being
+> designed in [#17](https://github.com/urario/Yurai/issues/17) and
+> [#18](https://github.com/urario/Yurai/issues/18).
 
 ## Why this exists
 
@@ -69,8 +68,9 @@ log, not a diagnostic trail, and not a statement about how much any input matter
   value in under your domain vocabulary; `.As("Total")` names a result after computing it.
   Names are what the explanation and the queries speak in.
 - **Ordinary arithmetic.** `+ - * /` between traced values, plus `Min` and `Max`. Traced
-  values also combine with plain `decimal` values on either side (`traced * 1.1m`), so
-  existing formulas do not have to be rewritten to become explainable.
+  values also combine with plain `decimal` values on either side (`traced * 1.1m`). Bringing
+  a calculation under Yurai means naming its inputs and taking the result back out at the
+  boundary — the arithmetic expression itself does not have to be rewritten into a DSL.
 - **Rounding as a recorded decision.** `Round(digits, reason)` keeps the stated reason next
   to the step that changed the number — usually the most contested step in a money
   calculation.
@@ -175,8 +175,10 @@ dotnet add package Yurai
 ```
 
 Yurai targets `netstandard2.0` and has **zero runtime dependencies** — BCL only, including
-the JSON export. It runs on .NET Framework 4.6.1+, .NET Core 2.0+, and every .NET release
-since, without pulling anything in behind it.
+the JSON export. NuGet compatibility therefore includes .NET Framework 4.6.1+ and .NET Core
+2.0+, and every .NET release since, without pulling anything in behind it. On .NET Framework,
+Microsoft [recommends 4.7.2 or later](https://learn.microsoft.com/en-us/dotnet/standard/net-standard)
+when consuming .NET Standard 2.0 libraries.
 
 ## Project
 
