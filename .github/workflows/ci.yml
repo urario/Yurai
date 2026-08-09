@@ -77,7 +77,7 @@ jobs:
             visit = lambda do |node|
               anchor = node.respond_to?(:anchor) ? node.anchor : nil
               anchors[anchor] = node if anchor && !node.is_a?(Psych::Nodes::Alias)
-              node.children.each { |child| visit.call(child) }
+              Array(node.children).each { |child| visit.call(child) }
             end
             visit.call(root)
             anchors
