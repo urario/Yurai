@@ -62,10 +62,10 @@ Commit order is the preferred form of test-first evidence
 so on a behavior change, sequence the commits deliberately rather than squashing at the
 end: the failing `test:` commit first, then the commit that makes it pass.
 
-Referencing a requirement in a commit body — `Refs RQ-NNN` — is part of the policy but
-not active yet, because the registry it points to is empty until
-[#12](https://github.com/urario/Yurai/issues/12). Do not invent an identifier to fill the
-line; CI rejects any three-digit `RQ-` string that is not registered.
+Referencing a requirement in a commit body — `Refs RQ-NNN` — is active: the registry was
+populated by [#12](https://github.com/urario/Yurai/issues/12). Use only identifiers that
+exist in [the registry](../../../knowledge/requirements/registry.md); CI rejects any
+three-digit `RQ-` string that is not registered.
 
 ## 3. Pull request
 

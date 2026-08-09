@@ -25,10 +25,10 @@ and answer two questions about the change:
   phrased in the negative. They exist to stop a debate from recurring; a change that
   re-opens one needs the maintainer, not a review comment.
 
-The registry is empty until [#12](https://github.com/urario/Yurai/issues/12) fills it. Until
-then, the reference points are the project proposal's requirement labels (R1–R6) as they
-appear in the issue being worked, and this check is a judgement rather than a lookup —
-say so in the review instead of implying a registry check happened.
+The registry was populated by [#12](https://github.com/urario/Yurai/issues/12): the
+proposal's requirement labels (R1–R6), the MVP scope, and the §7.2 non-goals are all
+registered entries with acceptance criteria, so this check is a lookup — cite the
+identifier the change serves or collides with.
 
 **Identifier hygiene.** Requirement identifiers in this repository are `RQ-` plus three
 digits, and every string in that format is a reference to a registered requirement
@@ -40,8 +40,7 @@ this repository-wide:
 git grep -nE 'RQ-[0-9]{3}'
 ```
 
-Every hit has to appear in the registry table. While the registry is empty, any hit is a
-finding.
+Every hit has to appear in the registry table.
 
 ## 2. Public API
 
