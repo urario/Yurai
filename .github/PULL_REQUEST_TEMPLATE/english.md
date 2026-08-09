@@ -40,20 +40,28 @@ Findings:
 <!--
 Required for implementation PRs. Include commands, measured results, and links to CI runs or artifacts.
 Do not remove rows when a gate was not run or does not apply; use NOT RUN / N/A and explain why.
-The final quality-gate criteria will be incorporated after #7 is decided.
+The gate is defined in knowledge/process/testing-and-quality.md — this table is where you show it was met.
 -->
 
-| Gate | Command or evidence | Result | Status |
+| Gate | Applies to | Command or evidence | Result |
 | --- | --- | --- | --- |
-| Build / analyzers | `N/A` | N/A | N/A |
-| Unit tests / coverage | `N/A` | N/A | N/A |
-| Format | `N/A` | N/A | N/A |
-| Mutation | `N/A` | N/A | N/A |
-| Other | `N/A` | N/A | N/A |
+| Build, test, format (CI) | Every PR | `N/A` | N/A |
+| Knowledge base (OKF) (CI) | Every PR | `N/A` | N/A |
+| Test-first evidence | A PR that changes behavior | See below | N/A |
+| Property test | A PR implementing a P0 requirement | `N/A` | N/A |
+| Counterexample landed as an example test | A PR fixing a property failure | `N/A` | N/A |
+| Mutation score (advisory) | Changes under `src/Yurai/` | `N/A` | N/A |
+| Benchmark (advisory) | Changes to a hot path | `N/A` | N/A |
 
-Test-first evidence (required for implementation PRs):
+Line coverage is not a gate. Report it only where it is part of a finding.
 
-<!-- Describe the failing test, test-first commit, or equivalent verification sequence. -->
+Test-first evidence (required when behavior changes) — one of the three accepted forms:
+
+<!--
+1. Commit order: a failing `test:` commit precedes the `feat:` / `fix:` commit.
+2. A named test that fails without the change. Say so if it does not compile against main — that counts.
+3. A counterexample test, citing where the values came from (a seed, an issue).
+-->
 
 ## Residual risks
 
