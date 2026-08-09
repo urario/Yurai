@@ -3,7 +3,7 @@ type: ADR
 title: A lightweight knowledge base with RQ-ID traceability
 description: Requirements are the only identified artifacts, traceability is derived by search, and decision records are immutable.
 tags: [knowledge, traceability, adr]
-status: draft
+status: stable
 generated: { by: claude-code/2.1.226, at: 2026-08-08T23:01:00Z }
 sources:
   - id: issue-8

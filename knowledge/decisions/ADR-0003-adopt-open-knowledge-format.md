@@ -3,7 +3,7 @@ type: ADR
 title: Adopt the Open Knowledge Format for the knowledge base
 description: knowledge/ is an OKF v0.2 bundle rather than a house style, conforming at the required level and adopting the optional families selectively.
 tags: [knowledge, okf, format, adr]
-status: draft
+status: stable
 generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: okf-spec

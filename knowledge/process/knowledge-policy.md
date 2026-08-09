@@ -3,7 +3,7 @@ type: Process
 title: Knowledge policy
 description: What belongs in the Yurai knowledge bundle, how its documents are structured, and how they change.
 tags: [process, knowledge, okf]
-status: draft
+status: stable
 generated: { by: codex/2026-08, at: 2026-08-09T09:11:32+09:00 }
 sources:
   - id: issue-8

@@ -3,7 +3,7 @@ type: ADR
 title: Check knowledge base conformance in CI, not with a ported validator
 description: Supersedes ADR-0002 — the deferral now ends when CI lands rather than when the conventions have proven themselves.
 tags: [knowledge, tooling, ci, adr]
-status: draft
+status: stable
 generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: issue-8
