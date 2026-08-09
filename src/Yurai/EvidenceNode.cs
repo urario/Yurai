@@ -1,0 +1,89 @@
+namespace Yurai;
+
+internal abstract class EvidenceNode
+{
+    protected EvidenceNode(decimal value)
+    {
+        Value = value;
+    }
+
+    internal decimal Value { get; }
+
+    internal abstract int ChildCount { get; }
+
+    internal abstract EvidenceNode GetChild(int index);
+}
+
+internal sealed class InputEvidenceNode : EvidenceNode
+{
+    internal InputEvidenceNode(decimal value, string? name)
+        : base(value)
+    {
+        Name = name;
+    }
+
+    internal string? Name { get; }
+
+    internal override int ChildCount => 0;
+
+    internal override EvidenceNode GetChild(int index) =>
+        throw new ArgumentOutOfRangeException(nameof(index));
+}
+
+internal enum BinaryOperationKind
+{
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+}
+
+internal sealed class BinaryOperationEvidenceNode : EvidenceNode
+{
+    internal BinaryOperationEvidenceNode(
+        decimal value,
+        BinaryOperationKind operation,
+        EvidenceNode left,
+        EvidenceNode right)
+        : base(value)
+    {
+        Operation = operation;
+        Left = left ?? throw new ArgumentNullException(nameof(left));
+        Right = right ?? throw new ArgumentNullException(nameof(right));
+    }
+
+    internal BinaryOperationKind Operation { get; }
+
+    internal EvidenceNode Left { get; }
+
+    internal EvidenceNode Right { get; }
+
+    internal override int ChildCount => 2;
+
+    internal override EvidenceNode GetChild(int index) => index switch
+    {
+        0 => Left,
+        1 => Right,
+        _ => throw new ArgumentOutOfRangeException(nameof(index)),
+    };
+}
+
+internal sealed class NamedEvidenceNode : EvidenceNode
+{
+    internal NamedEvidenceNode(EvidenceNode child, string name)
+        : base((child ?? throw new ArgumentNullException(nameof(child))).Value)
+    {
+        Child = child;
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+    }
+
+    internal string Name { get; }
+
+    internal EvidenceNode Child { get; }
+
+    internal override int ChildCount => 1;
+
+    internal override EvidenceNode GetChild(int index) => index == 0
+        ? Child
+        : throw new ArgumentOutOfRangeException(nameof(index));
+}
