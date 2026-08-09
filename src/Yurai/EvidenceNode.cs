@@ -112,6 +112,42 @@ internal sealed class RoundEvidenceNode : EvidenceNode
         : throw new ArgumentOutOfRangeException(nameof(index));
 }
 
+internal enum BranchSelection
+{
+    Then,
+    Else,
+}
+
+internal sealed class BranchEvidenceNode : EvidenceNode
+{
+    internal BranchEvidenceNode(
+        EvidenceNode child,
+        string decisionName,
+        bool condition)
+        : base((child ?? throw new ArgumentNullException(nameof(child))).Value)
+    {
+        Child = child;
+        DecisionName = decisionName ?? throw new ArgumentNullException(nameof(decisionName));
+        Condition = condition;
+    }
+
+    internal string DecisionName { get; }
+
+    internal bool Condition { get; }
+
+    internal BranchSelection SelectedBranch => Condition
+        ? BranchSelection.Then
+        : BranchSelection.Else;
+
+    internal EvidenceNode Child { get; }
+
+    internal override int ChildCount => 1;
+
+    internal override EvidenceNode GetChild(int index) => index == 0
+        ? Child
+        : throw new ArgumentOutOfRangeException(nameof(index));
+}
+
 internal sealed class NamedEvidenceNode : EvidenceNode
 {
     internal NamedEvidenceNode(EvidenceNode child, string name)
