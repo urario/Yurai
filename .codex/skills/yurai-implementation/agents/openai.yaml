@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yurai Implementation"
+  short_description: "TDD implementation workflow for Yurai changes"
+  default_prompt: "Use $yurai-implementation to implement a Yurai change test-first and capture its verification evidence."

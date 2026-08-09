@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yurai Git Workflow"
+  short_description: "Branch, commit, PR, and handoff workflow"
+  default_prompt: "Use $yurai-git-workflow to prepare and publish a policy-compliant Yurai pull request."

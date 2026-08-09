@@ -134,10 +134,40 @@ here.
 - **Report failures as failures.** If tests fail or a step was skipped, say so with the
   output. Never describe unverified work as verified.
 
-## 7. Scope of this document
+## 7. Codex implementation rules
+
+Codex is the default implementer, verifier, benchmark runner, and pull request preparer.
+Four constraints apply to every implementation:
+
+- **Work test-first.** A behavior change starts with a failing test and preserves one of
+  the evidence forms defined in
+  [`knowledge/process/testing-and-quality.md`](knowledge/process/testing-and-quality.md).
+- **Keep the shipped library dependency-free.** `src/Yurai/` remains
+  `netstandard2.0` and BCL-only. A runtime dependency or target-framework change is a
+  reserved decision under section 2.
+- **Write code and comments in English.** The language policy in section 4 applies to
+  identifiers, source comments, README content, and published documentation.
+- **Leave reproducible pull request evidence.** Fill every row of the pull request
+  quality-gate table with commands and measured results, or `N/A` / `NOT RUN` with a
+  reason. Never report an unmeasured gate as passing.
+
+Repo-local Codex procedures live in `.codex/skills/`. They point to the binding policy
+instead of copying it:
+
+| Skill | Use it for | Binding references |
+|---|---|---|
+| [`yurai-implementation`](.codex/skills/yurai-implementation/SKILL.md) | Test-first implementation, requirement traceability, verification, and evidence | Testing and quality strategy, traceability |
+| [`yurai-git-workflow`](.codex/skills/yurai-git-workflow/SKILL.md) | Branches, commits, pull requests, and GitHub handoff | Git policy, section 5 |
+| [`yurai-detailed-design`](.codex/skills/yurai-detailed-design/SKILL.md) | Implementation-readiness checks before coding | Requirements, ADRs, section 2 |
+
+The detailed-design skill does not move design authority to Codex. Missing design goes
+back through GitHub to Claude Code, and reserved decisions go to the human. Claude Code's
+`.claude/` assets remain separate; neither toolset binds the other.
+
+## 8. Scope of this document
 
 Defined here: roles, decision rights, agent-to-agent communication, language policy,
-and the pull request gate principle.
+the pull request gate principle, and Codex implementation guardrails.
 
 Defined elsewhere:
 
