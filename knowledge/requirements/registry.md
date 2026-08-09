@@ -4,7 +4,7 @@ title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
 status: draft
-generated: { by: codex/2026-08, at: 2026-08-09T19:15:55+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -90,7 +90,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-024 | Banned phrases and replacement vocabulary | P0 | Draft | Vocabulary scan of prose and diffs (gate #29) |
 | RQ-025 | Novelty claim ceiling: the single proposal §6.4 sentence | P0 | Draft | README and documentation review (#15, gate #29) |
 | RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Draft | Deferred; tests when a post-MVP issue implements it |
-| RQ-027 | JSON export schema documented, versioned if declared stable | P1 | Draft | Schema document review (#24, decision #18 Q5) |
+| RQ-027 | JSON export schema documented and versioned as a stable contract | P1 | Draft | Schema document review (#24, ADR-0013) |
 | RQ-028 | Value-type extensibility may be pursued later | P2 | Draft | No v1.0 criteria; registered as an open possibility |
 | RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Draft | Review of requirements, design, and API wording (#17, #18, this registry) |
 
@@ -218,9 +218,9 @@ behavior, its packaging, or how it is documented, and have no value type at all.
   behind it. `netstandard2.0` is how the proposal delivers that, and it is a P0
   requirement in its own right (§8 R4), so it is registered as one. What this
   requirement does *not* decide is whether a later release also builds for a newer
-  target alongside `netstandard2.0` — that is the
-  [#18](https://github.com/urario/Yurai/issues/18) Q4 question, left open by RQ-028 and
-  neither answered nor foreclosed here. What is settled is that dropping
+  target alongside `netstandard2.0`. The
+  [#18](https://github.com/urario/Yurai/issues/18) Q4 decision defers that change until a
+  second value type is approved while preserving inexpensive internal options. Dropping
   `netstandard2.0`, or taking a runtime dependency, is not on the table without a
   maintainer decision.
 - **Source**: §8 R4; [#2](https://github.com/urario/Yurai/issues/2),
@@ -241,9 +241,10 @@ behavior, its packaging, or how it is documented, and have no value type at all.
     and for nested conditionals ([#22](https://github.com/urario/Yurai/issues/22)).
   - The branch name appears in the human-readable output (RQ-012) and the
     machine-readable export (RQ-013).
-- **Constraints and notes**: The API shape (lazy or eager alternatives, short-circuit
-  behavior versus what is recorded) is decided in
-  [#18](https://github.com/urario/Yurai/issues/18) Q3, not fixed here.
+- **Constraints and notes**: The [#18](https://github.com/urario/Yurai/issues/18) Q3
+  decision uses lazy alternatives, evaluates the selected delegate exactly once, and
+  neither evaluates nor records the unselected alternative. Q13 limits condition
+  dependency to the plain-boolean boundary documented in ADR-0011.
 - **Source**: §5.2, §8 R5; [#22](https://github.com/urario/Yurai/issues/22).
 
 ### RQ-006 — Related work stated in the README (R6)
@@ -441,11 +442,11 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
     the parse-and-compare check above unchanged.
   - Implemented dependency-free (RQ-004).
   - Documentation states the §9.1 boundary: material for an audit trail, not one.
-- **Constraints and notes**: How values are represented in JSON is type-sensitive:
-  `decimal` must not lose precision to a binary float representation, and future types
-  raise their own questions (`double` NaN/Infinity have no JSON literal). Schema
-  stability and versioning are RQ-027 and the
-  [#18](https://github.com/urario/Yurai/issues/18) Q5 decision.
+- **Constraints and notes**: How values are represented in JSON is type-sensitive.
+  ADR-0014 encodes `decimal` as invariant text so it cannot lose precision or scale to a
+  binary float representation. Future types raise their own questions (`double`
+  NaN/Infinity have no JSON literal). ADR-0013 makes schema stability and versioning a
+  public compatibility contract.
 - **Source**: §5.2, §7.1, §9.1; [#24](https://github.com/urario/Yurai/issues/24).
 
 ### RQ-014 — Programmatic dependency queries
@@ -634,8 +635,9 @@ requirement's *Why*, and reclassifying one is a maintainer decision.
   - The v1.0 public surface exposes `decimal` as the only underlying value type.
   - Documentation describes the `decimal` bound as the MVP's scope, not as Yurai's
     definition — the distinction this section states.
-  - The extension question is kept open per RQ-028 and decided, when its time comes,
-    through [#18](https://github.com/urario/Yurai/issues/18) Q4.
+  - The extension mechanism remains open per RQ-028. ADR-0009 defers multi-targeting and
+    generic numeric design until a second value type is approved, while requiring cheap
+    option-preserving boundaries now.
 - **Source**: §7.2, §8 (P2), §13 Q4; [#18](https://github.com/urario/Yurai/issues/18).
 
 ## Documentation and positioning constraints
@@ -733,22 +735,18 @@ here because it exists to keep RQ-028 reachable rather than because it waits for
 ### RQ-027 — JSON export schema documented, versioned if declared stable
 
 - **Priority**: P1
-- **What**: The JSON export (RQ-013) has a documented schema, unconditionally. Whether
-  that schema is a stable API — and, if so, whether it carries a version from the
-  first release — is the [#18](https://github.com/urario/Yurai/issues/18) Q5 decision;
-  this requirement does not take a side on Q5, and is satisfied by documentation that
-  states the outcome plainly, whichever way Q5 goes.
+- **What**: The JSON export (RQ-013) has a documented, versioned stable schema from its
+  first release, as decided by [#18](https://github.com/urario/Yurai/issues/18) Q5 and
+  recorded in ADR-0013.
 - **Why / user value**: RQ-013's value is programs outside the process consuming the
   evidence; an undocumented shape makes every consumer reverse-engineer it and breaks
   them silently when it changes. Documentation is worth having regardless of whether
   the shape is promised stable yet.
 - **Acceptance criteria**:
   - A schema document (English) is merged alongside the export implementation
-    ([#24](https://github.com/urario/Yurai/issues/24)), independent of Q5.
-  - If Q5 designates the schema a stable API, the document states its version from
-    v1.0 onward and how it will change.
-  - If Q5 does not, the document says explicitly that the schema is not (yet) a
-    stable API and may change without notice.
+    ([#24](https://github.com/urario/Yurai/issues/24)).
+  - The document states the schema version from v1.0 onward and distinguishes compatible
+    evolution from changes that require a new version.
 - **Source**: §8 (P1); [#24](https://github.com/urario/Yurai/issues/24),
   [#18](https://github.com/urario/Yurai/issues/18).
 
@@ -758,11 +756,10 @@ here because it exists to keep RQ-028 reachable rather than because it waits for
 - **What**: Yurai's model — named inputs, arithmetic composition, recorded decisions,
   immutable shared evidence, explanation, export, and queries — may in the future
   extend to value types other than `decimal`: integers, floating point, or domain
-  value objects. Whether, when, and how that happens — generic math support,
-  multi-targeting beyond `netstandard2.0`, or a concrete extension architecture — is
-  undecided, is not designed, and is not required by v1.0. Those choices are the
-  [#18](https://github.com/urario/Yurai/issues/18) Q4 decision, for whenever a second
-  value type is actually pursued.
+  value objects. Whether and when that happens remains undecided and is not required by
+  v1.0. ADR-0009 also defers how it happens — generic math, multi-targeting beyond
+  `netstandard2.0`, or another extension architecture — until a second value type is
+  approved, while preserving inexpensive internal options now.
 - **Why / user value**: Domain calculations are not only money: quantities, indexes,
   and typed domain values ask the same "why this value" question. Registering the
   possibility now, even fully unresolved, means a future proposal to pursue it is

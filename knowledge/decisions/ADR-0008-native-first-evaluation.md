@@ -5,7 +5,7 @@ description: Each operation executes the native decimal operation once and creat
 tags: [decimal, semantics, correctness, evidence, adr]
 status: draft
 requirements: [RQ-001, RQ-004, RQ-008, RQ-009, RQ-010, RQ-015, RQ-023, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-09T19:15:55+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
   - id: issue-17
     resource: https://github.com/urario/Yurai/issues/17
@@ -42,11 +42,10 @@ Each recorded value operation follows a native-first boundary:
 5. return a new carrier containing the parent reference.
 
 The same rule applies to mixed operands after the plain `decimal` is introduced as an
-anonymous input. Mixed arithmetic uses explicit left/right overloads; no implicit
-numeric conversion creates evidence at an invisible call-site boundary. In particular,
-Yurai provides no implicit conversion from `double` or `float`, because a
-precision-changing conversion before decimal arithmetic would make the reference native
-expression ambiguous.
+anonymous input. The separate public-boundary decision in ADR-0012 determines how that
+mixed operation is exposed. In particular, Yurai does not accept an implicit `double`
+or `float` route, because a precision-changing conversion before decimal arithmetic
+would make the reference native expression ambiguous.
 
 `Round(digits, reason)` calls `decimal.Round(value, digits)`, preserving the native
 default `MidpointRounding.ToEven`, and records the digits, mode, and reason. Yurai does

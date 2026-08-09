@@ -5,7 +5,7 @@ description: Architecture drivers, evidence model, runtime boundaries, and imple
 tags: [architecture, evidence, computation-lineage, decimal]
 status: draft
 requirements: [RQ-001, RQ-002, RQ-003, RQ-004, RQ-005, RQ-007, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-014, RQ-015, RQ-016, RQ-017, RQ-018, RQ-019, RQ-020, RQ-021, RQ-022, RQ-023, RQ-024, RQ-025, RQ-026, RQ-027, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-09T19:15:55+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
   - id: issue-17
     resource: https://github.com/urario/Yurai/issues/17
@@ -72,8 +72,8 @@ the operation, including both compared Min/Max operands. A branch condition is d
 in the current API sketch: reading `.Value` and evaluating a comparison produces an
 ordinary `bool` outside the evidence graph. An input used only by that condition is
 therefore not discoverable as a dependency unless Yurai introduces traced predicates.
-Q13 must choose between documenting that v1 boundary and expanding the public model;
-the absence of a condition edge must never remain implicit.
+Q13 makes that absence the documented v1 boundary; any traced-predicate expansion is a
+separate future public capability.
 
 ## 3. Architecture viewpoints
 
@@ -111,7 +111,7 @@ names may differ without changing the contract.
 | `Input` | Evaluated value and optional developer-supplied name. | None. |
 | `BinaryOperation` | Evaluated value and operation kind. Min/Max also preserve which operand was selected so equal operands remain distinguishable. | Left and right, in source order. |
 | `Round` | Evaluated value, digits, `MidpointRounding.ToEven`, and reason. | The unrounded value. |
-| `Branch` | Evaluated value, decision name, condition outcome, selected branch label. | At least the selected result; treatment of the condition dependency and unselected alternative is Q3/Q13. |
+| `Branch` | Evaluated value, decision name, condition outcome, selected branch label. | The selected result only; a plain condition creates no evidence edge. |
 | `Named` | Evaluated value and developer-supplied result name. | The value being named. |
 
 Fixed child fields are preferred over an array per node. They express arity, prevent an
@@ -139,11 +139,12 @@ For a binary operation:
 5. Return a new carrier holding only that parent reference.
 
 Mixed operations first introduce the plain operand as an anonymous `Input` and then use
-the same flow. Its display convention is Q2. `Round(digits, reason)` invokes
+the same flow. Its display is the invariant-formatted value. `Round(digits, reason)` invokes
 `decimal.Round(value, digits)`, whose midpoint mode is `ToEven`, and records that mode
-explicitly. Parameter validation for names/reasons must not accidentally replace a
-native arithmetic failure; the exact validation order is an open public-contract
-question below.
+explicitly. Evidence-only metadata validation must not replace a native arithmetic
+failure: an operation first invokes native evaluation and its parameter validation,
+then validates evidence-only metadata, then allocates evidence. Operations that only
+add metadata validate it at entry.
 
 The decimal MVP provides no implicit conversion from `double` or `float`. Such a
 conversion would silently add a precision-changing step before the native `decimal`
@@ -180,11 +181,10 @@ traversal before a performance threshold is proposed.
 
 ### 3.5 Public API and internal-model boundary
 
-This design fixes behavior boundaries, not the names and signatures still owned by
-issue #18. In particular, the proposal's `Traced<T>` sketch conflicts with RQ-023's
-current rule that the v1 public surface exposes no generic abstraction over value types.
-Until Q6 is decided, this document uses **traced value carrier** rather than treating a
-type name as settled.
+This design fixes behavior boundaries and the public carrier name, while exact member
+signatures still receive detailed-design review. The v1 public carrier is the
+non-generic `Traced`; the proposal's `Traced<T>` sketch conflicts with RQ-023's current
+rule that the v1 public surface exposes no generic abstraction over value types.
 
 The public surface may expose entry, value extraction, arithmetic composition, naming,
 rounding, branch selection, text/JSON output, and dependency queries. It must not expose
@@ -229,9 +229,9 @@ do not inspect rendered labels, and renderers do not mutate or annotate nodes. T
 keeps a future output format or schema revision from becoming a graph-model migration.
 
 RQ-011 and RQ-012 already require a shared node to expand once and appear as a reference
-afterwards. Q14 decides the user-visible reference notation and how it maps to JSON's
-document-local node IDs. Until Q14 is approved, adapters may share traversal mechanics
-but must not invent incompatible text and JSON identity conventions.
+afterwards. Q14 uses one deterministic document-local numeric identity mapping for text
+and JSON. The text token and JSON field spelling remain representation contracts, but
+neither may introduce a different identity model.
 
 ### 3.7 Value-type extension policy
 
@@ -324,30 +324,33 @@ JSON semantics for that type (RQ-029). It does not inherit decimal behavior by a
 - **Reason:** it avoids building unused abstractions while keeping the private migration
   path inexpensive. Generic math would change targets and belongs to Q4.
 
-## 5. Open questions and ADR candidates
+## 5. Approved design directions
 
 Items Q2 through Q6 retain the numbering from issue #18. Q7 onward are gaps found by
-this architecture review; they require a durable decision before the named slice starts.
+this architecture review. The maintainer selected these directions after reviewing the
+options, evaluation axes, and trade-offs. They are implementation authority for the
+behavior stated here; exact signatures still receive the normal public-surface review.
 
-| Question | Options and evaluation | Recommendation | Blocks |
-| --- | --- | --- | --- |
-| Q2 anonymous-input display | Raw value, fixed anonymous marker, or generated ordinal; compare readability, determinism, and name collisions. | Display the invariant-formatted value without inventing a domain name. | S2, S5 |
-| Q3 conditional API | Eager values or lazy delegates; compare short-circuit equivalence, allocation, and readability. | Lazy alternatives, recording only the selected derivation and condition outcome. | S4 |
-| Q4 future type strategy | Remain `netstandard2.0` only, multi-target later, or multi-target now; compare reach and unused complexity. | Do not multi-target until a second value type is approved. | Project evolution, not decimal MVP |
-| Q5 JSON schema and stability | Stable/versioned or documented/unstable schema, with decimal encoded as a JSON number, invariant string, or both; compare consumer trust, exact scale preservation, interoperability, and evolution cost. | Publish a versioned stable schema and encode decimal as invariant text so value and scale remain exact. | S6 |
-| Q6 public carrier name | Generic `Traced<T>`, non-generic `Traced`, or decimal-named type; compare RQ-023, future compatibility, and usability. | Use a non-generic type-neutral name for v1; reserve genericity for an approved multi-type API. | S1 and all public API |
-| Q7 default carrier value | Throw everywhere, expose a diagnostic representation, represent zero input, or prevent with a reference type; compare struct ergonomics, diagnostics, and silent corruption. | Treat default as invalid: `Value`, operations, queries, and JSON throw a defined `InvalidOperationException`; `ToString()` and `Explain()` return a deterministic uninitialized diagnostic. | S1 |
-| Q8 name and reason validation | Allow null/empty, normalize, or reject; compare explanation integrity and compatibility. | Reject null names/reasons, reject empty names, and allow an empty reason only if Human explicitly accepts its loss of evidence. | S1, S3 |
-| Q9 duplicate names and paths | Treat names as unique, match all, or match first; compare composability, ambiguity, and query shape. | Permit duplicate names and make queries operate on all matches; define deterministic path ordering. | S7 |
-| Q10 text culture and format | Current culture, invariant culture, or configurable options; compare determinism and locality. | Use invariant culture for MVP and defer options to RQ-026. | S5 |
-| Q12 mixed-operation surface | Eight explicit mixed overloads or one implicit anonymous-input conversion; compare explicit traced boundaries, overload resolution, discoverability, and conceptual API size under RQ-015. | Use explicit left/right `decimal` overloads and no implicit numeric conversion. They add CLR members but no new logical operation, and keep traced-region entry visible. | S1, S2 |
-| Q13 branch-condition dependency | Treat only recorded value operands as dependencies, add traced predicates/comparisons, or accept an opaque caller-supplied condition dependency; compare RQ-014 completeness, API size, and semantic honesty. | For v1, do not create a dependency edge from a plain `bool`; document and test that condition-only inputs are outside dependency queries. Revisit traced predicates as a separate public capability. | S4, S7, README |
-| Q14 shared-reference notation | Name-only marker, document-local numeric ID, or path-based reference; compare readability, ambiguity with duplicate names, and alignment with JSON IDs. | Use one deterministic document-local ID space shared by traversal policy; text shows a concise reference marker and JSON uses the same conceptual identity mapping. | S5, S6 |
+| Question | Approved direction | Consequence |
+| --- | --- | --- |
+| Q2 anonymous-input display | Display the invariant-formatted value without inventing a domain name. | Q14 identity, rather than the display label, distinguishes equal anonymous inputs. |
+| Q3 conditional API | Accept lazy alternatives, evaluate the selected delegate exactly once, and neither evaluate nor record the unselected alternative. | Preserves native short-circuit behavior at the cost of delegate allocation. |
+| Q4 future type strategy | Keep `netstandard2.0` only until a second value type is approved. Preserve future options through type-neutral vocabulary and isolated decimal policies, not generic public API or speculative multi-targeting. | The decimal MVP stays small; a future type requires its own fidelity contract and reserved decision. |
+| Q5 JSON schema and stability | Publish a versioned stable schema. Encode decimal as invariant text so value and scale remain exact. | Consumers parse decimal explicitly; breaking schema changes require a new schema version. |
+| Q6 public carrier name | Use the non-generic, type-neutral public name `Traced` for v1. | The name expresses Yurai's concept without promising generic behavior. |
+| Q7 default carrier value | Treat default as invalid: `Value`, operations, queries, and JSON throw `InvalidOperationException`; `ToString()` and `Explain()` return a deterministic uninitialized diagnostic. | Initialization bugs cannot silently become zero evidence, while logs and debuggers remain useful. |
+| Q8 name and reason validation | Separate anonymous-input entry from named entry. Supplied names and rounding reasons reject null, empty, and whitespace-only text; accepted text is preserved without trimming or substitution. | Incomplete evidence fails early and Yurai does not invent metadata. |
+| Q9 duplicate names and paths | Permit duplicate names and return all matches and paths in deterministic traversal order. | Independent graphs remain composable; callers must handle multiple results. |
+| Q10 text culture and format | Use invariant culture for v1 and defer configuration to RQ-026. | Output and snapshot tests are reproducible across environments. |
+| Q12 mixed-operation surface | Use explicit left/right `decimal` overloads and no implicit numeric conversion. | CLR member count increases, but traced-region entry remains visible and logical operations do not multiply. |
+| Q13 branch-condition dependency | Do not create a dependency edge from a plain `bool`; document and test that condition-only inputs are outside v1 dependency queries. | Control dependencies require a separately approved traced-predicate capability. |
+| Q14 shared-reference notation | Assign deterministic document-local numeric IDs; text uses a concise ID reference and JSON uses the same identity mapping. | IDs are unique within one output and explicitly unstable across outputs or graph revisions. |
 
-Q11 has been folded into Q5 because decimal encoding is part of the JSON schema decision.
-Q2-Q6 should be decided by the maintainer in issue #18. Q7-Q10 and Q12-Q14 may be added to that
-issue or split into one-decision ADRs under the knowledge policy. Until then the
-recommendations above are proposals, not implementation authority.
+Q11 is folded into Q5 because decimal encoding is part of the JSON schema decision.
+The architecture-significant directions are separated into ADRs so that each can be
+revisited independently. Q2 and Q7-Q10 are public behavior contracts recorded here and
+in issue #18; their exact spellings and signatures remain reviewable implementation
+detail within the approved semantics.
 
 ## 6. Implementation slices and test seams
 
@@ -381,7 +384,7 @@ not yet visible through a public output slice.
 | Thread safety | Immutable reachable state, no cache or global identity service; concurrent-read tests. |
 | API stability | Internal nodes stay hidden; logical operations and CLR members are inventoried, requirement-mapped, and reviewed for redundant or surprising routes. |
 | Portability | `netstandard2.0`, BCL-only, no serialization package, no newer runtime features in shipped code. |
-| Failure observability | Native exceptions propagate; invalid carrier/metadata behavior is explicit once Q7/Q8 are decided; no partial result is returned. |
+| Failure observability | Native exceptions propagate; invalid carrier and metadata behavior follows Q7/Q8; no partial result is returned. |
 
 ## 8. Traceability
 
@@ -391,10 +394,10 @@ not yet visible through a public output slice.
 | RQ-002, RQ-007, RQ-012 | Named evidence, representation adapter, sample-based text tests. |
 | RQ-003, RQ-014, RQ-017, RQ-018 | Dependency-only vocabulary, query boundary, and explicit Q13 condition-dependency limit. |
 | RQ-004 | BCL-only serialization and `netstandard2.0` portability boundary. |
-| RQ-005 | Branch outcome and selected derivation evidence, pending Q3 API shape. |
+| RQ-005 | Lazy selected-only branch evaluation and recorded outcome. |
 | RQ-008, RQ-009, RQ-010 | Native operators, anonymous inputs, selection metadata, and recorded native rounding. |
 | RQ-011 | Immutable DAG, reference sharing, linear node growth, iterative traversal, and Q14 reference identity. |
-| RQ-013, RQ-020, RQ-021, RQ-027 | JSON adapter as caller-owned export material, no storage or rich renderer, pending Q5 schema decision. |
+| RQ-013, RQ-020, RQ-021, RQ-027 | Versioned JSON adapter with invariant decimal text, caller-owned export material, and no storage or rich renderer. |
 | RQ-015 | Hidden graph model, explicit traced boundary, purpose-mapped logical operations, and transparent dual inventory. |
 | RQ-016, RQ-019, RQ-022 | Eager concrete calculation inside an explicit traced region only. |
 | RQ-023, RQ-028, RQ-029 | Decimal-only public MVP, neutral private boundaries, no speculative multi-type framework. |
@@ -406,19 +409,20 @@ structure; it remains a release-gate requirement outside this architecture.
 
 ## 9. Risks and readiness
 
-- **Public contract blockers:** Q6 blocks the S1 public type; Q2, Q3, Q5, Q7-Q10, and Q12-Q14
-  block their named slices. None may be inferred from the sketches in the samples.
+- **Public contract readiness:** Q2-Q10 and Q12-Q14 now define the behavioral direction
+  for their named slices. Exact public signatures and the complete API inventory still
+  require normal detailed-design and public-surface review before implementation.
 - **API-coherence risk:** raw member counts can reward implicit conversions or overload
   compression that obscure the traced boundary. Gate review must inspect the purpose
   mapping and both inventories rather than optimize either count.
 - **Condition-dependency risk:** a plain `bool` loses which traced value decided a
-  branch. Q13 must either make this v1 limitation explicit or authorize a larger traced
-  predicate model before S4/S7 claim complete condition dependencies.
-- **Default-struct risk:** a `readonly struct` cannot prevent zero initialization. A
-  silent zero value would make evidence untrustworthy, so S1 needs the Q7 decision and
-  explicit tests.
-- **Name ambiguity:** name-based queries cannot be specified safely until duplicate
-  semantics and path ordering are fixed.
+  branch. Q13 accepts this documented v1 limitation; S4/S7 must not claim control
+  dependency completeness.
+- **Default-struct risk:** a `readonly struct` cannot prevent zero initialization. Q7
+  prevents silent zero evidence; every public operation still needs the specified
+  invalid-state tests.
+- **Name ambiguity:** Q9 preserves all duplicate matches, so result cardinality and
+  deterministic path ordering must be explicit in the query signatures and tests.
 - **Large-output risk:** structural sharing bounds graph storage but text and JSON can
   still be large. Iterative traversal prevents stack failure; RQ-026 and issue #27
   address usability and measured cost.
@@ -427,7 +431,7 @@ structure; it remains a release-gate requirement outside this architecture.
 - **Future-type risk:** decimal assumptions are isolated but not eliminated. A new type
   requires a new fidelity contract and a reserved architecture/API decision.
 
-The internal S0 evidence model and traversal kernel are implementation-ready because
-they expose no public API and do not depend on Q2-Q14. Each later public slice starts
-only after the reserved decisions listed for that slice are approved and recorded on
-GitHub.
+The internal S0 evidence model and traversal kernel remain implementation-ready. The
+reserved directions for later slices are now approved; each public slice next needs a
+signature-level detailed design, API inventory, and test contract that implements these
+directions without introducing a new reserved decision.

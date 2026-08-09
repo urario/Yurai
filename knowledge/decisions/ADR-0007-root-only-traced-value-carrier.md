@@ -5,7 +5,7 @@ description: A readonly value carrier keeps one evidence root as the single sour
 tags: [value, evidence, memory, api-boundary, adr]
 status: draft
 requirements: [RQ-011, RQ-015, RQ-023, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-09T19:15:55+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
   - id: issue-17
     resource: https://github.com/urario/Yurai/issues/17
@@ -35,18 +35,17 @@ allows evidence to change after the value is observed.
 
 The traced value carrier is a `readonly struct` containing exactly one reference to the
 root evidence node. Its exposed value is always the evaluated value stored by that root;
-the carrier does not duplicate the `decimal` in another field. The final public type
-name and whether it is generic remain issue #18 Q6 decisions. This record decides the
-ownership shape, not that reserved name.
+the carrier does not duplicate the `decimal` in another field. ADR-0016 separately names
+the public non-generic carrier `Traced`; this record decides its ownership shape.
 
 The carrier contains no cache and implements no mutable interface. It crosses out of a
 traced region only by exposing the plain native value; evidence does not attach itself
 to that value elsewhere in the program.
 
-The zero-initialized struct state cannot be prevented by a constructor. Its public
-failure behavior is intentionally not invented here: the architecture recommends a
-defined invalid state with diagnostic-safe text output, and the maintainer must approve
-the Q7 contract before the public S1 boundary.
+The zero-initialized struct state cannot be prevented by a constructor. Q7 therefore
+defines it as invalid: value access, operations, queries, and JSON throw
+`InvalidOperationException`, while `ToString()` and `Explain()` return a deterministic
+uninitialized diagnostic.
 
 ## Consequences
 

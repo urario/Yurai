@@ -5,7 +5,7 @@ description: Evidence nodes keep evaluated values and immutable child references
 tags: [evidence, dag, immutability, concurrency, adr]
 status: draft
 requirements: [RQ-005, RQ-007, RQ-008, RQ-010, RQ-011, RQ-012, RQ-013, RQ-014]
-generated: { by: codex/2026-08, at: 2026-08-09T19:15:55+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
   - id: issue-17
     resource: https://github.com/urario/Yurai/issues/17
@@ -47,12 +47,10 @@ The implementation uses an internal abstract base with sealed `Input`,
 `BinaryOperation`, `Round`, `Branch`, and `Named` node kinds. Each kind has fixed,
 read-only fields for its arity and metadata; no per-node child array is required.
 Min/Max remain binary operations and store the selected operand explicitly. Branch
-evidence stores the condition outcome and selected branch information; issue #18 Q3
-decides the public evaluation contract and whether an unselected alternative is ever
-represented. A plain `bool` carries no evidence edge back to the values used to compute
-it. Q13 must either fix that limitation as the documented v1 boundary or authorize a
-separate traced-predicate model; this DAG does not invent a condition dependency from a
-boolean alone.
+evidence stores the condition outcome and selected branch information. ADR-0010 fixes
+the public evaluation contract as lazy and selected-only. A plain `bool` carries no
+evidence edge back to the values used to compute it; ADR-0011 makes that limitation the
+documented v1 boundary rather than inventing a condition dependency from a boolean.
 
 Supported construction cannot produce a cycle: child references must be non-null,
 children already exist before the parent, and there is no mutation or rewiring API.
@@ -91,5 +89,5 @@ within one output call, not across calls, processes, or releases. A stable exter
 would require a separate approved contract.
 
 RQ-011 and RQ-012 require shared derivations to expand once in text and appear as
-references afterwards. Q14 decides the reference notation and its correspondence to
-JSON document-local IDs; it does not change the in-memory reference-identity decision.
+references afterwards. ADR-0015 maps in-memory reference identity to deterministic
+document-local numeric IDs in text and JSON without making them persistent identities.

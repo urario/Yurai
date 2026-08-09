@@ -1,7 +1,7 @@
 # Design
 
 * [Yurai core architecture](core-architecture.md) - Architecture drivers, evidence model,
-  runtime boundaries, open decisions, and implementation seams for the decimal MVP.
+  runtime boundaries, approved design directions, and implementation seams for the decimal MVP.
 
 # Related
 
