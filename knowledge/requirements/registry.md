@@ -4,7 +4,7 @@ title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
 status: draft
-generated: { by: claude-code/2.1.226, at: 2026-08-09T05:45:00Z }
+generated: { by: codex/2026-08, at: 2026-08-09T19:15:55+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -21,6 +21,9 @@ sources:
   - id: issue-29
     resource: https://github.com/urario/Yurai/issues/29
     title: "Issue #29: Phase 2 gate — P0 requirements R1-R6 review"
+  - id: pr-54
+    resource: https://github.com/urario/Yurai/pull/54
+    title: "Pull request #54: Yurai core architecture review"
   - id: execution-plan
     resource: ../../docs/project-execution-plan.md
     title: "Yurai project execution plan"
@@ -75,7 +78,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-012 | Human-readable derivation output | P0 | Draft | Output tests against sample expectations (#23) |
 | RQ-013 | Machine-readable derivation export | P0 | Draft | Serialization tests, all node kinds (#24) |
 | RQ-014 | Programmatic dependency queries | P0 | Draft | Path-query tests on shared structures (#25) |
-| RQ-015 | Public API surface of at most 20 members | P0 | Draft | Surface count at gate review (#29) |
+| RQ-015 | Minimal, coherent, and explicit public API | P0 | Draft | Purpose and surface review (#17, gate #29) |
 | RQ-016 | Non-goal: symbolic algebra | P0 | Draft | Design review against non-goals (gate #29) |
 | RQ-017 | Non-goal: sensitivity analysis and automatic differentiation | P0 | Draft | Design review against non-goals (gate #29) |
 | RQ-018 | Non-goal: attribution | P0 | Draft | Design review against non-goals (gate #29) |
@@ -463,29 +466,44 @@ they expire with v1.0. What the MVP bounds is the value type they are instantiat
     returns a dependency path only.
 - **Source**: §4, §5.2, §7.1; [#25](https://github.com/urario/Yurai/issues/25).
 
-### RQ-015 — Public API surface of at most 20 members
+### RQ-015 — Minimal, coherent, and explicit public API
 
 - **Priority**: P0
-- **What**: The public API surface of the shipped library stays at or below 20
-  members, and public names are written out in full — no abbreviated aliases (§5.3).
+- **What**: The shipped public API contains only operations that deliver a registered
+  user capability or the value-type behavior needed to use those operations safely.
+  Each capability has one coherent, unsurprising route; public names are written out in
+  full, with no abbreviated aliases (§5.3), and implicit conversions do not blur the
+  boundary between plain and traced values.
 - **Why / user value**: A surface a developer can hold in their head in one sitting is
-  what makes the five-minute promise (RQ-002) honest, and small surfaces stay
-  compatible: every member not added is a breaking change that can never happen.
+  what makes the five-minute promise (RQ-002) honest. The original proposal's
+  20-member ceiling was a proxy for that outcome, but a raw metadata count rewards
+  unsafe compression — for example, replacing explicit mixed-arithmetic overloads with
+  an implicit conversion solely to reduce the count. Users benefit from an explicit
+  traced boundary and one predictable spelling per operation, not from a smaller
+  reflection result at the cost of overload surprises.
 - **Acceptance criteria**:
-  - The count is taken and recorded at the gate
-    ([#29](https://github.com/urario/Yurai/issues/29)); exceeding it means removing or
-    deferring something, or a maintainer decision to raise the bound (reserved).
+  - The architecture keeps a public-surface inventory that maps every public type and
+    logical operation to a registered requirement or necessary .NET value behavior.
+    Anything with no such justification is removed or deferred.
+  - The Phase 2 gate records both the number of logical operations and the raw number
+    of declared public CLR members for transparency, but neither number is a standalone
+    pass/fail ceiling. Review checks that overloads implement one documented operation,
+    not unrelated behavior hidden under one count entry.
+  - No abbreviated alias, duplicate route to the same capability, public evidence-model
+    type, or implicit numeric conversion is introduced merely to make the API appear
+    smaller. Mixed operations remain natural C# while the plain/traced boundary stays
+    explicit.
   - Every public API addition or change is a reserved decision
     ([AGENTS.md §2](../../AGENTS.md#2-reserved-decisions-ai-proposes-the-human-decides)).
-- **Constraints and notes**: This requirement does not itself define what counts as
-  one "member" — whether an overload, an operator, or a property accessor counts
-  separately is a counting rule, not a requirement, and different rules would move the
-  count without changing the actual surface. The counting rule is fixed once, by the
-  [#17](https://github.com/urario/Yurai/issues/17) architecture design; the gate
-  review ([#29](https://github.com/urario/Yurai/issues/29)) counts against that rule
-  rather than each reviewer's own reading.
+- **Constraints and notes**: The requirement remains measurable without an arbitrary
+  ceiling: the inventory, requirement mapping, two published counts, and review of
+  redundant or surprising routes are concrete gate evidence. Because this requirement
+  was still `Draft`, the maintainer-approved review of
+  [PR #54](https://github.com/urario/Yurai/pull/54) replaces the proposal's numeric
+  proxy before implementation rather than superseding an accepted release contract.
 - **Source**: §5.2, §5.3; [#17](https://github.com/urario/Yurai/issues/17),
-  [#29](https://github.com/urario/Yurai/issues/29).
+  [#29](https://github.com/urario/Yurai/issues/29),
+  [PR #54](https://github.com/urario/Yurai/pull/54).
 
 ## Non-goals
 

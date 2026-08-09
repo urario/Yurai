@@ -27,6 +27,8 @@ var taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
 
 // The condition/value access and the value-vs-lambda form are illustrative.
 // Issue #18 Q3 decides the final Yurai.If contract and evaluation behavior.
+// Reading .Value also turns the condition into a plain bool; Q13 decides whether
+// condition-only inputs remain outside v1 dependency queries.
 var incomeTax = Yurai.If(
     taxableIncome.Value <= 200000m,
     taxableIncome * 0.10m,
@@ -84,13 +86,23 @@ NetPay = 257343
         If(name: "TaxableIncomeAtMost200000", branch: "else")
           If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.80
             TaxableIncome = 296679
-  GrossPay = 350000
+  <reference to GrossPay = 350000>
 ```
 
 The outer income-tax condition is false and the nested condition is true for
 this input. The explanation therefore records both decisions and the selected
 tax calculation. Whether an implementation evaluates or displays unselected
 alternatives is intentionally left to the Q3 decision.
+
+`GrossPay` is expanded under `SocialInsurance` and then encountered again as the final
+subtraction's other operand. The second occurrence above is conceptually a reference,
+not a second expansion. Its exact marker and its relationship to JSON node IDs are the
+Q14 decision.
+
+The conditions in this sketch read `taxableIncome.Value` before calling `Yurai.If`.
+That produces a plain `bool`, so the current evidence model cannot retain a dependency
+edge from an input used only by the condition. Q13 decides whether v1 documents and
+tests that boundary or adds a traced-predicate capability.
 
 The dependency query is expected to report `true` and a conceptual path such
 as:
@@ -109,7 +121,8 @@ design is settled.
   single expression, especially around deductions and taxable income.
 - Nested `Yurai.If` expresses progressive brackets, but the final contract must
   clarify whether conditions use `.Value`, whether alternatives are lazy, and
-  how the selected branch is named.
+  how the selected branch is named. It must also state whether condition-only inputs
+  participate in dependency queries.
 - `Round(digits, reason)` keeps the reason beside the policy decision, while the
   default midpoint treatment still needs to be fixed by the architecture work.
 - `DependsOn` is easy to read for a direct deduction-rate relationship; the

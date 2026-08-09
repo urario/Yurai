@@ -6,7 +6,8 @@
 * [ADR-0004: Check knowledge base conformance in CI, not with a ported validator](ADR-0004-conformance-check-in-ci.md) - What gets checked mechanically once CI lands, and what stays with review.
 * [ADR-0005: Use CsCheck for property-based testing](ADR-0005-property-based-testing-library.md) - A C#, dependency-free library, chosen over FsCheck so the test toolchain stays in one language and pins no runner version.
 * [ADR-0006: Represent derivation evidence as an immutable evaluated DAG](ADR-0006-immutable-evidence-dag.md) - Evidence nodes keep evaluated values and immutable child references, with structural sharing and reference identity.
-* [ADR-0007: Use a root-only traced value carrier and native-first evaluation](ADR-0007-root-only-traced-value-carrier.md) - A readonly value carrier keeps one evidence root, and native decimal operations complete before evidence is created.
+* [ADR-0007: Use a root-only traced value carrier](ADR-0007-root-only-traced-value-carrier.md) - A readonly value carrier keeps one evidence root as the single source of its evaluated value and derivation.
+* [ADR-0008: Evaluate native values before creating derivation evidence](ADR-0008-native-first-evaluation.md) - Each operation executes the native decimal operation once and creates evidence only after successful evaluation.
 
 Each record's current state is its `status` in frontmatter, not a word repeated here — a
 status copied into a listing is wrong the first time it changes. A supersession is the
