@@ -81,6 +81,37 @@ internal sealed class BinaryOperationEvidenceNode : EvidenceNode
     };
 }
 
+internal sealed class RoundEvidenceNode : EvidenceNode
+{
+    internal RoundEvidenceNode(
+        decimal value,
+        int digits,
+        MidpointRounding rounding,
+        string reason,
+        EvidenceNode child)
+        : base(value)
+    {
+        Digits = digits;
+        Rounding = rounding;
+        Reason = reason ?? throw new ArgumentNullException(nameof(reason));
+        Child = child ?? throw new ArgumentNullException(nameof(child));
+    }
+
+    internal int Digits { get; }
+
+    internal MidpointRounding Rounding { get; }
+
+    internal string Reason { get; }
+
+    internal EvidenceNode Child { get; }
+
+    internal override int ChildCount => 1;
+
+    internal override EvidenceNode GetChild(int index) => index == 0
+        ? Child
+        : throw new ArgumentOutOfRangeException(nameof(index));
+}
+
 internal sealed class NamedEvidenceNode : EvidenceNode
 {
     internal NamedEvidenceNode(EvidenceNode child, string name)

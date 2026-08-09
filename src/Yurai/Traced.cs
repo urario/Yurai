@@ -42,6 +42,28 @@ public readonly struct Traced
     }
 
     /// <summary>
+    /// Rounds the value using native decimal rounding and records the rounding policy.
+    /// </summary>
+    /// <param name="digits">The number of fractional digits to retain.</param>
+    /// <param name="reason">The reason for applying the rounding policy.</param>
+    /// <returns>A new traced value with the rounding evidence attached.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// The value is an uninitialized <see cref="Traced"/> instance.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="digits"/> is outside the range supported by decimal rounding.
+    /// </exception>
+    /// <exception cref="ArgumentNullException"><paramref name="reason"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="reason"/> is empty or consists only of white-space characters.</exception>
+    public Traced Round(int digits, string reason)
+    {
+        EvidenceNode currentRoot = GetRoot();
+        decimal value = decimal.Round(currentRoot.Value, digits);
+        string validReason = NameValidation.Validate(reason, nameof(reason), "reason");
+        return new Traced(new RoundEvidenceNode(value, digits, MidpointRounding.ToEven, validReason, currentRoot));
+    }
+
+    /// <summary>
     /// Adds two traced decimal values using native decimal arithmetic.
     /// </summary>
     /// <exception cref="InvalidOperationException">Either operand is uninitialized.</exception>
