@@ -104,9 +104,9 @@ dotnet test Yurai.sln --filter "RQ=RQ-NNN"
 ```
 
 Tag the test that *establishes* the requirement, not every test that happens to touch
-the code path — a trait on everything says nothing. The testing and quality strategy
-([#7](https://github.com/urario/Yurai/issues/7)) may extend this convention; it will not
-contradict it without saying so.
+the code path — a trait on everything says nothing. The
+[testing and quality strategy](testing-and-quality.md) applies the same rule to property
+tests and does not extend it further.
 
 **In code**, restraint is the point. `// RQ-NNN: netstandard2.0, no runtime
 dependencies` on a project property earns its place; the same comment repeated on thirty

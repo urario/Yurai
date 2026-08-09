@@ -5,7 +5,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
-    <!-- Retain xUnit v2 for the mature Stryker.NET and coverlet ecosystem until #7 selects the test toolchain. -->
+    <!-- xUnit v2 is the toolchain knowledge/process/testing-and-quality.md selects, and names the trigger to revisit. -->
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
