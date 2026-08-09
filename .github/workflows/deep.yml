@@ -1,0 +1,79 @@
+name: Deep quality
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/**
+      - tests/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutation:
+    name: .NET mutation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET from global.json
+        uses: actions/setup-dotnet@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('.config/dotnet-tools.json', 'Directory.Packages.props', 'global.json', '**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Run mutation tests
+        shell: pwsh
+        run: ./eng/stryker/Invoke-MutationTests.ps1
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stryker-report
+          path: artifacts/stryker/**
+          if-no-files-found: warn
+          retention-days: 30
+
+  property:
+    name: .NET long property tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CsCheck_Iter: 10000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET from global.json
+        uses: actions/setup-dotnet@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Yurai.sln
+
+      - name: Build
+        run: dotnet build Yurai.sln --configuration Release --no-restore
+
+      - name: Run long property tests
+        run: dotnet test Yurai.sln --configuration Release --no-build --no-restore --filter "Category=Property"
