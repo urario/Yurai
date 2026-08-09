@@ -1,15 +1,8 @@
 # Payroll calculation
 
-This conceptual sample explores a payroll calculation with a base salary,
-overtime pay, social insurance, progressive income tax, and rounding. It is
-deliberately not compiled because the public API is still being designed in
-issues [#17](https://github.com/urario/Yurai/issues/17) and
-[#18](https://github.com/urario/Yurai/issues/18).
-
-The example uses a monthly base salary of 300,000, 20 overtime hours at 2,500
-per hour, and a social-insurance rate of 0.152345. Income tax has three
-progressive brackets: 10% up to 200,000, 20% from 200,000 to 400,000, and 30%
-above 400,000.
+This sample calculates a monthly payroll with a base salary, overtime pay, social
+insurance, progressive income tax, and explicit rounding. It uses a base salary of
+300,000, 20 overtime hours at 2,500 per hour, and a social-insurance rate of 0.152345.
 
 ```csharp
 var baseSalary = Yurai.Of(300000m, "BaseSalary");
@@ -25,8 +18,7 @@ var socialInsurance = (grossPay * socialInsuranceRate)
     .As("SocialInsurance");
 var taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
 
-// Yurai.If receives lazy alternatives and evaluates the selected delegate once.
-// Reading .Value turns the condition into a plain bool; condition-only inputs
+// Reading .Value turns each condition into a plain bool. Condition-only inputs
 // intentionally remain outside v1 dependency queries.
 var incomeTax = Yurai.If(
     taxableIncome.Value <= 200000m,
@@ -44,84 +36,59 @@ var totalDeductions = (socialInsurance + incomeTax).As("TotalDeductions");
 var netPay = (grossPay - totalDeductions).As("NetPay");
 
 Console.WriteLine(netPay.Explain());
-
-Console.WriteLine(socialInsurance.DependsOn("SocialInsuranceRate"));
-Console.WriteLine(socialInsurance.Trace("SocialInsuranceRate"));
 ```
-
-The arithmetic checkpoints intentionally preserve the native `decimal` scale
-of the unrounded intermediate values. The trailing zeros are part of this
-sample's expected numeric evidence; the final rendering policy remains design
-work.
-
-The arithmetic checkpoints are:
-
-| Result | Value |
-| --- | ---: |
-| `OvertimePay` | `50,000` |
-| `GrossPay` | `350,000` |
-| Social insurance before rounding | `53,320.750000` |
-| `SocialInsurance` | `53,321` |
-| `TaxableIncome` | `296,679` |
-| Income tax before rounding | `39,335.80` |
-| `IncomeTax` | `39,336` |
-| `NetPay` | `257,343` |
 
 ## Expected explanation
 
-The exact punctuation and indentation remain design work. The explanation must
-make the following facts visible:
-
 ```text
-NetPay = 257343
-  TotalDeductions = 92657
-    SocialInsurance = 53321
-      Round(digits: 0, reason: "Round social insurance to whole currency units") = 53321
-        Multiply = 53320.750000
-          GrossPay = 350000
-          SocialInsuranceRate = 0.152345
-    IncomeTax = 39336
-      Round(digits: 0, reason: "Round income tax to whole currency units") = 39336
-        If(name: "TaxableIncomeAtMost200000", branch: "else") = 39335.80
-          If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.80
-            TaxableIncome = 296679
-  <reference to GrossPay = 350000>
+Result
+  257343
+Derivation
+  NetPay = 257343
+    Subtract = 257343
+      [#3] GrossPay = 350000
+        Add = 350000
+          BaseSalary = 300000
+          OvertimePay = 50000
+            Multiply = 50000
+              OvertimeHourlyRate = 2500
+              OvertimeHours = 20
+      TotalDeductions = 92657
+        Add = 92657
+          [#12] SocialInsurance = 53321
+            Round(digits: 0, reason: "Round social insurance to whole currency units") = 53321
+              Multiply = 53320.750000
+                <ref #3>
+                SocialInsuranceRate = 0.152345
+          IncomeTax = 39336
+            Round(digits: 0, reason: "Round income tax to whole currency units") = 39336
+              If(name: "TaxableIncomeAtMost200000", branch: "else") = 39335.80
+                If(name: "TaxableIncomeAtMost400000", branch: "then") = 39335.80
+                  Add = 39335.80
+                    20000
+                    Multiply = 19335.80
+                      Subtract = 96679
+                        TaxableIncome = 296679
+                          Subtract = 296679
+                            <ref #3>
+                            <ref #12>
+                        200000
+                      0.20
 ```
 
-The outer income-tax condition is false and the nested condition is true for
-this input. The explanation therefore records both decisions and the selected
-tax calculation. Unselected alternatives are neither evaluated nor displayed.
+The outer income-tax condition is false and the nested condition is true. Unselected
+alternatives are neither evaluated nor displayed. `GrossPay` and `SocialInsurance` are
+shared nodes: their first expanded lines define `[#3]` and `[#12]`, and later occurrences
+use the matching `<ref #N>` marker.
 
-`GrossPay` is expanded under `SocialInsurance` and then encountered again as the final
-subtraction's other operand. The second occurrence above is a reference, not a second
-expansion. Text and JSON use the same deterministic document-local numeric identity;
-the exact text token is fixed with the text-format contract.
-
-The conditions in this sketch read `taxableIncome.Value` before calling `Yurai.If`.
-That produces a plain `bool`, so v1 intentionally does not retain a dependency edge
-from an input used only by the condition. A traced-predicate capability is deferred.
-
-The dependency query is expected to report `true` and a conceptual path such
-as:
-
-```text
-SocialInsuranceRate -> Multiply -> Round -> SocialInsurance
-```
-
-The direction and return type of `Trace` are also provisional until the API
-design is settled.
+The arithmetic output deliberately preserves native `decimal` scale, including
+`53320.750000` and `39335.80`. The conditions read `taxableIncome.Value`, so v1 does not
+retain a dependency edge from a value used only by the plain-Boolean condition.
 
 ## API ergonomics observations
 
 - Ordinary arithmetic keeps the payroll formula close to its domain wording.
-- Naming each intermediate result makes the explanation easier to scan than a
-  single expression, especially around deductions and taxable income.
-- Nested `Yurai.If` expresses progressive brackets, but the final contract must
-  clarify whether conditions use `.Value`, whether alternatives are lazy, and
-  how the selected branch is named. It must also state whether condition-only inputs
-  participate in dependency queries.
-- `Round(digits, reason)` keeps the reason beside the policy decision, while the
-  default midpoint treatment still needs to be fixed by the architecture work.
-- `DependsOn` is easy to read for a direct deduction-rate relationship; the
-  final API should document `Trace` direction and behavior when multiple paths
-  exist.
+- Naming intermediate results makes the explanation easier to scan around deductions
+  and taxable income.
+- Nested `Yurai.If` records only the selected branches.
+- `Round(digits, reason)` keeps the policy explanation beside the operation.

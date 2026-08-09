@@ -60,7 +60,7 @@ public sealed class PublicApiTests
         Assert.Empty(carrier.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
         Assert.Equal(
             [
-                "As", "Round", "ToString", "get_Value",
+                "As", "Explain", "Round", "ToString", "get_Value",
                 "op_Addition", "op_Addition", "op_Addition",
                 "op_Division", "op_Division", "op_Division",
                 "op_Multiply", "op_Multiply", "op_Multiply",
