@@ -123,4 +123,4 @@ README, docs, and issue prose alike, in English and Japanese:
   `issue first`, and "the first example in the README" are all fine.
 
 Novelty claims are limited to a single sentence, held in the requirements specification
-(#12).
+([knowledge/requirements/registry.md](knowledge/requirements/registry.md), #12).

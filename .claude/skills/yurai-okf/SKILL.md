@@ -137,7 +137,7 @@ Reproduce the two that catch most mistakes locally:
 
 ```shell
 # Every string in the RQ-### format names a registered requirement.
-# The registry is empty until #12, so any hit at all is currently a failure.
+# Every hit must match a row of the table in knowledge/requirements/registry.md.
 git grep -nE 'RQ-[0-9]{3}'
 ```
 

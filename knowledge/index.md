@@ -11,7 +11,7 @@ both are closed.
 
 # Requirements
 
-* [Requirements registry](requirements/registry.md) - The single registry of `RQ-###` identifiers, with priorities, statuses, and acceptance criteria. Empty until [#12](https://github.com/urario/Yurai/issues/12) fills it.
+* [Requirements registry](requirements/registry.md) - The single registry of `RQ-###` identifiers, with priorities, statuses, and acceptance criteria. Populated by [#12](https://github.com/urario/Yurai/issues/12).
 * [requirements/](requirements/index.md) - The directory.
 
 # Decisions
