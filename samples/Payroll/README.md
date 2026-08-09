@@ -30,11 +30,11 @@ var taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
 // intentionally remain outside v1 dependency queries.
 var incomeTax = Yurai.If(
     taxableIncome.Value <= 200000m,
-    taxableIncome * 0.10m,
-    Yurai.If(
+    () => taxableIncome * 0.10m,
+    () => Yurai.If(
         taxableIncome.Value <= 400000m,
-        20000m + (taxableIncome - 200000m) * 0.20m,
-        60000m + (taxableIncome - 400000m) * 0.30m,
+        () => 20000m + (taxableIncome - 200000m) * 0.20m,
+        () => 60000m + (taxableIncome - 400000m) * 0.30m,
         "TaxableIncomeAtMost400000"),
     "TaxableIncomeAtMost200000")
     .Round(0, "Round income tax to whole currency units")
