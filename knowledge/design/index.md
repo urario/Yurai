@@ -1,9 +1,7 @@
 # Design
 
-No design documents yet. The computation graph, the `Traced<decimal>` value type, and the
-thread-safety model are designed in [#17](https://github.com/urario/Yurai/issues/17), with
-the individual choices inside them recorded as ADRs from
-[#18](https://github.com/urario/Yurai/issues/18) onward.
+* [Yurai core architecture](core-architecture.md) - Architecture drivers, evidence model,
+  runtime boundaries, open decisions, and implementation seams for the decimal MVP.
 
 # Related
 

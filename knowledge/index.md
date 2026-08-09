@@ -21,11 +21,14 @@ both are closed.
 * [ADR-0003: Adopt the Open Knowledge Format for the knowledge base](decisions/ADR-0003-adopt-open-knowledge-format.md) - This bundle is OKF v0.2 rather than a house style.
 * [ADR-0004: Check knowledge base conformance in CI, not with a ported validator](decisions/ADR-0004-conformance-check-in-ci.md) - What gets checked mechanically, and when.
 * [ADR-0005: Use CsCheck for property-based testing](decisions/ADR-0005-property-based-testing-library.md) - A C#, dependency-free library, chosen over FsCheck so the test toolchain stays in one language and pins nothing.
+* [ADR-0006: Represent derivation evidence as an immutable evaluated DAG](decisions/ADR-0006-immutable-evidence-dag.md) - Evidence nodes keep evaluated values and immutable child references, with structural sharing and reference identity.
+* [ADR-0007: Use a root-only traced value carrier and native-first evaluation](decisions/ADR-0007-root-only-traced-value-carrier.md) - A readonly value carrier keeps one evidence root, and native decimal operations complete before evidence is created.
 * [decisions/](decisions/index.md) - The directory, including the ADR template.
 
 # Design
 
-* [design/](design/index.md) - Architecture documents. Empty until [#17](https://github.com/urario/Yurai/issues/17).
+* [Yurai core architecture](design/core-architecture.md) - Architecture drivers, evidence model, runtime boundaries, open decisions, and implementation seams for the decimal MVP.
+* [design/](design/index.md) - The architecture document directory.
 
 # Process
 
