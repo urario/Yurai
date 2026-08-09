@@ -30,27 +30,30 @@ public static class Yurai
     /// Returns the smaller traced value and records the selected operand.
     /// </summary>
     public static Traced Min(Traced left, Traced right)
-    {
-        EvidenceNode leftRoot = left.Root;
-        EvidenceNode rightRoot = right.Root;
-        decimal value = Math.Min(leftRoot.Value, rightRoot.Value);
-        SelectedOperand selected = leftRoot.Value <= rightRoot.Value
-            ? SelectedOperand.Left
-            : SelectedOperand.Right;
-        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Min, leftRoot, rightRoot, selected));
-    }
+        => CreateSelection(left, right, BinaryOperationKind.Min);
 
     /// <summary>
     /// Returns the larger traced value and records the selected operand.
     /// </summary>
     public static Traced Max(Traced left, Traced right)
+        => CreateSelection(left, right, BinaryOperationKind.Max);
+
+    private static Traced CreateSelection(Traced left, Traced right, BinaryOperationKind operation)
     {
         EvidenceNode leftRoot = left.Root;
         EvidenceNode rightRoot = right.Root;
-        decimal value = Math.Max(leftRoot.Value, rightRoot.Value);
-        SelectedOperand selected = leftRoot.Value >= rightRoot.Value
+        bool leftSelected = operation == BinaryOperationKind.Min
+            ? leftRoot.Value <= rightRoot.Value
+            : leftRoot.Value >= rightRoot.Value;
+        decimal value = operation == BinaryOperationKind.Min
+            ? Math.Min(leftRoot.Value, rightRoot.Value)
+            : Math.Max(leftRoot.Value, rightRoot.Value);
+
+        // Keep native Min/Max as the value oracle; leftSelected records the deterministic
+        // evidence choice for numerically equal operands, including signed-zero cases.
+        SelectedOperand selected = leftSelected
             ? SelectedOperand.Left
             : SelectedOperand.Right;
-        return new Traced(new BinaryOperationEvidenceNode(value, BinaryOperationKind.Max, leftRoot, rightRoot, selected));
+        return new Traced(new BinaryOperationEvidenceNode(value, operation, leftRoot, rightRoot, selected));
     }
 }

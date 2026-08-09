@@ -167,10 +167,9 @@ public readonly struct Traced
         EvidenceNode left,
         EvidenceNode right,
         BinaryOperationKind operation,
-        Func<decimal, decimal, decimal> evaluate,
-        SelectedOperand selectedOperand = SelectedOperand.None)
+        Func<decimal, decimal, decimal> evaluate)
     {
         decimal value = evaluate(left.Value, right.Value);
-        return new Traced(new BinaryOperationEvidenceNode(value, operation, left, right, selectedOperand));
+        return new Traced(new BinaryOperationEvidenceNode(value, operation, left, right));
     }
 }
