@@ -35,6 +35,38 @@ Two habits matter more than the rest:
 - **Write for a stranger.** Codex and future-you read GitHub, not this session. An
   issue comment that assumes context you have and they don't is a dropped handoff.
 
+## Agents and skills
+
+`.claude/` holds the repeating work in two layers. **Agents are who does it** — a role,
+with the tool permissions that role should have. **Skills are how it is done** — the
+procedure, the checklist, the command to run. An agent invokes skills rather than
+carrying its own copy of a checklist, so each procedure has exactly one home.
+
+Neither layer restates a rule. The rules live in `AGENTS.md` and
+[`knowledge/`](knowledge/index.md); these files say which document to open, in what
+order, and what to check. Where they ever disagree with `knowledge/`, `knowledge/` binds.
+
+| Agent | Reach for it when | Permissions |
+|---|---|---|
+| [`yurai-architect`](.claude/agents/yurai-architect.md) | A design is needed before implementation — public surface, graph shape, test seams, and the reserved decisions to escalate | Read-only |
+| [`yurai-reviewer`](.claude/agents/yurai-reviewer.md) | An implementation is on a branch or in a pull request and needs review | Read-only — reports findings, never fixes |
+| [`yurai-knowledge-curator`](.claude/agents/yurai-knowledge-curator.md) | Something settled in an issue or pull request has to outlive it | Writes `knowledge/` only |
+
+| Skill | Procedure for | Rules it points at |
+|---|---|---|
+| [`yurai-design-review`](.claude/skills/yurai-design-review/SKILL.md) | Requirements and non-goals, API minimality, zero dependencies, vocabulary | `knowledge/requirements/`, `knowledge/process/traceability.md`, AGENTS.md §2 |
+| [`yurai-tdd-review`](.claude/skills/yurai-tdd-review/SKILL.md) | Test-first evidence, when a property is required, counterexamples, the gate table | [`knowledge/process/testing-and-quality.md`](knowledge/process/testing-and-quality.md) |
+| [`yurai-git-workflow`](.claude/skills/yurai-git-workflow/SKILL.md) | Branch and commit naming, pull request shape, merge conditions, handoff | [`knowledge/process/git-policy.md`](knowledge/process/git-policy.md), AGENTS.md §5 |
+| [`yurai-okf`](.claude/skills/yurai-okf/SKILL.md) | Adding, changing, or retiring a `knowledge/` document, and checking it locally | [`knowledge/process/knowledge-policy.md`](knowledge/process/knowledge-policy.md), ADR-0004 |
+
+`yurai-reviewer` runs `yurai-design-review` then `yurai-tdd-review` — requirements before
+tests, deliberately. `yurai-knowledge-curator` runs `yurai-okf`. Any of the four skills
+can also be used directly, without an agent, which is the usual way to reach
+`yurai-git-workflow`.
+
+Codex's equivalents are its own ([#11](https://github.com/urario/Yurai/issues/11)); these
+files are not shared tooling and neither set binds the other.
+
 ## Working rules
 
 - Branch from `main`, never push to it. Pull requests only.
@@ -59,6 +91,7 @@ say what you would do instead. Distinguish blocking findings from suggestions.
 
 | Path | Contents |
 |---|---|
+| `.claude/` | Claude Code project agents and skills — see [above](#agents-and-skills) |
 | `AGENTS.md` | Collaboration contract (all agents) |
 | `CONTRIBUTING.md` | Contributor-facing guide |
 | `docs/project-execution-plan.md` | Phases, issue map, dependency graph |
