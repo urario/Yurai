@@ -17,7 +17,7 @@ var taxRate = Yurai.Of(0.10m, "TaxRate");
 
 var discounted = (basePrice * (1 - discount)).As("DiscountedPrice");
 var total = (discounted * (1 + taxRate))
-    .Round(0, "Tax calculation")
+    .Round(0, "Round to whole currency unit")
     .As("Total");
 
 Console.WriteLine(total.Explain());
@@ -31,7 +31,7 @@ steps visible.
 
 ```text
 Total = 990
-└─ Round(digits: 0, reason: "Tax calculation") = 990
+└─ Round(digits: 0, reason: "Round to whole currency unit") = 990
    └─ Multiply = 990.0000
       ├─ DiscountedPrice = 900.00
       │  └─ Multiply = 900.00
