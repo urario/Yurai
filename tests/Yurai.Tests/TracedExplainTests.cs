@@ -21,8 +21,7 @@ public sealed class TracedExplainTests
             .Round(0, "Round to whole currency unit")
             .As("Total");
 
-        string expected = string.Join(
-            Environment.NewLine,
+        string expected = Lines(
             "Result",
             "  990",
             "Derivation",
@@ -39,8 +38,7 @@ public sealed class TracedExplainTests
             "          1",
             "          TaxRate = 0.10");
 
-        Assert.Equal(expected,
-            total.Explain());
+        Assert.Equal(expected, total.Explain());
     }
 
     [Fact]
@@ -48,30 +46,67 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public void ExplainMatchesThePayrollSampleAndShowsTheSelectedBranches()
     {
-        TracedValue grossPay = YuraiApi.Of(350000m, "GrossPay");
-        TracedValue taxableIncome = YuraiApi.Of(296679m, "TaxableIncome");
+        TracedValue baseSalary = YuraiApi.Of(300000m, "BaseSalary");
+        TracedValue overtimeHourlyRate = YuraiApi.Of(2500m, "OvertimeHourlyRate");
+        TracedValue overtimeHours = YuraiApi.Of(20m, "OvertimeHours");
+        TracedValue socialInsuranceRate = YuraiApi.Of(0.152345m, "SocialInsuranceRate");
+
+        TracedValue overtimePay = (overtimeHourlyRate * overtimeHours).As("OvertimePay");
+        TracedValue grossPay = (baseSalary + overtimePay).As("GrossPay");
+        TracedValue socialInsurance = (grossPay * socialInsuranceRate)
+            .Round(0, "Round social insurance to whole currency units")
+            .As("SocialInsurance");
+        TracedValue taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
         TracedValue incomeTax = YuraiApi.If(
-            false,
+            taxableIncome.Value <= 200000m,
             () => taxableIncome * 0.10m,
             () => YuraiApi.If(
-                true,
+                taxableIncome.Value <= 400000m,
                 () => 20000m + (taxableIncome - 200000m) * 0.20m,
                 () => 60000m + (taxableIncome - 400000m) * 0.30m,
                 "TaxableIncomeAtMost400000"),
             "TaxableIncomeAtMost200000")
             .Round(0, "Round income tax to whole currency units")
             .As("IncomeTax");
+        TracedValue totalDeductions = (socialInsurance + incomeTax).As("TotalDeductions");
+        TracedValue netPay = (grossPay - totalDeductions).As("NetPay");
 
-        TracedValue result = (grossPay - incomeTax).As("NetPay");
+        string expected = Lines(
+            "Result",
+            "  257343",
+            "Derivation",
+            "  NetPay = 257343",
+            "    Subtract = 257343",
+            "      [#3] GrossPay = 350000",
+            "        Add = 350000",
+            "          BaseSalary = 300000",
+            "          OvertimePay = 50000",
+            "            Multiply = 50000",
+            "              OvertimeHourlyRate = 2500",
+            "              OvertimeHours = 20",
+            "      TotalDeductions = 92657",
+            "        Add = 92657",
+            "          [#12] SocialInsurance = 53321",
+            "            Round(digits: 0, reason: \"Round social insurance to whole currency units\") = 53321",
+            "              Multiply = 53320.750000",
+            "                <ref #3>",
+            "                SocialInsuranceRate = 0.152345",
+            "          IncomeTax = 39336",
+            "            Round(digits: 0, reason: \"Round income tax to whole currency units\") = 39336",
+            "              If(name: \"TaxableIncomeAtMost200000\", branch: \"else\") = 39335.80",
+            "                If(name: \"TaxableIncomeAtMost400000\", branch: \"then\") = 39335.80",
+            "                  Add = 39335.80",
+            "                    20000",
+            "                    Multiply = 19335.80",
+            "                      Subtract = 96679",
+            "                        TaxableIncome = 296679",
+            "                          Subtract = 296679",
+            "                            <ref #3>",
+            "                            <ref #12>",
+            "                        200000",
+            "                      0.20");
 
-        Assert.Contains(
-            "If(name: \"TaxableIncomeAtMost200000\", branch: \"else\") = 39335.80",
-            result.Explain(),
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "If(name: \"TaxableIncomeAtMost400000\", branch: \"then\") = 39335.80",
-            result.Explain(),
-            StringComparison.Ordinal);
+        Assert.Equal(expected, netPay.Explain());
     }
 
     [Fact]
@@ -82,10 +117,17 @@ public sealed class TracedExplainTests
         TracedValue shared = YuraiApi.Of(10m, "Shared");
         TracedValue result = (shared + shared).As("Total");
 
+        string expected = Lines(
+            "Result",
+            "  20",
+            "Derivation",
+            "  Total = 20",
+            "    Add = 20",
+            "      [#3] Shared = 10",
+            "      <ref #3>");
         string explanation = result.Explain();
 
-        Assert.Equal(1, CountOccurrences(explanation, "Shared = 10"));
-        Assert.Contains("<ref #", explanation, StringComparison.Ordinal);
+        Assert.Equal(expected, explanation);
         Assert.Equal(explanation, result.Explain());
     }
 
@@ -124,8 +166,7 @@ public sealed class TracedExplainTests
         Assert.Contains("Min = 2", explanation, StringComparison.Ordinal);
         Assert.Contains("If(name: \"Decision\", branch: \"then\") = 2", explanation, StringComparison.Ordinal);
         Assert.Contains("Round(digits: 0, reason: \"Reason\\\\line\\nnext\") = 2", explanation, StringComparison.Ordinal);
-        string escapedName = "Input" + "\\" + "\"Name = 2.5";
-        Assert.Contains(escapedName, explanation, StringComparison.Ordinal);
+        Assert.Contains("Input\"Name = 2.5", explanation, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -147,6 +188,7 @@ public sealed class TracedExplainTests
 
             Assert.Contains("1.25", explanation, StringComparison.Ordinal);
             Assert.DoesNotContain("1,25", explanation, StringComparison.Ordinal);
+            Assert.DoesNotContain('\r', explanation);
         }
         finally
         {
@@ -160,16 +202,5 @@ public sealed class TracedExplainTests
         Assert.Equal("Uninitialized Traced", default(TracedValue).Explain());
     }
 
-    private static int CountOccurrences(string text, string value)
-    {
-        int count = 0;
-        int index = 0;
-        while ((index = text.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
-        {
-            count++;
-            index += value.Length;
-        }
-
-        return count;
-    }
+    private static string Lines(params string[] lines) => string.Join("\n", lines);
 }
