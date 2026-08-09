@@ -38,6 +38,48 @@ public static class Yurai
     public static Traced Max(Traced left, Traced right)
         => CreateSelection(left, right, BinaryOperationKind.Max);
 
+    /// <summary>
+    /// Evaluates one conditional alternative and records the branch that produced the result.
+    /// </summary>
+    /// <param name="condition">The plain Boolean condition used to select an alternative.</param>
+    /// <param name="whenTrue">The alternative evaluated when <paramref name="condition"/> is <see langword="true"/>.</param>
+    /// <param name="whenFalse">The alternative evaluated when <paramref name="condition"/> is <see langword="false"/>.</param>
+    /// <param name="branchName">The developer-supplied name of the recorded decision.</param>
+    /// <returns>A traced value containing the selected result and branch evidence.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="whenTrue"/>, <paramref name="whenFalse"/>, or <paramref name="branchName"/> is
+    /// <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="branchName"/> is empty or consists only of white-space characters.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">The selected alternative returns an uninitialized traced value.</exception>
+    public static Traced If(
+        bool condition,
+        Func<Traced> whenTrue,
+        Func<Traced> whenFalse,
+        string branchName)
+    {
+        if (whenTrue is null)
+        {
+            throw new ArgumentNullException(nameof(whenTrue));
+        }
+
+        if (whenFalse is null)
+        {
+            throw new ArgumentNullException(nameof(whenFalse));
+        }
+
+        string validBranchName = ArgumentValidation.Validate(branchName, nameof(branchName));
+        Traced selected = condition ? whenTrue() : whenFalse();
+        EvidenceNode selectedRoot = selected.Root;
+        BranchSelection selectedBranch = condition
+            ? BranchSelection.Then
+            : BranchSelection.Else;
+
+        return new Traced(new BranchEvidenceNode(selectedRoot, validBranchName, condition, selectedBranch));
+    }
+
     private static Traced CreateSelection(Traced left, Traced right, BinaryOperationKind operation)
     {
         EvidenceNode leftRoot = left.Root;
