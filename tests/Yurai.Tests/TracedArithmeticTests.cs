@@ -26,16 +26,18 @@ public sealed class TracedArithmeticTests
     {
         TracedValue left = YuraiApi.Of(leftValue, "Left");
         TracedValue right = YuraiApi.Of(rightValue, "Right");
+        EvidenceNode originalLeftRoot = left.Root;
+        EvidenceNode originalRightRoot = right.Root;
 
         TracedValue result = Apply(operation, left, right);
 
         AssertDecimalBitsEqual(expected, result.Value);
         var node = Assert.IsType<BinaryOperationEvidenceNode>(result.Root);
         Assert.Equal(Enum.Parse<BinaryOperationKind>(operation), node.Operation);
-        Assert.Same(left.Root, node.Left);
-        Assert.Same(right.Root, node.Right);
-        Assert.Same(left.Root, left.Root);
-        Assert.Same(right.Root, right.Root);
+        Assert.Same(originalLeftRoot, node.Left);
+        Assert.Same(originalRightRoot, node.Right);
+        Assert.Same(originalLeftRoot, left.Root);
+        Assert.Same(originalRightRoot, right.Root);
     }
 
     [Fact]

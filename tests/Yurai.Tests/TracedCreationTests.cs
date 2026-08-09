@@ -32,13 +32,14 @@ public sealed class TracedCreationTests
     public void AsCreatesANamedParentWithoutChangingItsChild()
     {
         TracedValue input = YuraiApi.Of(10m, "Input");
+        EvidenceNode originalRoot = input.Root;
 
         TracedValue named = input.As("Result");
 
         var node = Assert.IsType<NamedEvidenceNode>(named.Root);
         Assert.Equal("Result", node.Name);
-        Assert.Same(input.Root, node.Child);
-        Assert.Same(input.Root, input.Root);
+        Assert.Same(originalRoot, node.Child);
+        Assert.Same(originalRoot, input.Root);
         AssertDecimalBitsEqual(input.Value, named.Value);
     }
 
