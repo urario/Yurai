@@ -4,7 +4,7 @@ title: Use CsCheck for property-based testing
 description: A C#, dependency-free property-based testing library, chosen over FsCheck so the test toolchain stays in one language and pins nothing.
 tags: [testing, property-based, tooling, adr]
 status: stable
-generated: { by: claude-code/2.1.226, at: 2026-08-09T00:41:34Z }
+generated: { by: codex/2026-08, at: 2026-08-09T10:16:44+09:00 }
 sources:
   - id: issue-7
     resource: https://github.com/urario/Yurai/issues/7
@@ -56,7 +56,7 @@ proposal.
 
 ## Decision
 
-Yurai uses **[CsCheck](https://github.com/AnthonyLloyd/CsCheck)** (4.8.0 at the time of
+Yurai uses **[CsCheck](https://github.com/AnthonyLloyd/CsCheck)** (4.7.0 at the time of
 writing) for property-based tests. The version is fixed centrally in
 `Directory.Packages.props` alongside the other test packages, and the tests land with
 [#9](https://github.com/urario/Yurai/issues/9).
