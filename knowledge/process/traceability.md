@@ -3,7 +3,7 @@ type: Process
 title: Traceability
 description: How a requirement stays connected to the design, code, and tests that satisfy it.
 tags: [process, requirements, traceability]
-status: draft
+status: stable
 generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 sources:
   - id: issue-8

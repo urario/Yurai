@@ -3,7 +3,7 @@ type: Template
 title: ADR template
 description: Skeleton for a new architecture decision record, with the frontmatter and the three sections to fill in.
 tags: [template, adr]
-status: draft
+status: stable
 generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
 ---
 

@@ -3,7 +3,7 @@ type: Process
 title: Git policy
 description: Branch naming, commit message style, and merge conditions for changes to Yurai.
 tags: [process, git, governance]
-status: draft
+status: stable
 generated: { by: codex/2026-08, at: 2026-08-09T09:11:32+09:00 }
 sources:
   - id: issue-4
