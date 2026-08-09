@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yurai Detailed Design"
+  short_description: "Check implementation readiness before coding"
+  default_prompt: "Use $yurai-detailed-design to check that a Yurai issue is ready for implementation."
