@@ -58,12 +58,18 @@ public sealed class EvidenceGraphTests
             () => new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, null!, input));
         var nullRoundChild = Assert.Throws<ArgumentNullException>(
             () => new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, "Reason", null!));
+        var nullBranchName = Assert.Throws<ArgumentNullException>(
+            () => new BranchEvidenceNode(input, null!, true, BranchSelection.Then));
+        var nullBranchChild = Assert.Throws<ArgumentNullException>(
+            () => new BranchEvidenceNode(null!, "Decision", true, BranchSelection.Then));
 
         Assert.Equal("child", named.ParamName);
         Assert.Equal("left", left.ParamName);
         Assert.Equal("right", right.ParamName);
         Assert.Equal("reason", nullReason.ParamName);
         Assert.Equal("child", nullRoundChild.ParamName);
+        Assert.Equal("decisionName", nullBranchName.ParamName);
+        Assert.Equal("child", nullBranchChild.ParamName);
     }
 
     [Fact]
@@ -72,11 +78,14 @@ public sealed class EvidenceGraphTests
         var input = new InputEvidenceNode(1m, null);
         var named = new NamedEvidenceNode(input, "Name");
         var rounded = new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, "Reason", input);
+        var branch = new BranchEvidenceNode(input, "Decision", true, BranchSelection.Then);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => { input.GetChild(0); });
         Assert.Throws<ArgumentOutOfRangeException>(() => { named.GetChild(-1); });
         Assert.Throws<ArgumentOutOfRangeException>(() => { named.GetChild(1); });
         Assert.Throws<ArgumentOutOfRangeException>(() => { rounded.GetChild(-1); });
         Assert.Throws<ArgumentOutOfRangeException>(() => { rounded.GetChild(1); });
+        Assert.Throws<ArgumentOutOfRangeException>(() => { branch.GetChild(-1); });
+        Assert.Throws<ArgumentOutOfRangeException>(() => { branch.GetChild(1); });
     }
 }

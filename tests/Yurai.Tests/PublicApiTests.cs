@@ -25,12 +25,23 @@ public sealed class PublicApiTests
 
         Assert.True(facade.IsAbstract && facade.IsSealed);
         Assert.Empty(facade.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
-        Assert.Equal(4, methods.Length);
+        Assert.Equal(5, methods.Length);
         Assert.Equal(2, methods.Count(method => method.Name == "Of"));
         Assert.Equal(1, methods.Count(method => method.Name == "Min"));
         Assert.Equal(1, methods.Count(method => method.Name == "Max"));
+        Assert.Equal(1, methods.Count(method => method.Name == "If"));
         Assert.Contains(methods, method => HasParameters(method, typeof(decimal)));
         Assert.Contains(methods, method => HasParameters(method, typeof(decimal), typeof(string)));
+        MethodInfo conditional = Assert.Single(methods, method => method.Name == "If");
+        Assert.True(HasParameters(
+            conditional,
+            typeof(bool),
+            typeof(Func<TracedValue>),
+            typeof(Func<TracedValue>),
+            typeof(string)));
+        Assert.Equal(
+            ["condition", "whenTrue", "whenFalse", "branchName"],
+            conditional.GetParameters().Select(parameter => parameter.Name));
         Assert.All(methods, method => Assert.Equal(typeof(TracedValue), method.ReturnType));
     }
 
