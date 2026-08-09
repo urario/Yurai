@@ -37,7 +37,7 @@ public readonly struct Traced
     public Traced As(string name)
     {
         EvidenceNode currentRoot = GetRoot();
-        string validName = NameValidation.Validate(name);
+        string validName = ArgumentValidation.Validate(name, nameof(name));
         return new Traced(new NamedEvidenceNode(currentRoot, validName));
     }
 
@@ -58,9 +58,10 @@ public readonly struct Traced
     public Traced Round(int digits, string reason)
     {
         EvidenceNode currentRoot = GetRoot();
-        decimal value = decimal.Round(currentRoot.Value, digits);
-        string validReason = NameValidation.Validate(reason, nameof(reason), "reason");
-        return new Traced(new RoundEvidenceNode(value, digits, MidpointRounding.ToEven, validReason, currentRoot));
+        const MidpointRounding rounding = MidpointRounding.ToEven;
+        decimal value = decimal.Round(currentRoot.Value, digits, rounding);
+        string validReason = ArgumentValidation.Validate(reason, nameof(reason));
+        return new Traced(new RoundEvidenceNode(value, digits, rounding, validReason, currentRoot));
     }
 
     /// <summary>

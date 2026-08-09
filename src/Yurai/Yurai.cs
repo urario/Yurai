@@ -22,7 +22,7 @@ public static class Yurai
     /// <exception cref="ArgumentException"><paramref name="name"/> is empty or consists only of white-space characters.</exception>
     public static Traced Of(decimal value, string name)
     {
-        string validName = NameValidation.Validate(name);
+        string validName = ArgumentValidation.Validate(name, nameof(name));
         return new Traced(new InputEvidenceNode(value, validName));
     }
 

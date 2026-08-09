@@ -9,12 +9,9 @@ public sealed class EvidenceGraphTests
     [Trait("RQ", "RQ-011")]
     public void NodeKindsAreSealedAndImmutable()
     {
-        Type[] nodeTypes =
-        [
-            typeof(InputEvidenceNode),
-            typeof(BinaryOperationEvidenceNode),
-            typeof(NamedEvidenceNode),
-        ];
+        Type[] nodeTypes = typeof(EvidenceNode).Assembly.GetTypes()
+            .Where(type => type.IsSubclassOf(typeof(EvidenceNode)))
+            .ToArray();
 
         foreach (Type nodeType in nodeTypes)
         {
@@ -57,10 +54,16 @@ public sealed class EvidenceGraphTests
             () => new BinaryOperationEvidenceNode(1m, BinaryOperationKind.Add, null!, input));
         var right = Assert.Throws<ArgumentNullException>(
             () => new BinaryOperationEvidenceNode(1m, BinaryOperationKind.Add, input, null!));
+        var nullReason = Assert.Throws<ArgumentNullException>(
+            () => new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, null!, input));
+        var nullRoundChild = Assert.Throws<ArgumentNullException>(
+            () => new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, "Reason", null!));
 
         Assert.Equal("child", named.ParamName);
         Assert.Equal("left", left.ParamName);
         Assert.Equal("right", right.ParamName);
+        Assert.Equal("reason", nullReason.ParamName);
+        Assert.Equal("child", nullRoundChild.ParamName);
     }
 
     [Fact]
@@ -68,9 +71,12 @@ public sealed class EvidenceGraphTests
     {
         var input = new InputEvidenceNode(1m, null);
         var named = new NamedEvidenceNode(input, "Name");
+        var rounded = new RoundEvidenceNode(1m, 2, MidpointRounding.ToEven, "Reason", input);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => { input.GetChild(0); });
         Assert.Throws<ArgumentOutOfRangeException>(() => { named.GetChild(-1); });
         Assert.Throws<ArgumentOutOfRangeException>(() => { named.GetChild(1); });
+        Assert.Throws<ArgumentOutOfRangeException>(() => { rounded.GetChild(-1); });
+        Assert.Throws<ArgumentOutOfRangeException>(() => { rounded.GetChild(1); });
     }
 }

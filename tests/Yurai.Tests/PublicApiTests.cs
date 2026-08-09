@@ -57,6 +57,7 @@ public sealed class PublicApiTests
             ],
             methodNames);
         Assert.Equal(typeof(decimal), carrier.GetProperty("Value")?.PropertyType);
+        Assert.NotNull(carrier.GetMethod("Round", [typeof(int), typeof(string)]));
         Assert.Null(carrier.GetMethod("op_Implicit", BindingFlags.Public | BindingFlags.Static));
         Assert.Null(carrier.GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static));
         Assert.Null(carrier.GetMethod("op_Inequality", BindingFlags.Public | BindingFlags.Static));
