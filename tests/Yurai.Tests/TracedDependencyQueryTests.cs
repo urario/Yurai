@@ -1,6 +1,5 @@
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -18,8 +17,8 @@ public sealed class TracedDependencyQueryTests
     [Trait("RQ", "RQ-014")]
     public void QueriesExposeNamedDependenciesAndAllPathsInDeterministicOrder()
     {
-        TracedValue basePrice = YuraiApi.Of(100m, "BasePrice");
-        TracedValue discount = YuraiApi.Of(10m, "Discount");
+        TracedValue basePrice = TracedValue.Of(100m, "BasePrice");
+        TracedValue discount = TracedValue.Of(10m, "Discount");
         TracedValue subtotal = (basePrice - discount).As("Subtotal");
         TracedValue total = (subtotal + basePrice).As("Total");
 
@@ -39,8 +38,8 @@ public sealed class TracedDependencyQueryTests
     [Trait("RQ", "RQ-014")]
     public void DuplicateNamesPreserveEveryMatchAndPathButInputsAreUnique()
     {
-        TracedValue left = YuraiApi.Of(1m, "Rate");
-        TracedValue right = YuraiApi.Of(2m, "Rate");
+        TracedValue left = TracedValue.Of(1m, "Rate");
+        TracedValue right = TracedValue.Of(2m, "Rate");
         TracedValue shared = (left + right).As("Rate");
         TracedValue result = (shared + shared).As("Total");
 
@@ -58,7 +57,7 @@ public sealed class TracedDependencyQueryTests
     [Fact]
     public void RootMatchesAndAnonymousNodesAreTraversedButNotProjected()
     {
-        TracedValue input = YuraiApi.Of(3m, "Input");
+        TracedValue input = TracedValue.Of(3m, "Input");
         TracedValue result = (input + 2m).As("Result");
 
         AssertPaths(result.Trace("Result"), ["Result"]);
@@ -69,7 +68,7 @@ public sealed class TracedDependencyQueryTests
     [Fact]
     public void QueryResultsAreReadOnlySnapshots()
     {
-        TracedValue result = YuraiApi.Of(1m, "Input").As("Result");
+        TracedValue result = TracedValue.Of(1m, "Input").As("Result");
 
         IReadOnlyList<string> inputs = result.Inputs;
         IReadOnlyList<IReadOnlyList<string>> paths = result.Trace("Input");
@@ -85,12 +84,12 @@ public sealed class TracedDependencyQueryTests
     [Fact]
     public void ConditionOnlyInputIsNotARecordedDependency()
     {
-        TracedValue conditionOnly = YuraiApi.Of(5m, "ConditionOnly");
-        TracedValue selected = YuraiApi.Of(1m, "Selected");
-        TracedValue result = YuraiApi.If(
+        TracedValue conditionOnly = TracedValue.Of(5m, "ConditionOnly");
+        TracedValue selected = TracedValue.Of(1m, "Selected");
+        TracedValue result = TracedValue.If(
             conditionOnly.Value > 0m,
             () => selected,
-            () => YuraiApi.Of(0m, "Unselected"),
+            () => TracedValue.Of(0m, "Unselected"),
             "Positive");
 
         Assert.False(result.DependsOn("ConditionOnly"));
@@ -112,7 +111,7 @@ public sealed class TracedDependencyQueryTests
     [MemberData(nameof(InvalidQueryNames))]
     public void NamedQueriesUseStrictNameValidation(string? name)
     {
-        TracedValue value = YuraiApi.Of(1m, "Input");
+        TracedValue value = TracedValue.Of(1m, "Input");
 
         ArgumentException dependsOn = Assert.ThrowsAny<ArgumentException>(() => value.DependsOn(name!));
         ArgumentException trace = Assert.ThrowsAny<ArgumentException>(() => value.Trace(name!));
@@ -126,7 +125,7 @@ public sealed class TracedDependencyQueryTests
     [Fact]
     public void NamedQueriesRejectMalformedUtf16ConstructedInProcess()
     {
-        TracedValue value = YuraiApi.Of(1m, "Input");
+        TracedValue value = TracedValue.Of(1m, "Input");
         string malformed = new('\uDC00', 1);
 
         ArgumentException dependsOn = Assert.Throws<ArgumentException>(() => value.DependsOn(malformed));
@@ -140,7 +139,7 @@ public sealed class TracedDependencyQueryTests
     [Trait("RQ", "RQ-014")]
     public void TraceHandlesAChainBeyondTenThousandNodesWithoutRecursion()
     {
-        TracedValue result = YuraiApi.Of(1m, "Input");
+        TracedValue result = TracedValue.Of(1m, "Input");
         const int namedNodeCount = 10_001;
         for (int index = 0; index < namedNodeCount; index++)
         {
@@ -157,7 +156,7 @@ public sealed class TracedDependencyQueryTests
     [Fact]
     public async Task ImmutableGraphCanBeQueriedConcurrently()
     {
-        TracedValue result = (YuraiApi.Of(2m, "Left") * YuraiApi.Of(3m, "Right")).As("Result");
+        TracedValue result = (TracedValue.Of(2m, "Left") * TracedValue.Of(3m, "Right")).As("Result");
 
         Task<(bool DependsOn, string[] Inputs, string[][] Paths)>[] reads = Enumerable.Range(0, 32)
             .Select(_ => Task.Run(() => (
@@ -179,20 +178,20 @@ public sealed class TracedDependencyQueryTests
     [Fact]
     public void PayrollQueryExampleMatchesPublishedPaths()
     {
-        TracedValue baseSalary = YuraiApi.Of(300000m, "BaseSalary");
-        TracedValue overtimeHourlyRate = YuraiApi.Of(2500m, "OvertimeHourlyRate");
-        TracedValue overtimeHours = YuraiApi.Of(20m, "OvertimeHours");
-        TracedValue socialInsuranceRate = YuraiApi.Of(0.152345m, "SocialInsuranceRate");
+        TracedValue baseSalary = TracedValue.Of(300000m, "BaseSalary");
+        TracedValue overtimeHourlyRate = TracedValue.Of(2500m, "OvertimeHourlyRate");
+        TracedValue overtimeHours = TracedValue.Of(20m, "OvertimeHours");
+        TracedValue socialInsuranceRate = TracedValue.Of(0.152345m, "SocialInsuranceRate");
         TracedValue overtimePay = (overtimeHourlyRate * overtimeHours).As("OvertimePay");
         TracedValue grossPay = (baseSalary + overtimePay).As("GrossPay");
         TracedValue socialInsurance = (grossPay * socialInsuranceRate)
             .Round(0, "Round social insurance to whole currency units")
             .As("SocialInsurance");
         TracedValue taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
-        TracedValue incomeTax = YuraiApi.If(
+        TracedValue incomeTax = TracedValue.If(
                 taxableIncome.Value <= 200000m,
                 () => taxableIncome * 0.10m,
-                () => YuraiApi.If(
+                () => TracedValue.If(
                     taxableIncome.Value <= 400000m,
                     () => 20000m + (taxableIncome - 200000m) * 0.20m,
                     () => 60000m + (taxableIncome - 400000m) * 0.30m,

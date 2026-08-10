@@ -1,7 +1,6 @@
 using CsCheck;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -50,8 +49,8 @@ public sealed class TracedArithmeticProperties
             decimal right = values.Item2;
             decimal expected = operation == "Min" ? Math.Min(left, right) : Math.Max(left, right);
             TracedValue actual = operation == "Min"
-                ? YuraiApi.Min(YuraiApi.Of(left), YuraiApi.Of(right))
-                : YuraiApi.Max(YuraiApi.Of(left), YuraiApi.Of(right));
+                ? TracedValue.Min(TracedValue.Of(left), TracedValue.Of(right))
+                : TracedValue.Max(TracedValue.Of(left), TracedValue.Of(right));
 
             TracedArithmeticTests.AssertDecimalBitsEqual(expected, actual.Value);
         });
@@ -65,7 +64,7 @@ public sealed class TracedArithmeticProperties
 
         TracedValue tracedResult = default;
         Exception? tracedException = Record.Exception(
-            () => { tracedResult = TracedArithmeticTests.Apply(operation, YuraiApi.Of(left), YuraiApi.Of(right)); });
+            () => { tracedResult = TracedArithmeticTests.Apply(operation, TracedValue.Of(left), TracedValue.Of(right)); });
 
         if (nativeException is null)
         {
@@ -88,7 +87,7 @@ public sealed class TracedArithmeticProperties
         Exception? tracedException = Record.Exception(
             () =>
             {
-                TracedValue value = YuraiApi.Of(traced);
+                TracedValue value = TracedValue.Of(traced);
                 tracedResult = tracedOnLeft
                     ? TracedArithmeticTests.ApplyMixed(operation, value, plain)
                     : TracedArithmeticTests.ApplyMixed(operation, plain, value);

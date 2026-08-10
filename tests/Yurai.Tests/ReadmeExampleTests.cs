@@ -4,7 +4,8 @@ using Yurai;
 // Deliberately outside the Yurai namespace, and deliberately without the type alias the
 // other test files use. A reader of the README writes `using Yurai;` from their own
 // namespace, so that is the name resolution these tests have to exercise: if the examples
-// below stop compiling, the README stops being copy-pasteable.
+// below stop compiling, the README stops being copy-pasteable. Keeping this file out of
+// Yurai.Tests is what makes it a regression test for ADR-0017.
 namespace YuraiReadme.Consumer;
 
 public sealed class ReadmeExampleTests
@@ -14,9 +15,9 @@ public sealed class ReadmeExampleTests
     [Trait("RQ", "RQ-012")]
     public void ReadmeOpeningExampleExplainsExactlyAsDocumented()
     {
-        var basePrice = Yurai.Of(1000m, "BasePrice");
-        var discount = Yurai.Of(0.10m, "MemberDiscount");
-        var taxRate = Yurai.Of(0.10m, "TaxRate");
+        var basePrice = Traced.Of(1000m, "BasePrice");
+        var discount = Traced.Of(0.10m, "MemberDiscount");
+        var taxRate = Traced.Of(0.10m, "TaxRate");
         var total = (basePrice * (1 - discount) * (1 + taxRate))
             .Round(0, "Round to whole currency unit")
             .As("Total");
@@ -46,7 +47,7 @@ public sealed class ReadmeExampleTests
     [Trait("RQ", "RQ-014")]
     public void ReadmeDependencyQueryExampleReturnsTheDocumentedNamesAndPath()
     {
-        var subtotal = (Yurai.Of(100m, "BasePrice") - Yurai.Of(10m, "Discount"))
+        var subtotal = (Traced.Of(100m, "BasePrice") - Traced.Of(10m, "Discount"))
             .As("Subtotal");
         var total = (subtotal + 5m).As("Total");
 

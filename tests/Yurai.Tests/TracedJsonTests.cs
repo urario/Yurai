@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text.Json;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -13,15 +12,15 @@ public sealed class TracedJsonTests
     [Trait("RQ", "RQ-027")]
     public void ToJsonExportsTheNormalizedSchemaForEveryEvidenceKind()
     {
-        TracedValue input = YuraiApi.Of(2.500m, "Input\"Name\n");
+        TracedValue input = TracedValue.Of(2.500m, "Input\"Name\n");
         TracedValue rounded = input.Round(1, "Reason\\line\nnext");
-        TracedValue branch = YuraiApi.If(
+        TracedValue branch = TracedValue.If(
             false,
-            () => YuraiApi.Of(-1m),
+            () => TracedValue.Of(-1m),
             () => rounded,
             "Decision\"");
-        TracedValue anonymous = YuraiApi.Of(3m);
-        TracedValue selected = YuraiApi.Min(branch, anonymous);
+        TracedValue anonymous = TracedValue.Of(3m);
+        TracedValue selected = TracedValue.Min(branch, anonymous);
         TracedValue result = (selected + input).As("Total");
 
         using JsonDocument document = JsonDocument.Parse(result.ToJson());
@@ -92,16 +91,16 @@ public sealed class TracedJsonTests
     [Trait("RQ", "RQ-013")]
     public void ToJsonUsesTheStableBinaryOperationVocabulary(string operation)
     {
-        TracedValue left = YuraiApi.Of(6m, "Left");
-        TracedValue right = YuraiApi.Of(2m, "Right");
+        TracedValue left = TracedValue.Of(6m, "Left");
+        TracedValue right = TracedValue.Of(2m, "Right");
         TracedValue result = operation switch
         {
             "add" => left + right,
             "subtract" => left - right,
             "multiply" => left * right,
             "divide" => left / right,
-            "min" => YuraiApi.Min(left, right),
-            "max" => YuraiApi.Max(left, right),
+            "min" => TracedValue.Min(left, right),
+            "max" => TracedValue.Max(left, right),
             _ => throw new InvalidOperationException(),
         };
 
@@ -129,10 +128,10 @@ public sealed class TracedJsonTests
         string expectedBranch,
         string expectedChildName)
     {
-        TracedValue result = YuraiApi.If(
+        TracedValue result = TracedValue.If(
             condition,
-            () => YuraiApi.Of(1m, "TrueValue"),
-            () => YuraiApi.Of(2m, "FalseValue"),
+            () => TracedValue.Of(1m, "TrueValue"),
+            () => TracedValue.Of(2m, "FalseValue"),
             "Decision");
 
         using JsonDocument document = JsonDocument.Parse(result.ToJson());
@@ -155,7 +154,7 @@ public sealed class TracedJsonTests
     public void ToJsonPreservesDecimalValueAndScaleAsInvariantText(string valueText)
     {
         decimal value = decimal.Parse(valueText, NumberStyles.Number, CultureInfo.InvariantCulture);
-        TracedValue traced = YuraiApi.Of(value);
+        TracedValue traced = TracedValue.Of(value);
 
         using JsonDocument document = JsonDocument.Parse(traced.ToJson());
         string exported = document.RootElement.GetProperty("nodes")[0].GetProperty("value").GetString()!;
@@ -170,7 +169,7 @@ public sealed class TracedJsonTests
     public void ToJsonEscapesEveryJsonStringCharacterClass()
     {
         const string metadata = "quote\" slash\\ backspace\b formfeed\f newline\n carriage\r tab\t control\u0001 emoji \U0001F600";
-        TracedValue traced = YuraiApi.Of(1m, metadata).Round(0, metadata).As(metadata);
+        TracedValue traced = TracedValue.Of(1m, metadata).Round(0, metadata).As(metadata);
 
         string json = traced.ToJson();
         using JsonDocument document = JsonDocument.Parse(json);
@@ -194,7 +193,7 @@ public sealed class TracedJsonTests
     [Trait("RQ", "RQ-013")]
     public void ToJsonEmitsSharedNodesOnceAndUsesDeterministicReferences()
     {
-        TracedValue shared = YuraiApi.Of(10m, "Shared");
+        TracedValue shared = TracedValue.Of(10m, "Shared");
         TracedValue result = shared + shared;
 
         string first = result.ToJson();
@@ -213,7 +212,7 @@ public sealed class TracedJsonTests
     [Trait("RQ", "RQ-013")]
     public void ToJsonHandlesAChainBeyondTenThousandNodesWithoutRecursion()
     {
-        TracedValue result = YuraiApi.Of(1m, "Input");
+        TracedValue result = TracedValue.Of(1m, "Input");
         const int namedNodeCount = 10_001;
         for (int index = 0; index < namedNodeCount; index++)
         {
@@ -229,7 +228,7 @@ public sealed class TracedJsonTests
     [Trait("RQ", "RQ-013")]
     public async Task ToJsonIsSafeForConcurrentReads()
     {
-        TracedValue result = (YuraiApi.Of(10m, "Input") * 2m).As("Total");
+        TracedValue result = (TracedValue.Of(10m, "Input") * 2m).As("Total");
 
         Task<string>[] reads = Enumerable.Range(0, 32)
             .Select(_ => Task.Run(result.ToJson))

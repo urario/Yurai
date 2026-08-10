@@ -12,7 +12,7 @@ internal static class GraphFactory
         var level = new Traced[leafCount];
         for (int index = 0; index < leafCount; index++)
         {
-            level[index] = global::Yurai.Yurai.Of(index + 1m, $"Input{index}");
+            level[index] = Traced.Of(index + 1m, $"Input{index}");
         }
 
         while (level.Length > 1)
@@ -31,7 +31,7 @@ internal static class GraphFactory
 
     internal static Traced BuildSharedDiamond(int depth)
     {
-        Traced result = global::Yurai.Yurai.Of(1m, "Root");
+        Traced result = Traced.Of(1m, "Root");
         for (int index = 0; index < depth; index++)
         {
             result += result;

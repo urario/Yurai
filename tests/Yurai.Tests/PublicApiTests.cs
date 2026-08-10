@@ -1,7 +1,6 @@
 using System.Reflection;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -14,17 +13,18 @@ public sealed class PublicApiTests
             .OrderBy(type => type.FullName, StringComparer.Ordinal)
             .ToArray();
 
-        Assert.Equal([typeof(TracedValue), typeof(YuraiApi)], exportedTypes);
+        Assert.Equal([typeof(TracedValue)], exportedTypes);
     }
 
     [Fact]
-    public void FacadeContainsOnlyTheApprovedCreationOverloads()
+    public void CarrierContainsOnlyTheApprovedCreationOverloads()
     {
-        Type facade = typeof(YuraiApi);
-        MethodInfo[] methods = facade.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        // Operators are public static too, so the creation inventory is the non-special-name half.
+        MethodInfo[] methods = typeof(TracedValue)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Where(method => !method.IsSpecialName)
+            .ToArray();
 
-        Assert.True(facade.IsAbstract && facade.IsSealed);
-        Assert.Empty(facade.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
         Assert.Equal(5, methods.Length);
         Assert.Equal(2, methods.Count(method => method.Name == "Of"));
         Assert.Equal(1, methods.Count(method => method.Name == "Min"));
@@ -60,7 +60,8 @@ public sealed class PublicApiTests
         Assert.Empty(carrier.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
         Assert.Equal(
             [
-                "As", "DependsOn", "Explain", "Round", "ToJson", "ToString", "Trace", "get_Inputs", "get_Value",
+                "As", "DependsOn", "Explain", "If", "Max", "Min", "Of", "Of",
+                "Round", "ToJson", "ToString", "Trace", "get_Inputs", "get_Value",
                 "op_Addition", "op_Addition", "op_Addition",
                 "op_Division", "op_Division", "op_Division",
                 "op_Multiply", "op_Multiply", "op_Multiply",

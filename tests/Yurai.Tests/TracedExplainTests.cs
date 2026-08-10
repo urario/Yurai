@@ -1,7 +1,6 @@
 using System.Globalization;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -12,9 +11,9 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public void ExplainMatchesThePricingSample()
     {
-        TracedValue basePrice = YuraiApi.Of(1000m, "BasePrice");
-        TracedValue discount = YuraiApi.Of(0.10m, "MemberDiscount");
-        TracedValue taxRate = YuraiApi.Of(0.10m, "TaxRate");
+        TracedValue basePrice = TracedValue.Of(1000m, "BasePrice");
+        TracedValue discount = TracedValue.Of(0.10m, "MemberDiscount");
+        TracedValue taxRate = TracedValue.Of(0.10m, "TaxRate");
 
         TracedValue discounted = (basePrice * (1 - discount)).As("DiscountedPrice");
         TracedValue total = (discounted * (1 + taxRate))
@@ -46,10 +45,10 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public void ExplainMatchesThePayrollSampleAndShowsTheSelectedBranches()
     {
-        TracedValue baseSalary = YuraiApi.Of(300000m, "BaseSalary");
-        TracedValue overtimeHourlyRate = YuraiApi.Of(2500m, "OvertimeHourlyRate");
-        TracedValue overtimeHours = YuraiApi.Of(20m, "OvertimeHours");
-        TracedValue socialInsuranceRate = YuraiApi.Of(0.152345m, "SocialInsuranceRate");
+        TracedValue baseSalary = TracedValue.Of(300000m, "BaseSalary");
+        TracedValue overtimeHourlyRate = TracedValue.Of(2500m, "OvertimeHourlyRate");
+        TracedValue overtimeHours = TracedValue.Of(20m, "OvertimeHours");
+        TracedValue socialInsuranceRate = TracedValue.Of(0.152345m, "SocialInsuranceRate");
 
         TracedValue overtimePay = (overtimeHourlyRate * overtimeHours).As("OvertimePay");
         TracedValue grossPay = (baseSalary + overtimePay).As("GrossPay");
@@ -57,10 +56,10 @@ public sealed class TracedExplainTests
             .Round(0, "Round social insurance to whole currency units")
             .As("SocialInsurance");
         TracedValue taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
-        TracedValue incomeTax = YuraiApi.If(
+        TracedValue incomeTax = TracedValue.If(
             taxableIncome.Value <= 200000m,
             () => taxableIncome * 0.10m,
-            () => YuraiApi.If(
+            () => TracedValue.If(
                 taxableIncome.Value <= 400000m,
                 () => 20000m + (taxableIncome - 200000m) * 0.20m,
                 () => 60000m + (taxableIncome - 400000m) * 0.30m,
@@ -114,7 +113,7 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public void ExplainExpandsSharedNodesOnceAndUsesDocumentLocalReferences()
     {
-        TracedValue shared = YuraiApi.Of(10m, "Shared");
+        TracedValue shared = TracedValue.Of(10m, "Shared");
         TracedValue result = (shared + shared).As("Total");
 
         string expected = Lines(
@@ -136,7 +135,7 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public async Task ExplainIsSafeForConcurrentReads()
     {
-        TracedValue shared = YuraiApi.Of(10m, "Shared");
+        TracedValue shared = TracedValue.Of(10m, "Shared");
         TracedValue result = (shared * 2m).As("Total");
 
         Task<string>[] reads = Enumerable.Range(0, 32)
@@ -153,12 +152,12 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public void ExplainRendersEveryEvidenceNodeKindAndEscapesMetadata()
     {
-        TracedValue input = YuraiApi.Of(2.5m, "Input\"Name");
+        TracedValue input = TracedValue.Of(2.5m, "Input\"Name");
         TracedValue rounded = input.Round(0, "Reason\\line\nnext");
-        TracedValue branch = YuraiApi.If(true, () => rounded, () => YuraiApi.Of(0m), "Decision");
-        TracedValue result = YuraiApi.Max(
-            YuraiApi.Min(branch, YuraiApi.Of(3m, "Other")),
-            YuraiApi.Of(1m, "Last"));
+        TracedValue branch = TracedValue.If(true, () => rounded, () => TracedValue.Of(0m), "Decision");
+        TracedValue result = TracedValue.Max(
+            TracedValue.Min(branch, TracedValue.Of(3m, "Other")),
+            TracedValue.Of(1m, "Last"));
 
         string explanation = result.Explain();
 
@@ -174,12 +173,12 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public void ExplainEscapesControlCharactersInQuotedAndUnquotedMetadata()
     {
-        TracedValue input = YuraiApi.Of(2.5m, "Input\\\"Name\r\n\t\u0001");
+        TracedValue input = TracedValue.Of(2.5m, "Input\\\"Name\r\n\t\u0001");
         TracedValue rounded = input.Round(0, "Reason\\\"line\r\n\t\u0002");
-        TracedValue branch = YuraiApi.If(
+        TracedValue branch = TracedValue.If(
             true,
             () => rounded,
-            () => YuraiApi.Of(0m),
+            () => TracedValue.Of(0m),
             "Decision\\\"Name\r\n\t\u0003");
         TracedValue result = branch.As("Result\\\"Name\r\n\t\u0004");
 
@@ -200,7 +199,7 @@ public sealed class TracedExplainTests
     [Trait("RQ", "RQ-012")]
     public void ExplainUsesInvariantCultureAndHandlesDeepChains()
     {
-        TracedValue result = YuraiApi.Of(1.25m, "Value");
+        TracedValue result = TracedValue.Of(1.25m, "Value");
         for (int index = 0; index < 10_001; index++)
         {
             result = result.As($"Node{index}");

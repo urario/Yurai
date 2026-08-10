@@ -3,7 +3,6 @@ using System.Text.Json;
 using CsCheck;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -17,10 +16,10 @@ public sealed class TracedJsonProperties
         Gen.Int.Sample(seed =>
         {
             string metadata = CreateMetadata(seed);
-            TracedValue result = YuraiApi.If(
+            TracedValue result = TracedValue.If(
                     true,
-                    () => YuraiApi.Of(1m, metadata).Round(0, metadata),
-                    () => YuraiApi.Of(2m),
+                    () => TracedValue.Of(1m, metadata).Round(0, metadata),
+                    () => TracedValue.Of(2m),
                     metadata)
                 .As(metadata);
 

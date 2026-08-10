@@ -1,6 +1,5 @@
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -24,8 +23,8 @@ public sealed class TracedArithmeticTests
         decimal rightValue,
         decimal expected)
     {
-        TracedValue left = YuraiApi.Of(leftValue, "Left");
-        TracedValue right = YuraiApi.Of(rightValue, "Right");
+        TracedValue left = TracedValue.Of(leftValue, "Left");
+        TracedValue right = TracedValue.Of(rightValue, "Right");
         EvidenceNode originalLeftRoot = left.Root;
         EvidenceNode originalRightRoot = right.Root;
 
@@ -45,8 +44,8 @@ public sealed class TracedArithmeticTests
     [Trait("RQ", "RQ-001")]
     public void DivisionByZeroMatchesDecimalExceptionAndLeavesOperandsUsable()
     {
-        TracedValue left = YuraiApi.Of(1m, "Left");
-        TracedValue right = YuraiApi.Of(0m, "Right");
+        TracedValue left = TracedValue.Of(1m, "Left");
+        TracedValue right = TracedValue.Of(0m, "Right");
         decimal zero = 0m;
 
         Exception native = Assert.Throws<DivideByZeroException>(() => { _ = 1m / zero; });
@@ -66,8 +65,8 @@ public sealed class TracedArithmeticTests
     {
         decimal leftValue = operation == "Subtract" ? decimal.MinValue : decimal.MaxValue;
         decimal rightValue = operation == "Multiply" ? 2m : 1m;
-        TracedValue left = YuraiApi.Of(leftValue, "Left");
-        TracedValue right = YuraiApi.Of(rightValue, "Right");
+        TracedValue left = TracedValue.Of(leftValue, "Left");
+        TracedValue right = TracedValue.Of(rightValue, "Right");
         decimal one = 1m;
         decimal two = 2m;
 
@@ -95,7 +94,7 @@ public sealed class TracedArithmeticTests
     [InlineData("Divide")]
     public void OperatorsRejectDefaultOperandsFromLeftToRight(string operation)
     {
-        TracedValue initialized = YuraiApi.Of(1m);
+        TracedValue initialized = TracedValue.Of(1m);
         TracedValue uninitialized = default;
 
         Assert.Throws<InvalidOperationException>(() => { _ = Apply(operation, uninitialized, initialized); });
@@ -114,7 +113,7 @@ public sealed class TracedArithmeticTests
         decimal tracedValue,
         decimal plainValue)
     {
-        TracedValue traced = YuraiApi.Of(tracedValue, "Traced");
+        TracedValue traced = TracedValue.Of(tracedValue, "Traced");
 
         TracedValue leftResult = ApplyMixed(operation, traced, plainValue);
         TracedValue rightResult = ApplyMixed(operation, plainValue, traced);
@@ -132,11 +131,11 @@ public sealed class TracedArithmeticTests
     [Trait("RQ", "RQ-008")]
     public void MinAndMaxMatchDecimalAndRecordTheSelectedOperand()
     {
-        TracedValue left = YuraiApi.Of(2m, "Left");
-        TracedValue right = YuraiApi.Of(3m, "Right");
+        TracedValue left = TracedValue.Of(2m, "Left");
+        TracedValue right = TracedValue.Of(3m, "Right");
 
-        TracedValue min = YuraiApi.Min(left, right);
-        TracedValue max = YuraiApi.Max(left, right);
+        TracedValue min = TracedValue.Min(left, right);
+        TracedValue max = TracedValue.Max(left, right);
 
         Assert.Equal(Math.Min(2m, 3m), min.Value);
         Assert.Equal(Math.Max(2m, 3m), max.Value);
@@ -152,23 +151,23 @@ public sealed class TracedArithmeticTests
     [Trait("RQ", "RQ-008")]
     public void MinAndMaxSelectTheLeftOperandWhenValuesAreEqual()
     {
-        TracedValue left = YuraiApi.Of(2.00m, "Left");
-        TracedValue right = YuraiApi.Of(2.00m, "Right");
+        TracedValue left = TracedValue.Of(2.00m, "Left");
+        TracedValue right = TracedValue.Of(2.00m, "Right");
 
-        Assert.Equal(SelectedOperand.Left, Assert.IsType<BinaryOperationEvidenceNode>(YuraiApi.Min(left, right).Root).SelectedOperand);
-        Assert.Equal(SelectedOperand.Left, Assert.IsType<BinaryOperationEvidenceNode>(YuraiApi.Max(left, right).Root).SelectedOperand);
+        Assert.Equal(SelectedOperand.Left, Assert.IsType<BinaryOperationEvidenceNode>(TracedValue.Min(left, right).Root).SelectedOperand);
+        Assert.Equal(SelectedOperand.Left, Assert.IsType<BinaryOperationEvidenceNode>(TracedValue.Max(left, right).Root).SelectedOperand);
     }
 
     [Fact]
     public void MinAndMaxRejectDefaultOperands()
     {
-        TracedValue initialized = YuraiApi.Of(1m);
+        TracedValue initialized = TracedValue.Of(1m);
         TracedValue uninitialized = default;
 
-        Assert.Throws<InvalidOperationException>(() => YuraiApi.Min(uninitialized, initialized));
-        Assert.Throws<InvalidOperationException>(() => YuraiApi.Min(initialized, uninitialized));
-        Assert.Throws<InvalidOperationException>(() => YuraiApi.Max(uninitialized, initialized));
-        Assert.Throws<InvalidOperationException>(() => YuraiApi.Max(initialized, uninitialized));
+        Assert.Throws<InvalidOperationException>(() => TracedValue.Min(uninitialized, initialized));
+        Assert.Throws<InvalidOperationException>(() => TracedValue.Min(initialized, uninitialized));
+        Assert.Throws<InvalidOperationException>(() => TracedValue.Max(uninitialized, initialized));
+        Assert.Throws<InvalidOperationException>(() => TracedValue.Max(initialized, uninitialized));
     }
 
     private static void AssertAnonymousInput(EvidenceNode root, decimal expectedValue, SelectedOperand expectedSide)

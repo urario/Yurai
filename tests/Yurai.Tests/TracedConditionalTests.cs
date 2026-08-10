@@ -1,6 +1,5 @@
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -20,12 +19,12 @@ public sealed class TracedConditionalTests
     [Trait("RQ", "RQ-005")]
     public void IfMatchesConditionalAndRecordsTheSelectedBranch(bool condition)
     {
-        TracedValue whenTrue = YuraiApi.Of(10.00m, "TrueValue");
-        TracedValue whenFalse = YuraiApi.Of(20.000m, "FalseValue");
+        TracedValue whenTrue = TracedValue.Of(10.00m, "TrueValue");
+        TracedValue whenFalse = TracedValue.Of(20.000m, "FalseValue");
         int trueInvocations = 0;
         int falseInvocations = 0;
 
-        TracedValue result = YuraiApi.If(
+        TracedValue result = TracedValue.If(
             condition,
             () =>
             {
@@ -59,8 +58,8 @@ public sealed class TracedConditionalTests
     [Trait("RQ", "RQ-005")]
     public void IfDoesNotInvokeOrRecordTheUnselectedAlternative(bool condition)
     {
-        TracedValue selected = YuraiApi.Of(1m, "Selected");
-        TracedValue unselected = YuraiApi.Of(2m, "Unselected");
+        TracedValue selected = TracedValue.Of(1m, "Selected");
+        TracedValue unselected = TracedValue.Of(2m, "Unselected");
         int unselectedInvocations = 0;
         Func<TracedValue> returnsSelected = () => selected;
         Func<TracedValue> returnsUnselected = () =>
@@ -70,8 +69,8 @@ public sealed class TracedConditionalTests
         };
 
         TracedValue result = condition
-            ? YuraiApi.If(true, returnsSelected, returnsUnselected, "Decision")
-            : YuraiApi.If(false, returnsUnselected, returnsSelected, "Decision");
+            ? TracedValue.If(true, returnsSelected, returnsUnselected, "Decision")
+            : TracedValue.If(false, returnsUnselected, returnsSelected, "Decision");
 
         Assert.Equal(0, unselectedInvocations);
         EvidenceNode[] visited = EvidenceTraversal.PreOrder(result.Root).ToArray();
@@ -85,12 +84,12 @@ public sealed class TracedConditionalTests
     [Trait("RQ", "RQ-005")]
     public void IfDoesNotInvokeAThrowingUnselectedAlternative(bool condition)
     {
-        Func<TracedValue> returnsSelected = () => YuraiApi.Of(1m);
+        Func<TracedValue> returnsSelected = () => TracedValue.Of(1m);
         Func<TracedValue> throws = () => throw new InvalidOperationException("The unselected alternative ran.");
 
         TracedValue result = condition
-            ? YuraiApi.If(true, returnsSelected, throws, "Decision")
-            : YuraiApi.If(false, throws, returnsSelected, "Decision");
+            ? TracedValue.If(true, returnsSelected, throws, "Decision")
+            : TracedValue.If(false, throws, returnsSelected, "Decision");
 
         Assert.Equal(1m, result.Value);
     }
@@ -99,24 +98,24 @@ public sealed class TracedConditionalTests
     [Trait("RQ", "RQ-005")]
     public void NestedIfRecordsBothSelectedDecisions()
     {
-        TracedValue selected = YuraiApi.Of(30m, "Selected");
+        TracedValue selected = TracedValue.Of(30m, "Selected");
         int outerUnselectedInvocations = 0;
         int innerUnselectedInvocations = 0;
 
-        TracedValue result = YuraiApi.If(
+        TracedValue result = TracedValue.If(
             false,
             () =>
             {
                 outerUnselectedInvocations++;
-                return YuraiApi.Of(10m);
+                return TracedValue.Of(10m);
             },
-            () => YuraiApi.If(
+            () => TracedValue.If(
                 true,
                 () => selected,
                 () =>
                 {
                     innerUnselectedInvocations++;
-                    return YuraiApi.Of(20m);
+                    return TracedValue.Of(20m);
                 },
                 "InnerDecision"),
             "OuterDecision");
@@ -138,10 +137,10 @@ public sealed class TracedConditionalTests
     [Trait("RQ", "RQ-005")]
     public void BranchResultComposesWithDownstreamOperations()
     {
-        TracedValue input = YuraiApi.Of(10.005m, "Input");
+        TracedValue input = TracedValue.Of(10.005m, "Input");
 
-        TracedValue result = YuraiApi
-            .If(true, () => input, () => YuraiApi.Of(0m), "Decision")
+        TracedValue result = TracedValue
+            .If(true, () => input, () => TracedValue.Of(0m), "Decision")
             .Round(2, "Round to currency units")
             .As("Total");
 
@@ -156,13 +155,13 @@ public sealed class TracedConditionalTests
     [Fact]
     public void PlainBooleanConditionDoesNotCreateAControlDependency()
     {
-        TracedValue conditionOnly = YuraiApi.Of(5m, "ConditionOnly");
-        TracedValue selected = YuraiApi.Of(1m, "Selected");
+        TracedValue conditionOnly = TracedValue.Of(5m, "ConditionOnly");
+        TracedValue selected = TracedValue.Of(1m, "Selected");
 
-        TracedValue result = YuraiApi.If(
+        TracedValue result = TracedValue.If(
             conditionOnly.Value > 0m,
             () => selected,
-            () => YuraiApi.Of(0m),
+            () => TracedValue.Of(0m),
             "Positive");
 
         EvidenceNode[] visited = EvidenceTraversal.PreOrder(result.Root).ToArray();
@@ -177,13 +176,13 @@ public sealed class TracedConditionalTests
         Func<TracedValue> valid = () =>
         {
             invocations++;
-            return YuraiApi.Of(1m);
+            return TracedValue.Of(1m);
         };
 
         var nullWhenTrue = Assert.Throws<ArgumentNullException>(
-            () => YuraiApi.If(false, null!, valid, "Decision"));
+            () => TracedValue.If(false, null!, valid, "Decision"));
         var nullWhenFalse = Assert.Throws<ArgumentNullException>(
-            () => YuraiApi.If(true, valid, null!, "Decision"));
+            () => TracedValue.If(true, valid, null!, "Decision"));
 
         Assert.Equal("whenTrue", nullWhenTrue.ParamName);
         Assert.Equal("whenFalse", nullWhenFalse.ParamName);
@@ -198,11 +197,11 @@ public sealed class TracedConditionalTests
         Func<TracedValue> alternative = () =>
         {
             invocations++;
-            return YuraiApi.Of(1m);
+            return TracedValue.Of(1m);
         };
 
         ArgumentException exception = Assert.ThrowsAny<ArgumentException>(
-            () => YuraiApi.If(true, alternative, alternative, branchName!));
+            () => TracedValue.If(true, alternative, alternative, branchName!));
 
         Assert.Equal("branchName", exception.ParamName);
         Assert.Equal(0, invocations);
@@ -220,7 +219,7 @@ public sealed class TracedConditionalTests
     public void IfRejectsAnUninitializedSelectedResult()
     {
         Assert.Throws<InvalidOperationException>(
-            () => YuraiApi.If(true, () => default, () => YuraiApi.Of(1m), "Decision"));
+            () => TracedValue.If(true, () => default, () => TracedValue.Of(1m), "Decision"));
     }
 
     [Fact]
@@ -230,13 +229,13 @@ public sealed class TracedConditionalTests
         int unselectedInvocations = 0;
 
         Exception actual = Assert.Throws<ArithmeticException>(
-            () => YuraiApi.If(
+            () => TracedValue.If(
                 true,
                 () => throw expected,
                 () =>
                 {
                     unselectedInvocations++;
-                    return YuraiApi.Of(1m);
+                    return TracedValue.Of(1m);
                 },
                 "Decision"));
 

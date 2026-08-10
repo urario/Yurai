@@ -1,6 +1,5 @@
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -10,7 +9,7 @@ public sealed class TracedCreationTests
     [Trait("RQ", "RQ-007")]
     public void NamedInputPreservesValueAndName()
     {
-        TracedValue traced = YuraiApi.Of(123.4500m, "BasePrice");
+        TracedValue traced = TracedValue.Of(123.4500m, "BasePrice");
 
         AssertDecimalBitsEqual(123.4500m, traced.Value);
         var input = Assert.IsType<InputEvidenceNode>(traced.Root);
@@ -21,7 +20,7 @@ public sealed class TracedCreationTests
     [Trait("RQ", "RQ-007")]
     public void AnonymousInputHasNoInventedName()
     {
-        TracedValue traced = YuraiApi.Of(10m);
+        TracedValue traced = TracedValue.Of(10m);
 
         var input = Assert.IsType<InputEvidenceNode>(traced.Root);
         Assert.Null(input.Name);
@@ -31,7 +30,7 @@ public sealed class TracedCreationTests
     [Trait("RQ", "RQ-007")]
     public void AsCreatesANamedParentWithoutChangingItsChild()
     {
-        TracedValue input = YuraiApi.Of(10m, "Input");
+        TracedValue input = TracedValue.Of(10m, "Input");
         EvidenceNode originalRoot = input.Root;
 
         TracedValue named = input.As("Result");
@@ -46,9 +45,9 @@ public sealed class TracedCreationTests
     [Fact]
     public void NamedInputRejectsInvalidNames()
     {
-        var nullName = Assert.Throws<ArgumentNullException>(() => { YuraiApi.Of(1m, null!); });
-        var emptyName = Assert.Throws<ArgumentException>(() => { YuraiApi.Of(1m, string.Empty); });
-        var whitespaceName = Assert.Throws<ArgumentException>(() => { YuraiApi.Of(1m, " \t\r\n"); });
+        var nullName = Assert.Throws<ArgumentNullException>(() => { TracedValue.Of(1m, null!); });
+        var emptyName = Assert.Throws<ArgumentException>(() => { TracedValue.Of(1m, string.Empty); });
+        var whitespaceName = Assert.Throws<ArgumentException>(() => { TracedValue.Of(1m, " \t\r\n"); });
 
         Assert.Equal("name", nullName.ParamName);
         Assert.Equal("name", emptyName.ParamName);
@@ -58,7 +57,7 @@ public sealed class TracedCreationTests
     [Fact]
     public void AsRejectsInvalidNames()
     {
-        TracedValue traced = YuraiApi.Of(1m);
+        TracedValue traced = TracedValue.Of(1m);
 
         var nullName = Assert.Throws<ArgumentNullException>(() => { traced.As(null!); });
         var emptyName = Assert.Throws<ArgumentException>(() => { traced.As(string.Empty); });
@@ -82,7 +81,7 @@ public sealed class TracedCreationTests
     [Fact]
     public void ToStringUsesInvariantDecimalFormatting()
     {
-        TracedValue traced = YuraiApi.Of(1234.5600m);
+        TracedValue traced = TracedValue.Of(1234.5600m);
 
         Assert.Equal("1234.5600", traced.ToString());
     }
