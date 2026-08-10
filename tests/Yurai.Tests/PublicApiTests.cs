@@ -60,7 +60,7 @@ public sealed class PublicApiTests
         Assert.Empty(carrier.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
         Assert.Equal(
             [
-                "As", "Explain", "Round", "ToString", "get_Value",
+                "As", "Explain", "Round", "ToJson", "ToString", "get_Value",
                 "op_Addition", "op_Addition", "op_Addition",
                 "op_Division", "op_Division", "op_Division",
                 "op_Multiply", "op_Multiply", "op_Multiply",
@@ -69,6 +69,7 @@ public sealed class PublicApiTests
             methodNames);
         Assert.Equal(typeof(decimal), carrier.GetProperty("Value")?.PropertyType);
         Assert.NotNull(carrier.GetMethod("Round", [typeof(int), typeof(string)]));
+        Assert.Equal(typeof(string), carrier.GetMethod("ToJson", Type.EmptyTypes)?.ReturnType);
         Assert.Null(carrier.GetMethod("op_Implicit", BindingFlags.Public | BindingFlags.Static));
         Assert.Null(carrier.GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static));
         Assert.Null(carrier.GetMethod("op_Inequality", BindingFlags.Public | BindingFlags.Static));
