@@ -33,7 +33,9 @@ public readonly struct Traced
     /// The value is an uninitialized <see cref="Traced"/> instance.
     /// </exception>
     /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><paramref name="name"/> is empty or consists only of white-space characters.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="name"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
+    /// </exception>
     public Traced As(string name)
     {
         EvidenceNode currentRoot = GetRoot();
@@ -54,7 +56,9 @@ public readonly struct Traced
     /// <paramref name="digits"/> is outside the range supported by decimal rounding.
     /// </exception>
     /// <exception cref="ArgumentNullException"><paramref name="reason"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><paramref name="reason"/> is empty or consists only of white-space characters.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="reason"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
+    /// </exception>
     public Traced Round(int digits, string reason)
     {
         EvidenceNode currentRoot = GetRoot();

@@ -19,7 +19,9 @@ public static class Yurai
     /// <param name="name">The domain name of the input.</param>
     /// <returns>A traced value rooted at the named input.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><paramref name="name"/> is empty or consists only of white-space characters.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="name"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
+    /// </exception>
     public static Traced Of(decimal value, string name)
     {
         string validName = ArgumentValidation.Validate(name, nameof(name));
@@ -52,7 +54,7 @@ public static class Yurai
     /// <see langword="null"/>.
     /// </exception>
     /// <exception cref="ArgumentException">
-    /// <paramref name="branchName"/> is empty or consists only of white-space characters.
+    /// <paramref name="branchName"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
     /// </exception>
     /// <exception cref="InvalidOperationException">The selected alternative returns an uninitialized traced value.</exception>
     public static Traced If(

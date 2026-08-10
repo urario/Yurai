@@ -110,9 +110,14 @@ represent condition-only control dependencies.
 ## Strings
 
 Names and reasons are ordinary JSON strings. Quotes, backslashes, control characters,
-and UTF-16 surrogate code units are escaped as needed to produce valid JSON. Parsing the
-document returns the original .NET string; Yurai does not trim, normalize, or replace
-accepted metadata.
+and valid UTF-16 surrogate pairs are escaped as needed to produce valid JSON. Parsing
+the document returns the original .NET string; Yurai does not trim, normalize, or
+replace accepted metadata.
+
+The public metadata entry points reject an isolated high or low UTF-16 surrogate with
+`ArgumentException`. This validation happens when the name or reason enters the evidence,
+so every accepted metadata string can be exported losslessly rather than failing later
+at `ToJson()`.
 
 ## Complete example
 
