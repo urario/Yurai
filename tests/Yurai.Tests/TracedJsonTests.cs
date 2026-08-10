@@ -120,6 +120,31 @@ public sealed class TracedJsonTests
     }
 
     [Theory]
+    [InlineData(true, "then", "TrueValue")]
+    [InlineData(false, "else", "FalseValue")]
+    [Trait("RQ", "RQ-005")]
+    [Trait("RQ", "RQ-013")]
+    public void ToJsonRecordsBothBranchOutcomes(
+        bool condition,
+        string expectedBranch,
+        string expectedChildName)
+    {
+        TracedValue result = YuraiApi.If(
+            condition,
+            () => YuraiApi.Of(1m, "TrueValue"),
+            () => YuraiApi.Of(2m, "FalseValue"),
+            "Decision");
+
+        using JsonDocument document = JsonDocument.Parse(result.ToJson());
+        JsonElement[] nodes = document.RootElement.GetProperty("nodes").EnumerateArray().ToArray();
+
+        Assert.Equal(condition, nodes[0].GetProperty("condition").GetBoolean());
+        Assert.Equal(expectedBranch, nodes[0].GetProperty("selectedBranch").GetString());
+        Assert.Equal(2, nodes[0].GetProperty("child").GetInt32());
+        Assert.Equal(expectedChildName, nodes[1].GetProperty("name").GetString());
+    }
+
+    [Theory]
     [InlineData("0.00")]
     [InlineData("-0.000")]
     [InlineData("1.2300")]
@@ -219,6 +244,14 @@ public sealed class TracedJsonTests
     public void ToJsonRejectsAnUninitializedCarrier()
     {
         Assert.Throws<InvalidOperationException>(() => default(TracedValue).ToJson());
+    }
+
+    [Fact]
+    public void JsonFormatterRejectsNullRoot()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() => JsonFormatter.Render(null!));
+
+        Assert.Equal("root", exception.ParamName);
     }
 
     private static int NodeId(JsonElement node) => node.GetProperty("id").GetInt32();
