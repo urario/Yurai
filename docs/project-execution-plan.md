@@ -66,7 +66,7 @@ Yurai(Explainable domain calculations for .NET — 軽量 computation-lineage �
 | [#25](https://github.com/urario/Yurai/issues/25) | S7: `DependsOn` / `Trace` / `Inputs` |
 | [#26](https://github.com/urario/Yurai/issues/26) | RQ-001 検証 — CsCheck によるプロパティベーステスト |
 | [#27](https://github.com/urario/Yurai/issues/27) | ベンチマーク・メモリ計測 — [`docs/performance.md`](performance.md) |
-| [#28](https://github.com/urario/Yurai/issues/28) | ミューテーションテスト・ベースライン(閾値の確定は #68 に持ち越し) |
+| [#28](https://github.com/urario/Yurai/issues/28) | ミューテーションテスト・ベースライン(これを根拠に `break` 閾値を 90 に設定) |
 | [#29](https://github.com/urario/Yurai/issues/29) | **Gate: P0要件達成確認** — 通過 |
 
 到達点: 公開 API は静的クラス `Yurai` の5メソッドと `readonly struct Traced` のみ。
@@ -119,12 +119,14 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 | Issue | 内容 | 担当 | 依存 |
 |---|---|---|---|
 | [#67](https://github.com/urario/Yurai/issues/67) | 方式設計 + ADR-0017 | Claude → Human決定 | なし |
-| [#68](https://github.com/urario/Yurai/issues/68) | ミューテーションスコアのベースラインと `break` 閾値の確定 | Codex → Human決定 | #67 承認後、実装着手前 |
+| [#68](https://github.com/urario/Yurai/issues/68) | 生存ミュータントの棚卸し | Codex → Claude レビュー | 実装着手前 |
 | 未起票 | 実装スライス(S8 以降) | Codex | #67 の ADR 承認後に分割起票 |
 
-#68 を実装前に置く理由: 0.2.0 の移行はノード階層・フォーマッタ・JSON・依存クエリ・テスト
-全域に及ぶ。閾値が立っていない状態で全域リファクタに入ると、テスト強度が下がっても CI が
-気づかない。
+`break` 閾値は **90 に設定済み**(`low` 90 / `high` 95)。実測ベースラインは main HEAD
+`7ca744b` の deep レーン実行。0.2.0 の移行はノード階層・フォーマッタ・JSON・依存クエリ・
+テスト全域に及ぶため、閾値が立っていない状態で全域リファクタに入ると、テスト強度が下がっても
+気づけない — それを避けるために公開前に設定した。#68 には、その計測で生存していた
+ミュータントの棚卸しだけが残っている。
 
 この決定は **ADR-0009**(多型ターゲティングの延期)と **ADR-0016**(carrier を非ジェネリックな
 `Traced` と命名)を supersede する。**ADR-0014**(decimal を不変文化テキストで符号化)の
@@ -148,10 +150,6 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 
 リリースに紐付かない既知の負債。優先度は低いが実在する。
 
-- **`knowledge/` の status が実態と合っていない。** ADR-0006〜0016 の11本が `status: draft`、
-  要求レジストリ29件が全て `Draft`、`core-architecture.md` が `draft` のまま。
-  [`knowledge/process/knowledge-policy.md`](../knowledge/process/knowledge-policy.md) は
-  「マージのコミットで `stable` に上げる」と定めており、現状は規約違反。
 - **`samples/Pricing` / `samples/Payroll` が Markdown のみでコンパイルされない。** 出力自体は
   `tests/Yurai.Tests/TracedExplainTests.cs` が固定しているため壊れてはいないが、実行可能な
   プロジェクトにはなっていない。
@@ -184,8 +182,8 @@ flowchart LR
 ```mermaid
 flowchart LR
     I30["#30 0.1.0 publish"] --> R2["0.2.0 第2の値型"]
-    I67["#67 方式設計 + ADR-0017"] --> I68["#68 mutation break 閾値"]
-    I68 --> R2
+    I67["#67 方式設計 + ADR-0017"] --> R2
+    I68["#68 生存ミュータント棚卸し"] --> R2
     R2 --> R3["0.3.0 ExplainOptions"]
     R3 --> R4["0.4.0 traced predicate"]
     R4 --> R5["0.5.0 DAG 差分 + JSON import"]
@@ -217,7 +215,7 @@ Milestone / GitHub Project は使わず、ラベル+Epic のチェックリス�
 - main の branch protection 設定(#4)
 - NuGet アカウント・API キー準備と publish 実行(#30)
 - 各 `gate` Issue の判定と close
-- 予約判断(AGENTS.md §2)の決定 — 直近では #67 の方式選択と #68 の `break` 閾値
+- 予約判断(AGENTS.md §2)の決定 — 直近では #67 の方式選択
 
 ## 完了条件
 
