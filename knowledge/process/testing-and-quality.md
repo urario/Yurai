@@ -202,18 +202,20 @@ to add to a pull request in passing.
 
 ## Benchmarks
 
-Performance is a requirement in the proposal (graphs beyond ten thousand nodes) and it
-gets its baseline in [#27](https://github.com/urario/Yurai/issues/27). Until that
-baseline exists there is no threshold to state, and stating one now would be the same
-guess the mutation threshold is avoiding. Benchmarks are advisory, they run in the deep
-lane, and the numbers that turn into a gate are written here when #27 produces them.
+Performance is a requirement in the proposal (graphs beyond ten thousand nodes). The
+initial, environment-qualified results and reproduction commands are published in the
+[performance baseline](../../docs/performance.md) by
+[#27](https://github.com/urario/Yurai/issues/27). A single-machine baseline does not
+justify a regression threshold. Benchmarks remain advisory and run in the deep lane;
+any future gate needs repeated measurements on a stable runner and a separately reviewed
+threshold recorded here.
 
 ## Two lanes
 
 | Lane | Runs on | Contains | Blocks a merge |
 |---|---|---|---|
 | **Pull request lane** | Every pull request to `main`, and every push to `main` | Build, example and property tests, format, knowledge base conformance | Yes |
-| **Deep lane** | Push to `main` touching `src/**` or `tests/**`, and `workflow_dispatch` | Mutation run, long property runs, benchmarks | No |
+| **Deep lane** | Push to `main` touching runtime, test, benchmark, or relevant toolchain files, and `workflow_dispatch` | Mutation run, long property runs, short benchmarks with uploaded results | No |
 
 The split is what keeps both useful. Fast feedback stays fast, and the slow signals stay
 honest instead of being trimmed until they fit in a pull request's patience.

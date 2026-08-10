@@ -143,6 +143,11 @@ public decimal CalculateTotal(Order order)
 Isolating the calculation that has to be explained is a design decision, not a workaround:
 the traced region stays small enough to read, and everything around it keeps its own types.
 
+Yurai is designed for explicitly bounded regions with tens of domain calculation steps,
+not for tracing every variable in an application. The published
+[performance baseline](docs/performance.md) includes graphs beyond 10,000 evidence nodes as
+stress cases and explains the time, allocation, and dependency-path scaling trade-offs.
+
 Boolean conditions are another explicit boundary in the current v1 design. Reading
 `.Value` and evaluating a comparison produces a plain `bool`; if that boolean is passed to
 `Yurai.If`, Yurai cannot recover which traced input decided it. An input used only by the
