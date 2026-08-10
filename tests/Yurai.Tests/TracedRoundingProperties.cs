@@ -1,7 +1,6 @@
 using CsCheck;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -24,7 +23,7 @@ public sealed class TracedRoundingProperties
 
         TracedValue tracedResult = default;
         Exception? tracedException = Record.Exception(
-            () => { tracedResult = YuraiApi.Of(value).Round(digits, "generated rounding"); });
+            () => { tracedResult = TracedValue.Of(value).Round(digits, "generated rounding"); });
 
         if (nativeException is null)
         {

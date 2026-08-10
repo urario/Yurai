@@ -124,7 +124,7 @@ at `ToJson()`.
 For a shared input:
 
 ```csharp
-var amount = Yurai.Of(10.00m, "Amount");
+var amount = Traced.Of(10.00m, "Amount");
 var total = (amount + amount).As("Total");
 string json = total.ToJson();
 ```

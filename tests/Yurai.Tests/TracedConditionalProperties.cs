@@ -1,7 +1,6 @@
 using CsCheck;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -20,10 +19,10 @@ public sealed class TracedConditionalProperties
             bool condition = values.Item3;
             decimal expected = condition ? whenTrue : whenFalse;
 
-            TracedValue actual = YuraiApi.If(
+            TracedValue actual = TracedValue.If(
                 condition,
-                () => YuraiApi.Of(whenTrue),
-                () => YuraiApi.Of(whenFalse),
+                () => TracedValue.Of(whenTrue),
+                () => TracedValue.Of(whenFalse),
                 "GeneratedDecision");
 
             TracedArithmeticTests.AssertDecimalBitsEqual(expected, actual.Value);

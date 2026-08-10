@@ -16,6 +16,7 @@
 * [ADR-0014: Encode decimal values as invariant JSON text](ADR-0014-encode-decimal-as-invariant-json-text.md) - JSON preserves decimal value and scale without relying on consumer number precision.
 * [ADR-0015: Use document-local identities for shared evidence](ADR-0015-use-document-local-output-identities.md) - Deterministic numeric IDs identify shared nodes consistently in text and JSON.
 * [ADR-0016: Name the non-generic v1 carrier Traced](ADR-0016-name-the-v1-carrier-traced.md) - The decimal MVP uses a type-neutral public name without promising generic behavior.
+* [ADR-0017: Fold the creation methods onto the carrier](ADR-0017-fold-creation-onto-the-carrier.md) - A type named after its own namespace is unreachable from a consumer, so Traced carries Of, Min, Max, and If.
 
 Each record's current state is its `status` in frontmatter, not a word repeated here — a
 status copied into a listing is wrong the first time it changes. A supersession is the

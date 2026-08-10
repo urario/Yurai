@@ -1,7 +1,6 @@
 using System.Globalization;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -25,7 +24,7 @@ public sealed class TracedRoundingTests
     {
         decimal value = decimal.Parse(valueText, CultureInfo.InvariantCulture);
         decimal expected = decimal.Parse(expectedText, CultureInfo.InvariantCulture);
-        TracedValue traced = YuraiApi.Of(value, "Value");
+        TracedValue traced = TracedValue.Of(value, "Value");
 
         TracedValue rounded = traced.Round(digits, "business rounding");
 
@@ -38,7 +37,7 @@ public sealed class TracedRoundingTests
     [Trait("RQ", "RQ-011")]
     public void RoundRecordsPolicyReasonAndOriginalRoot()
     {
-        TracedValue traced = YuraiApi.Of(12.345m, "Value");
+        TracedValue traced = TracedValue.Of(12.345m, "Value");
 
         TracedValue rounded = traced.Round(2, "regulatory rounding to cents");
         RoundEvidenceNode node = Assert.IsType<RoundEvidenceNode>(rounded.Root);
@@ -56,7 +55,7 @@ public sealed class TracedRoundingTests
     [Trait("RQ", "RQ-010")]
     public void RoundPreservesNativeDigitsException(int digits)
     {
-        TracedValue traced = YuraiApi.Of(1.25m, "Value");
+        TracedValue traced = TracedValue.Of(1.25m, "Value");
         Exception? native = Record.Exception(() => decimal.Round(1.25m, digits));
 
         Exception? actual = Record.Exception(() => traced.Round(digits, "reason"));
@@ -72,7 +71,7 @@ public sealed class TracedRoundingTests
     [Trait("RQ", "RQ-010")]
     public void RoundValidatesReasonWithoutCreatingEvidence()
     {
-        TracedValue traced = YuraiApi.Of(1.25m, "Value");
+        TracedValue traced = TracedValue.Of(1.25m, "Value");
         EvidenceNode originalRoot = traced.Root;
 
         var nullReason = Assert.Throws<ArgumentNullException>(() => traced.Round(2, null!));
@@ -89,7 +88,7 @@ public sealed class TracedRoundingTests
     [Trait("RQ", "RQ-010")]
     public void NativeDigitsFailureTakesPrecedenceOverInvalidReason()
     {
-        TracedValue traced = YuraiApi.Of(1.25m, "Value");
+        TracedValue traced = TracedValue.Of(1.25m, "Value");
 
         Assert.Throws<ArgumentOutOfRangeException>(() => traced.Round(-1, null!));
     }

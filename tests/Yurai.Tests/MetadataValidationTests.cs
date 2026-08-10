@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -24,7 +23,7 @@ public sealed class MetadataValidationTests
     public void MetadataEntryPointsRejectMalformedUtf16(int caseId)
     {
         string metadata = MalformedUtf16(caseId);
-        TracedValue traced = YuraiApi.Of(1m, "Input");
+        TracedValue traced = TracedValue.Of(1m, "Input");
         int alternativeInvocations = 0;
         Func<TracedValue> alternative = () =>
         {
@@ -32,11 +31,11 @@ public sealed class MetadataValidationTests
             return traced;
         };
 
-        AssertMalformed(() => YuraiApi.Of(1m, metadata), "name");
+        AssertMalformed(() => TracedValue.Of(1m, metadata), "name");
         AssertMalformed(() => traced.As(metadata), "name");
         AssertMalformed(() => traced.Round(0, metadata), "reason");
         AssertMalformed(
-            () => YuraiApi.If(true, alternative, alternative, metadata),
+            () => TracedValue.If(true, alternative, alternative, metadata),
             "branchName");
 
         Assert.Equal(0, alternativeInvocations);
@@ -48,13 +47,13 @@ public sealed class MetadataValidationTests
     public void ValidSurrogatePairsRoundTripThroughEveryMetadataField()
     {
         const string metadata = "Domain \U0001F600 value";
-        TracedValue input = YuraiApi.Of(1m, metadata);
+        TracedValue input = TracedValue.Of(1m, metadata);
         TracedValue named = input.As(metadata);
         TracedValue rounded = named.Round(0, metadata);
-        TracedValue result = YuraiApi.If(
+        TracedValue result = TracedValue.If(
             true,
             () => rounded,
-            () => YuraiApi.Of(0m),
+            () => TracedValue.Of(0m),
             metadata);
 
         using JsonDocument document = JsonDocument.Parse(result.ToJson());

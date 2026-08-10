@@ -5,10 +5,10 @@ insurance, progressive income tax, and explicit rounding. It uses a base salary 
 300,000, 20 overtime hours at 2,500 per hour, and a social-insurance rate of 0.152345.
 
 ```csharp
-var baseSalary = Yurai.Of(300000m, "BaseSalary");
-var overtimeHourlyRate = Yurai.Of(2500m, "OvertimeHourlyRate");
-var overtimeHours = Yurai.Of(20m, "OvertimeHours");
-var socialInsuranceRate = Yurai.Of(0.152345m, "SocialInsuranceRate");
+var baseSalary = Traced.Of(300000m, "BaseSalary");
+var overtimeHourlyRate = Traced.Of(2500m, "OvertimeHourlyRate");
+var overtimeHours = Traced.Of(20m, "OvertimeHours");
+var socialInsuranceRate = Traced.Of(0.152345m, "SocialInsuranceRate");
 
 var overtimePay = (overtimeHourlyRate * overtimeHours).As("OvertimePay");
 var grossPay = (baseSalary + overtimePay).As("GrossPay");
@@ -20,10 +20,10 @@ var taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
 
 // Reading .Value turns each condition into a plain bool. Condition-only inputs
 // intentionally remain outside v1 dependency queries.
-var incomeTax = Yurai.If(
+var incomeTax = Traced.If(
     taxableIncome.Value <= 200000m,
     () => taxableIncome * 0.10m,
-    () => Yurai.If(
+    () => Traced.If(
         taxableIncome.Value <= 400000m,
         () => 20000m + (taxableIncome - 200000m) * 0.20m,
         () => 60000m + (taxableIncome - 400000m) * 0.30m,
@@ -109,6 +109,6 @@ node to its first occurrence.
 - Ordinary arithmetic keeps the payroll formula close to its domain wording.
 - Naming intermediate results makes the explanation easier to scan around deductions
   and taxable income.
-- Nested `Yurai.If` records only the selected branches.
+- Nested `Traced.If` records only the selected branches.
 - `Round(digits, reason)` keeps the policy explanation beside the operation.
 - Dependency queries expose shared calculation routes without parsing the explanation.

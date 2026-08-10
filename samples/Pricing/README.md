@@ -5,9 +5,9 @@ tax, and rounds the total to a whole monetary unit. The names use the domain voc
 that appears in the explanation.
 
 ```csharp
-var basePrice = Yurai.Of(1000m, "BasePrice");
-var discount = Yurai.Of(0.10m, "MemberDiscount");
-var taxRate = Yurai.Of(0.10m, "TaxRate");
+var basePrice = Traced.Of(1000m, "BasePrice");
+var discount = Traced.Of(0.10m, "MemberDiscount");
+var taxRate = Traced.Of(0.10m, "TaxRate");
 
 var discounted = (basePrice * (1 - discount)).As("DiscountedPrice");
 var total = (discounted * (1 + taxRate))

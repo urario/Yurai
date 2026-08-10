@@ -23,8 +23,8 @@ public class CalculationBenchmarks
     [Benchmark]
     public Traced TracedDecimal()
     {
-        Traced result = global::Yurai.Yurai.Of(0m, "Start");
-        Traced increment = global::Yurai.Yurai.Of(1m, "Increment");
+        Traced result = Traced.Of(0m, "Start");
+        Traced increment = Traced.Of(1m, "Increment");
         for (int index = 0; index < OperationCount; index++)
         {
             result += increment;

@@ -57,10 +57,10 @@ Yurai(Explainable domain calculations for .NET — 軽量 computation-lineage �
 |---|---|
 | [#17](https://github.com/urario/Yurai/issues/17) | アーキテクチャ設計 — [`knowledge/design/core-architecture.md`](../knowledge/design/core-architecture.md)、ADR-0006〜0008 |
 | [#18](https://github.com/urario/Yurai/issues/18) | Open Questions Q2〜Q6 の設計判断 — ADR-0009〜0016 |
-| [#19](https://github.com/urario/Yurai/issues/19) | S1: 不変 evidence DAG + `Yurai.Of` / `.As` / `.Value` + 四則演算 |
+| [#19](https://github.com/urario/Yurai/issues/19) | S1: 不変 evidence DAG + `Traced.Of` / `.As` / `.Value` + 四則演算 |
 | [#20](https://github.com/urario/Yurai/issues/20) | S2: プレーン値との混在演算(明示オーバーロード)+ `Min` / `Max` |
 | [#21](https://github.com/urario/Yurai/issues/21) | S3: `Round(digits, reason)` |
-| [#22](https://github.com/urario/Yurai/issues/22) | S4: `Yurai.If` — 実行された分岐の記録 |
+| [#22](https://github.com/urario/Yurai/issues/22) | S4: `Traced.If` — 実行された分岐の記録 |
 | [#23](https://github.com/urario/Yurai/issues/23) | S5: `Explain()` テキスト出力 |
 | [#24](https://github.com/urario/Yurai/issues/24) | S6: `ToJson()` + [`docs/json-schema-v1.md`](json-schema-v1.md) |
 | [#25](https://github.com/urario/Yurai/issues/25) | S7: `DependsOn` / `Trace` / `Inputs` |
@@ -69,8 +69,11 @@ Yurai(Explainable domain calculations for .NET — 軽量 computation-lineage �
 | [#28](https://github.com/urario/Yurai/issues/28) | ミューテーションテスト・ベースライン(これを根拠に `break` 閾値を 90 に設定) |
 | [#29](https://github.com/urario/Yurai/issues/29) | **Gate: P0要件達成確認** — 通過 |
 
-到達点: 公開 API は静的クラス `Yurai` の5メソッドと `readonly struct Traced` のみ。
-`netstandard2.0`、実行時依存0。
+到達点: 公開 API は `readonly struct Traced` ただ1つ。生成(`Of` / `Min` / `Max` / `If`)も
+その静的メンバとして載る。`netstandard2.0`、実行時依存0。
+
+> 当初は静的クラス `Yurai` が生成の入口だったが、名前空間 `Yurai` と衝突して外部から
+> 呼べないことが #66 で判明し、ADR-0017 で `Traced` に畳んだ。
 
 ## リリース列
 
@@ -118,7 +121,7 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 
 | Issue | 内容 | 担当 | 依存 |
 |---|---|---|---|
-| [#67](https://github.com/urario/Yurai/issues/67) | 方式設計 + ADR-0017 | Claude → Human決定 | なし |
+| [#67](https://github.com/urario/Yurai/issues/67) | 方式設計 + ADR | Claude → Human決定 | なし |
 | [#68](https://github.com/urario/Yurai/issues/68) | 生存ミュータントの棚卸し | Codex → Claude レビュー | 実装着手前 |
 | 未起票 | 実装スライス(S8 以降) | Codex | #67 の ADR 承認後に分割起票 |
 
@@ -131,7 +134,7 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 この決定は **ADR-0009**(多型ターゲティングの延期)と **ADR-0016**(carrier を非ジェネリックな
 `Traced` と命名)を supersede する。**ADR-0014**(decimal を不変文化テキストで符号化)の
 一般化に伴い JSON schema v2 が必要になり、`docs/json-schema-v1.md` は v1 のまま凍結する。
-**RQ-028** の昇格と **RQ-023** の scope 見直しも伴う。これらの書き換えは ADR-0017 の PR で
+**RQ-028** の昇格と **RQ-023** の scope 見直しも伴う。これらの書き換えは #67 の ADR の PR で
 行う — 本書が先に要求を書き換えると正本が二重化する。
 
 ### 0.3.0 以降
@@ -142,7 +145,7 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 | リリース | 内容 | 出典 |
 |---|---|---|
 | 0.3.0 | ExplainOptions — 深さ制限、カルチャ、出力形式 | RQ-026(P1)。8,192葉で `Explain()` が 6.9MB / `ToJson()` が 11.5MB という実測(`docs/performance.md`)があり、深さ制限がないのは実害のある足元の穴 |
-| 0.4.0 | traced predicate(条件の系譜) | ADR-0011 が「将来の別 capability として提案され得る」と明示的に残した領域。現在は `Yurai.If` の条件に使った値が依存クエリに現れない |
+| 0.4.0 | traced predicate(条件の系譜) | ADR-0011 が「将来の別 capability として提案され得る」と明示的に残した領域。現在は `Traced.If` の条件に使った値が依存クエリに現れない |
 | 0.5.0 | DAG 差分比較 + JSON import | 「先月と今月で何が変わったか」に答える。前提として JSON 逆シリアライズが必要(RQ-013 は現在 export のみ) |
 | 1.0.0 | 公開 API 凍結の判断 | — |
 
@@ -182,7 +185,7 @@ flowchart LR
 ```mermaid
 flowchart LR
     I30["#30 0.1.0 publish"] --> R2["0.2.0 第2の値型"]
-    I67["#67 方式設計 + ADR-0017"] --> R2
+    I67["#67 方式設計 + ADR"] --> R2
     I68["#68 生存ミュータント棚卸し"] --> R2
     R2 --> R3["0.3.0 ExplainOptions"]
     R3 --> R4["0.4.0 traced predicate"]

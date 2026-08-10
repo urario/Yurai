@@ -1,7 +1,6 @@
 using CsCheck;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -74,7 +73,7 @@ public sealed class TracedDependencyQueryProperties
             ? null
             : GeneratedNames[random.Next(GeneratedNames.Length)];
         decimal value = random.Next(10);
-        TracedValue traced = name is null ? YuraiApi.Of(value) : YuraiApi.Of(value, name);
+        TracedValue traced = name is null ? TracedValue.Of(value) : TracedValue.Of(value, name);
         return new GeneratedNode(traced, ModelNode.Input(name));
     }
 

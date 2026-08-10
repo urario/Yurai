@@ -1,7 +1,6 @@
 using CsCheck;
 using Xunit;
 using TracedValue = global::Yurai.Traced;
-using YuraiApi = global::Yurai.Yurai;
 
 namespace Yurai.Tests;
 
@@ -86,14 +85,14 @@ public sealed class TracedCompositeProperties
         Exception? tracedException = Record.Exception(
             () =>
             {
-                TracedValue selected = YuraiApi.If(
+                TracedValue selected = TracedValue.If(
                     condition,
-                    () => YuraiApi.Of(left),
-                    () => YuraiApi.Of(right),
+                    () => TracedValue.Of(left),
+                    () => TracedValue.Of(right),
                     "GeneratedDecision");
                 TracedValue selectedOperand = digits % 2 == 0
-                    ? YuraiApi.Max(selected, YuraiApi.Of(candidate))
-                    : YuraiApi.Min(selected, YuraiApi.Of(candidate));
+                    ? TracedValue.Max(selected, TracedValue.Of(candidate))
+                    : TracedValue.Min(selected, TracedValue.Of(candidate));
                 tracedResult = ((selectedOperand - addend) * multiplier / divisor)
                     .Round(digits, "generated rounding");
             });
