@@ -13,9 +13,9 @@
 Fitting, since that is exactly what the library keeps attached to every value it touches.*
 
 ```csharp
-var basePrice = Yurai.Of(1000m, "BasePrice");
-var discount = Yurai.Of(0.10m, "MemberDiscount");
-var taxRate = Yurai.Of(0.10m, "TaxRate");
+var basePrice = Traced.Of(1000m, "BasePrice");
+var discount = Traced.Of(0.10m, "MemberDiscount");
+var taxRate = Traced.Of(0.10m, "TaxRate");
 var total = (basePrice * (1 - discount) * (1 + taxRate))
     .Round(0, "Round to whole currency unit")
     .As("Total");
@@ -77,7 +77,7 @@ log, not a diagnostic trail, and not a statement about how much any input matter
 
 ## What Yurai records
 
-- **Named inputs and named intermediate results.** `Yurai.Of(1000m, "BasePrice")` brings a
+- **Named inputs and named intermediate results.** `Traced.Of(1000m, "BasePrice")` brings a
   value in under your domain vocabulary; `.As("Total")` names a result after computing it.
   Names are what the explanation and the queries speak in.
 - **Ordinary arithmetic.** `+ - * /` between traced values, plus `Min` and `Max`. Traced
@@ -89,7 +89,7 @@ log, not a diagnostic trail, and not a statement about how much any input matter
 - **Rounding as a recorded decision.** `Round(digits, reason)` keeps the stated reason next
   to the step that changed the number — usually the most contested step in a money
   calculation.
-- **The branch actually taken.** `Yurai.If` records which alternative produced the value,
+- **The branch actually taken.** `Traced.If` records which alternative produced the value,
   under the name you gave that decision, so "which rule fired?" is answerable.
 - **Immutable evidence, shared structure.** Evidence never changes once computed, values are
   safe to share across threads, and reusing an intermediate result records its derivation
@@ -104,7 +104,7 @@ Three ways out of the evidence:
 | `DependsOn`, `Trace`, `Inputs` | The same evidence queried in code — assert in a test that a calculation still uses an input, or route a question by what a value depends on |
 
 ```csharp
-var subtotal = (Yurai.Of(100m, "BasePrice") - Yurai.Of(10m, "Discount"))
+var subtotal = (Traced.Of(100m, "BasePrice") - Traced.Of(10m, "Discount"))
     .As("Subtotal");
 var total = (subtotal + 5m).As("Total");
 
@@ -139,8 +139,8 @@ plain values cross the boundary in both directions:
 ```csharp
 public decimal CalculateTotal(Order order)
 {
-    var basePrice = Yurai.Of(order.BasePrice, "BasePrice");
-    var total = (basePrice * (1 - Yurai.Of(order.Discount, "MemberDiscount")))
+    var basePrice = Traced.Of(order.BasePrice, "BasePrice");
+    var total = (basePrice * (1 - Traced.Of(order.Discount, "MemberDiscount")))
         .Round(0, "Round to whole currency unit")
         .As("Total");
 
@@ -160,7 +160,7 @@ stress cases and explains the time, allocation, and dependency-path scaling trad
 
 Boolean conditions are another explicit boundary in the current v1 design. Reading
 `.Value` and evaluating a comparison produces a plain `bool`; if that boolean is passed to
-`Yurai.If`, Yurai cannot recover which traced input decided it. An input used only by the
+`Traced.If`, Yurai cannot recover which traced input decided it. An input used only by the
 condition therefore does not appear in v1 `DependsOn` or `Trace`. Q13 in
 [#18](https://github.com/urario/Yurai/issues/18) fixes this as a documented boundary:
 dependency queries cover recorded value derivation, not condition-only control

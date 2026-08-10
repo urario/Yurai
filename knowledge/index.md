@@ -32,6 +32,7 @@ both are closed.
 * [ADR-0014: Encode decimal values as invariant JSON text](decisions/ADR-0014-encode-decimal-as-invariant-json-text.md) - JSON preserves exact decimal value and scale.
 * [ADR-0015: Use document-local identities for shared evidence](decisions/ADR-0015-use-document-local-output-identities.md) - Text and JSON share deterministic per-document node identity.
 * [ADR-0016: Name the non-generic v1 carrier Traced](decisions/ADR-0016-name-the-v1-carrier-traced.md) - The decimal MVP uses a type-neutral public name without generic promises.
+* [ADR-0017: Fold the creation methods onto the carrier](decisions/ADR-0017-fold-creation-onto-the-carrier.md) - A type named after its own namespace is unreachable from a consumer, so Traced carries Of, Min, Max, and If.
 * [decisions/](decisions/index.md) - The directory, including the ADR template.
 
 # Design
