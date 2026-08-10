@@ -72,7 +72,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-003 | Trace means the dependency path of a value, nothing else (R3) | P0 | Accepted | Vocabulary review of API, doc comments, docs (#25, gate #29) |
 | RQ-004 | Zero runtime dependencies, `netstandard2.0` (R4) | P0 | Accepted | Zero-package-reference build check (#2, CI, gate #29) |
 | RQ-005 | Conditionals record the branch actually taken (R5) | P0 | Accepted | Branch-recording tests (#22); trait `RQ-005` |
-| RQ-006 | README names related work and states the differences (R6) | P0 | Accepted | README review (#15, gate #29) |
+| RQ-006 | README names related work and states the differences (R6) | P0 | Accepted | README review (#15, gate #29 for the original five; #31, PR #72 for later additions) |
 | RQ-007 | Named inputs and named intermediate results | P0 | Accepted | Unit tests (#19); trait `RQ-007` |
 | RQ-008 | Arithmetic composition with ordinary operators, plus Min/Max | P0 | Accepted | Unit tests (#19, #20) and property suite (#26) |
 | RQ-009 | Mixed operations with plain, untraced values | P0 | Accepted | Unit tests (#20) and property suite (#26) |
@@ -91,7 +91,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-022 | Non-goal: evaluating expressions supplied as strings | P0 | Accepted | Design review against non-goals (gate #29) |
 | RQ-023 | MVP non-goal: value types other than `decimal` | P0 | Accepted | Design review against non-goals (gate #29) |
 | RQ-024 | Banned phrases and replacement vocabulary | P0 | Accepted | Vocabulary scan of prose and diffs (gate #29) |
-| RQ-025 | Novelty claim ceiling: one positioning sentence about Yurai itself, no existence-negation claim | P0 | Accepted | README and documentation review (#15, #31, gate #29) |
+| RQ-025 | Novelty claim ceiling: one positioning sentence about Yurai itself, no existence-negation claim | P0 | Accepted | README and documentation review (#31, PR #72; #15 for the original ceiling mechanism) |
 | RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Accepted | Deferred; tests when a post-MVP issue implements it |
 | RQ-027 | JSON export schema documented and versioned as a stable contract | P1 | Accepted | Schema document review (#24, ADR-0013) |
 | RQ-028 | Value-type extensibility may be pursued later | P2 | Accepted | No v1.0 criteria; registered as an open possibility |
@@ -264,8 +264,17 @@ behavior, its packaging, or how it is documented, and have no value type at all.
   bounded novelty claim (RQ-025) credible rather than promotional.
 - **Acceptance criteria**:
   - The Related Work section exists in the README with the named projects and explicit
-    differences ([#15](https://github.com/urario/Yurai/issues/15)), confirmed at the
-    gate ([#29](https://github.com/urario/Yurai/issues/29)).
+    differences. The original five entries (Petit Poucet, handcalcs, Calcpad, NCalc,
+    Audit.NET) were confirmed at the Phase 2 gate
+    ([#15](https://github.com/urario/Yurai/issues/15),
+    [#29](https://github.com/urario/Yurai/issues/29)) — historical evidence for that
+    earlier version of the section, not a re-validation of what replaced it. The
+    entries added by the [#31](https://github.com/urario/Yurai/issues/31) pre-publish
+    rescan (Fluent.Calculations.Primitives, compprov-core,
+    Appify.HumanReadableCalculationSteps, and the regrouped
+    NCalc/NTDLS.ExpressionParser/MathParser.org-mXparser row) are verified by #31's
+    investigation and [PR #72](https://github.com/urario/Yurai/pull/72)'s review, with
+    a final pre-publish check at [#32](https://github.com/urario/Yurai/issues/32).
 - **Source**: §8 R6; [#15](https://github.com/urario/Yurai/issues/15),
   [#31](https://github.com/urario/Yurai/issues/31).
 
@@ -693,12 +702,19 @@ and are checked at the gate ([#29](https://github.com/urario/Yurai/issues/29)).
 
 - **Priority**: P0
 - **What**: The project makes no existence-negation novelty claim ("no other library
-  does X"). Instead it states exactly one positioning sentence about Yurai itself, and
-  never a stronger one:
+  does X"). Any claim of uniqueness — that Yurai is the only library combining a
+  particular set of properties — is limited to exactly one positioning sentence about
+  Yurai itself, and never a stronger one:
 
   > Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with
   > immutable, structurally shared derivation evidence and first-class dependency-path
   > queries, in a zero-runtime-dependency `netstandard2.0` library.
+
+  This requirement bounds uniqueness claims only. An ordinary descriptive statement
+  about what Yurai itself is or does — such as the README's opening sentence, "Yurai
+  is a lightweight computation-lineage library for explainable domain calculations in
+  .NET." — asserts no absence elsewhere, makes no uniqueness claim, and is not this
+  sentence's "direct translation" requirement below.
 
   This corrects the proposal's original §6.4 sentence — an existence-negation claim
   ("No zero-dependency NuGet library exists that, using ordinary C# arithmetic syntax
@@ -717,11 +733,19 @@ and are checked at the gate ([#29](https://github.com/urario/Yurai/issues/29)).
   claim about every other library's absence is checkable only by whoever finds the
   counterexample first — and asserting it invites exactly that search.
 - **Acceptance criteria**:
-  - Every novelty or positioning statement in README or documentation is this sentence
-    or a direct translation of it; nothing stronger appears, and no existence-negation
-    ("no library exists...") form is reintroduced without a fresh, dated rescan
-    ([#31](https://github.com/urario/Yurai/issues/31), gate
-    [#29](https://github.com/urario/Yurai/issues/29)).
+  - Any claim about uniqueness — that no comparable capability exists elsewhere, or
+    that Yurai is the only library combining some set of properties — is limited to
+    this one sentence or a direct translation of it; nothing stronger appears, and no
+    existence-negation ("no library exists...") form is reintroduced without a fresh,
+    dated rescan. This bounds uniqueness claims only: a plain descriptive statement
+    about what Yurai itself is or does, asserting no absence elsewhere, is not bound
+    by this criterion.
+  - The corrected sentence is itself verified by
+    [#31](https://github.com/urario/Yurai/issues/31)'s investigation and
+    [PR #72](https://github.com/urario/Yurai/pull/72)'s review, with a final
+    pre-publish check at [#32](https://github.com/urario/Yurai/issues/32) — not by the
+    Phase 2 gate ([#29](https://github.com/urario/Yurai/issues/29)), which closed
+    before this correction existed and validated only the original §6.4 sentence.
   - The corrected sentence names only properties Yurai's own requirements and ADRs
     establish: ordinary C# arithmetic (RQ-008), eager evaluation (RQ-001, ADR-0006),
     immutable structurally shared derivation evidence (RQ-011, ADR-0006), first-class
