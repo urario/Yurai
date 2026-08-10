@@ -86,10 +86,18 @@ internal static class DependencyQuery
 
     private readonly struct PathFrame
     {
-        private PathFrame(EvidenceNode node, bool isExit, bool removesName)
+        private PathFrame(EvidenceNode node)
         {
             Node = node;
-            IsExit = isExit;
+            IsExit = false;
+            // Stryker disable once Boolean: RemovesName is ignored until an exit frame is processed.
+            RemovesName = false;
+        }
+
+        private PathFrame(EvidenceNode node, bool removesName)
+        {
+            Node = node;
+            IsExit = true;
             RemovesName = removesName;
         }
 
@@ -99,8 +107,8 @@ internal static class DependencyQuery
 
         internal bool RemovesName { get; }
 
-        internal static PathFrame Enter(EvidenceNode node) => new(node, false, false);
+        internal static PathFrame Enter(EvidenceNode node) => new(node);
 
-        internal static PathFrame Exit(EvidenceNode node, bool removesName) => new(node, true, removesName);
+        internal static PathFrame Exit(EvidenceNode node, bool removesName) => new(node, removesName);
     }
 }

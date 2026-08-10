@@ -8,11 +8,6 @@ internal static class ExplainFormatter
 {
     internal static string Render(EvidenceNode root)
     {
-        if (root is null)
-        {
-            throw new ArgumentNullException(nameof(root));
-        }
-
         var builder = new StringBuilder();
         builder.Append("Result\n  ").Append(FormatValue(root.Value)).Append("\nDerivation\n");
 
