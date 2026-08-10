@@ -1,5 +1,12 @@
 # Yurai
 
+[![CI](https://img.shields.io/github/actions/workflow/status/urario/Yurai/ci.yml?branch=main&label=CI)](https://github.com/urario/Yurai/actions/workflows/ci.yml)
+[![Deep quality](https://img.shields.io/github/actions/workflow/status/urario/Yurai/deep.yml?branch=main&label=deep%20quality)](https://github.com/urario/Yurai/actions/workflows/deep.yml)
+[![Mutation gate](https://img.shields.io/badge/mutation%20gate-%E2%89%A590%25-brightgreen)](knowledge/process/testing-and-quality.md#mutation-testing)
+[![netstandard2.0](https://img.shields.io/badge/netstandard-2.0-512BD4)](https://learn.microsoft.com/dotnet/standard/net-standard)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](Directory.Build.targets)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **Yurai is a lightweight computation-lineage library for explainable domain calculations in .NET.**
 
 *The name comes from the Japanese word 由来 (yurai), "origin" — how something came to be.
