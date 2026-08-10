@@ -8,11 +8,6 @@ internal static class JsonFormatter
 {
     internal static string Render(EvidenceNode root)
     {
-        if (root is null)
-        {
-            throw new ArgumentNullException(nameof(root));
-        }
-
         var nodes = new List<EvidenceVisit>();
         var identifiers = new Dictionary<EvidenceNode, int>(EvidenceNodeReferenceComparer.Instance);
         foreach (EvidenceVisit visit in EvidenceTraversal.DepthFirst(root))
