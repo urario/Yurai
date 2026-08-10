@@ -172,6 +172,32 @@ public sealed class TracedExplainTests
     [Fact]
     [Trait("RQ", "RQ-002")]
     [Trait("RQ", "RQ-012")]
+    public void ExplainEscapesControlCharactersInQuotedAndUnquotedMetadata()
+    {
+        TracedValue input = YuraiApi.Of(2.5m, "Input\\\"Name\r\n\t\u0001");
+        TracedValue rounded = input.Round(0, "Reason\\\"line\r\n\t\u0002");
+        TracedValue branch = YuraiApi.If(
+            true,
+            () => rounded,
+            () => YuraiApi.Of(0m),
+            "Decision\\\"Name\r\n\t\u0003");
+        TracedValue result = branch.As("Result\\\"Name\r\n\t\u0004");
+
+        string expected = Lines(
+            "Result",
+            "  2",
+            "Derivation",
+            "  Result\\\"Name\\r\\n\\t\\u0004 = 2",
+            "    If(name: \"Decision\\\\\\\"Name\\r\\n\\t\\u0003\", branch: \"then\") = 2",
+            "      Round(digits: 0, reason: \"Reason\\\\\\\"line\\r\\n\\t\\u0002\") = 2",
+            "        Input\\\"Name\\r\\n\\t\\u0001 = 2.5");
+
+        Assert.Equal(expected, result.Explain());
+    }
+
+    [Fact]
+    [Trait("RQ", "RQ-002")]
+    [Trait("RQ", "RQ-012")]
     public void ExplainUsesInvariantCultureAndHandlesDeepChains()
     {
         TracedValue result = YuraiApi.Of(1.25m, "Value");
