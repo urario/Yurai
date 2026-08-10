@@ -7,6 +7,8 @@ namespace Yurai.Tests;
 
 public sealed class TracedDependencyQueryProperties
 {
+    private static readonly string[] QueryNames = ["Input", "Right", "Shared", "Result", "Missing"];
+
     [Fact]
     [Trait("Category", "Property")]
     [Trait("RQ", "RQ-014")]
@@ -21,7 +23,7 @@ public sealed class TracedDependencyQueryProperties
             TracedValue other = (seed & 2) == 0 ? shared : right;
             TracedValue result = (shared * other).As("Result");
 
-            foreach (string name in new[] { "Input", "Right", "Shared", "Result", "Missing" })
+            foreach (string name in QueryNames)
             {
                 string[][] expectedPaths = FindPaths(result.Root, name).ToArray();
 

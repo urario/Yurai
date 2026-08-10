@@ -6,6 +6,13 @@ namespace Yurai.Tests;
 
 public sealed class TracedDependencyQueryTests
 {
+    public static TheoryData<string?> InvalidQueryNames => new()
+    {
+        null,
+        string.Empty,
+        "   ",
+    };
+
     [Fact]
     [Trait("RQ", "RQ-003")]
     [Trait("RQ", "RQ-014")]
@@ -102,10 +109,7 @@ public sealed class TracedDependencyQueryTests
     }
 
     [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData("\uDC00")]
+    [MemberData(nameof(InvalidQueryNames))]
     public void NamedQueriesUseStrictNameValidation(string? name)
     {
         TracedValue value = YuraiApi.Of(1m, "Input");
@@ -117,6 +121,19 @@ public sealed class TracedDependencyQueryTests
         Assert.Equal("name", trace.ParamName);
         Assert.Equal(name is null, dependsOn is ArgumentNullException);
         Assert.Equal(name is null, trace is ArgumentNullException);
+    }
+
+    [Fact]
+    public void NamedQueriesRejectMalformedUtf16ConstructedInProcess()
+    {
+        TracedValue value = YuraiApi.Of(1m, "Input");
+        string malformed = new('\uDC00', 1);
+
+        ArgumentException dependsOn = Assert.Throws<ArgumentException>(() => value.DependsOn(malformed));
+        ArgumentException trace = Assert.Throws<ArgumentException>(() => value.Trace(malformed));
+
+        Assert.Equal("name", dependsOn.ParamName);
+        Assert.Equal("name", trace.ParamName);
     }
 
     [Fact]
