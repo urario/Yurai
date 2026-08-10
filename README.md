@@ -182,11 +182,14 @@ are worth stating up front.
 | [NCalc](https://github.com/ncalc/ncalc), [NTDLS.ExpressionParser](https://github.com/NTDLS/NTDLS.ExpressionParser), [MathParser.org-mXparser](https://mathparser.org/) | .NET expression evaluators: they parse and evaluate expressions supplied as strings (mXparser also does symbolic calculus) at runtime | Calculations stay compiled C# — type-checked, refactorable, reviewable. Yurai never parses an expression string, and it answers why a value is what it is rather than what a string expression evaluates to |
 | [Audit.NET](https://github.com/thepirat000/Audit.NET) | .NET framework for audit trails: records operations and data changes through pluggable data providers | Audit logging records *what happened* — which operation, when, by whom. Yurai answers *why this value* — the derivation inside a single calculation. Yurai also stores nothing; it returns the evidence and stops there |
 
-That leaves a specific gap, and it is the only claim this project makes for itself:
+None of them combines every one of Yurai's properties in one package, but stating that as an
+absence invites exactly the kind of narrow rebuttal the comparison above is meant to avoid —
+[issue #31](https://github.com/urario/Yurai/issues/31) found a zero-dependency NuGet package
+that gets close on several axes. Yurai's claim is only about itself:
 
-> No zero-dependency NuGet library exists that, using ordinary C# arithmetic syntax as-is in
-> a production application, provides eagerly evaluated domain values together with queryable
-> derivation evidence (a DAG) as one thing.
+> Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with immutable,
+> structurally shared derivation evidence and first-class dependency-path queries, in a
+> zero-runtime-dependency `netstandard2.0` library.
 
 ## Non-goals
 
