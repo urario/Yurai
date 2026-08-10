@@ -24,27 +24,30 @@ Console.WriteLine(total.Explain());
 ```
 
 ```text
-Total = 990
-└─ Round(digits: 0, reason: "Round to whole currency unit") = 990
-   └─ Multiply = 990.0000
-      ├─ Multiply = 900.00
-      │  ├─ BasePrice = 1000
-      │  └─ Subtract = 0.90
-      │     ├─ 1
-      │     └─ MemberDiscount = 0.10
-      └─ Add = 1.10
-         ├─ 1
-         └─ TaxRate = 0.10
+Result
+  990
+Derivation
+  Total = 990
+    Round(digits: 0, reason: "Round to whole currency unit") = 990
+      Multiply = 990.0000
+        Multiply = 900.00
+          BasePrice = 1000
+          Subtract = 0.90
+            1
+            MemberDiscount = 0.10
+        Add = 1.10
+          1
+          TaxRate = 0.10
 ```
 
 `total` is a value you can keep using — `total.Value` is `990m`, exactly what the same
 expression produces without Yurai. What Yurai adds is that the value carries the evidence of
 how it was reached, and that evidence can be printed, exported as JSON, or queried in code.
 
-> **Status: pre-release.** The library is not implemented or published yet. The code above is
-> the intended shape of the API; its final form and the exact explanation output are being
-> designed in [#17](https://github.com/urario/Yurai/issues/17) and
-> [#18](https://github.com/urario/Yurai/issues/18).
+> **Status: 0.1.0, not yet on NuGet.** The library is implemented and its behavior is under
+> test — the output above is what it prints, pinned by a test that reads this page. The
+> version is deliberately `0.x`: the public surface may still change, and a second value type
+> beside `decimal` is the change most likely to move it.
 
 ## Why this exists
 
@@ -212,7 +215,7 @@ Out of v1.0, with the future left open:
 
 ## Installation
 
-The package is not published yet. From v1.0 onward:
+The package is not on NuGet yet. From the first release (`0.1.0`) onward:
 
 ```shell
 dotnet add package Yurai
