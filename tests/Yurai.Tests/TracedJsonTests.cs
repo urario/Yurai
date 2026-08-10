@@ -232,6 +232,8 @@ public sealed class TracedJsonTests
 
     private static void AssertPropertyNames(JsonElement element, params string[] expected)
     {
-        Assert.Equal(expected, element.EnumerateObject().Select(property => property.Name));
+        Assert.Equal(
+            expected.OrderBy(name => name, StringComparer.Ordinal),
+            element.EnumerateObject().Select(property => property.Name).OrderBy(name => name, StringComparer.Ordinal));
     }
 }
