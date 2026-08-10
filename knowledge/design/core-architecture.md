@@ -5,7 +5,7 @@ description: Architecture drivers, evidence model, runtime boundaries, and imple
 tags: [architecture, evidence, computation-lineage, decimal]
 status: draft
 requirements: [RQ-001, RQ-002, RQ-003, RQ-004, RQ-005, RQ-007, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-014, RQ-015, RQ-016, RQ-017, RQ-018, RQ-019, RQ-020, RQ-021, RQ-022, RQ-023, RQ-024, RQ-025, RQ-026, RQ-027, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-10T11:20:15+09:00 }
 sources:
   - id: issue-17
     resource: https://github.com/urario/Yurai/issues/17
@@ -163,15 +163,19 @@ is immutable. Thread safety is a property of the object graph, not a lock protoc
 - A carrier keeps its entire reachable graph alive. When no carrier or traversal refers
   to a root, normal garbage collection reclaims the root and any children not shared by
   another live root.
-- Traversals use an explicit stack and a reference-identity visited set. They do not use
-  call-stack recursion, so a graph beyond 10,000 nodes does not fail merely because it
-  is deep.
+- Collapsing traversals use an explicit stack and a reference-identity visited set. The
+  expanding path traversal also uses an explicit stack but revisits shared nodes once
+  per path. Neither uses call-stack recursion, so a graph beyond 10,000 nodes does not
+  fail merely because it is deep.
 - Construction performs one node allocation per recorded operation. The carrier is a
   `readonly struct`, avoiding a carrier allocation in ordinary generic-free usage;
   boxing still occurs if callers place it in `object` or a non-generic interface.
-- Each full traversal costs `O(V + E)` time and `O(V)` temporary identity state. No
-  result is cached in the MVP: repeated calls recompute representations and queries
-  from immutable evidence rather than retaining large strings or synchronized caches.
+- Each collapsing traversal costs `O(V + E)` time and `O(V)` temporary identity state.
+  `Trace` is output-sensitive: its time and result size are proportional to the total
+  returned path data, whose path count can be exponential in `V` for a heavily shared
+  DAG. No result is cached in the MVP: repeated calls recompute representations and
+  queries from immutable evidence rather than retaining large strings or synchronized
+  caches.
 - Serialization writes directly to a `StringBuilder` or equivalent BCL buffer. It does
   not build a second public object model and does not add a JSON package dependency.
 
@@ -233,9 +237,12 @@ afterwards. Q14 uses one deterministic document-local numeric identity mapping f
 and JSON. The text token and JSON field spelling remain representation contracts, but
 neither may introduce a different identity model.
 
-The traversal kernel therefore owns root-first, left-to-right visitation, reference
-identity, first-encounter numeric IDs, depth, and revisit detection. Representation
-adapters consume that shared traversal result. The closed node family exposes an internal
+The collapsing traversal kernel therefore owns root-first, left-to-right visitation,
+reference identity, first-encounter numeric IDs, depth, and revisit detection. Explain,
+JSON, `DependsOn`, and `Inputs` consume that shared traversal discipline. `Trace` must
+retain every root-to-match route, so it uses a separate expanding traversal with the same
+child order but without global revisit suppression; using the collapsing result would
+silently discard paths through shared nodes. The closed node family exposes an internal
 visitor seam so adding a node kind requires every representation adapter to handle it at
 compile time; adapters still own the content they produce for each kind.
 
@@ -450,8 +457,11 @@ structure; it remains a release-gate requirement outside this architecture.
   deterministic path ordering must be explicit in the query signatures and tests.
 - **Large-output risk:** structural sharing bounds graph storage but text and JSON can
   still be large. Iterative traversal prevents stack failure, but full two-space
-  indentation makes a depth-*D* chain's text size `O(D^2)`. RQ-026 and issue #27 address
-  depth limiting, usability, and measured cost.
+  indentation makes a depth-*D* chain's text size `O(D^2)`. `Trace` retains every path,
+  so a repeatedly shared graph can produce exponentially many paths relative to its
+  unique-node count even though `DependsOn` and `Inputs` remain linear. RQ-026 and issue
+  #27 address depth or output limiting, usability, and measured cost; adding a public
+  bound or guard remains a reserved semantic decision.
 - **Hand-written JSON risk:** escaping and exact decimal representation are correctness
   hotspots. Parse-and-compare tests and mutation review are mandatory seams.
 - **Future-type risk:** decimal assumptions are isolated but not eliminated. A new type

@@ -93,6 +93,25 @@ Three ways out of the evidence:
 | [`ToJson()`](docs/json-schema-v1.md) | The same evidence as versioned JSON, for systems outside the process. It is *material* for an audit trail kept by your systems, not an audit trail in itself |
 | `DependsOn`, `Trace`, `Inputs` | The same evidence queried in code — assert in a test that a calculation still uses an input, or route a question by what a value depends on |
 
+```csharp
+var subtotal = (Yurai.Of(100m, "BasePrice") - Yurai.Of(10m, "Discount"))
+    .As("Subtotal");
+var total = (subtotal + 5m).As("Total");
+
+bool stillUsesBasePrice = total.DependsOn("BasePrice");
+IReadOnlyList<string> inputs = total.Inputs;
+IReadOnlyList<IReadOnlyList<string>> paths = total.Trace("BasePrice");
+// inputs: ["BasePrice", "Discount"]
+// paths: [["BasePrice", "Subtotal", "Total"]]
+```
+
+Names use exact ordinal matching. `DependsOn` and `Trace` address both named inputs and
+results named with `As`; `Inputs` contains distinct input names only. `Trace` returns every
+matching path in deterministic order, projected from the matching name toward the result.
+Anonymous nodes remain part of dependency traversal but do not add a name to a path.
+`DependsOn` and `Inputs` are linear in graph size. Because `Trace` retains every path, its
+result can grow exponentially relative to the number of unique nodes in a heavily shared graph.
+
 Two worked examples, with their expected output:
 
 - [Pricing calculation](samples/Pricing/README.md) — discount, tax, rounding.

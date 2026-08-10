@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Yurai;
@@ -66,6 +67,63 @@ public readonly struct Traced
         decimal value = decimal.Round(currentRoot.Value, digits, rounding);
         string validReason = ArgumentValidation.Validate(reason, nameof(reason));
         return new Traced(new RoundEvidenceNode(value, digits, rounding, validReason, currentRoot));
+    }
+
+    /// <summary>
+    /// Determines whether this result depends on a named input or named intermediate result.
+    /// </summary>
+    /// <param name="name">The exact developer-supplied name to find.</param>
+    /// <returns><see langword="true"/> when any recorded dependency has the name; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// The value is an uninitialized <see cref="Traced"/> instance.
+    /// </exception>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="name"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
+    /// </exception>
+    public bool DependsOn(string name)
+    {
+        EvidenceNode currentRoot = GetRoot();
+        string validName = ArgumentValidation.Validate(name, nameof(name));
+        return DependencyQuery.DependsOn(currentRoot, validName);
+    }
+
+    /// <summary>
+    /// Gets the distinct names of recorded inputs on which this result depends.
+    /// </summary>
+    /// <value>
+    /// A read-only snapshot computed on every access in deterministic root-first, left-to-right discovery order.
+    /// Duplicate names are returned once, and named intermediate results are not included.
+    /// </value>
+    /// <exception cref="InvalidOperationException">
+    /// The value is an uninitialized <see cref="Traced"/> instance.
+    /// </exception>
+    public IReadOnlyList<string> Inputs => DependencyQuery.GetInputs(GetRoot());
+
+    /// <summary>
+    /// Returns every recorded dependency path from a named input or named intermediate result to this result.
+    /// </summary>
+    /// <param name="name">The exact developer-supplied name at which each path starts.</param>
+    /// <returns>
+    /// A read-only snapshot of all matching paths in deterministic root-first, left-to-right discovery order.
+    /// Each path is projected as developer-supplied names from the match to this result; anonymous nodes are omitted.
+    /// A trace is a dependency path only. It does not express sensitivity or attribution.
+    /// Because every path is retained, the result size can grow exponentially relative to the number of unique
+    /// evidence nodes in a heavily shared graph. <see cref="DependsOn(string)"/> and <see cref="Inputs"/> remain
+    /// linear in graph size.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// The value is an uninitialized <see cref="Traced"/> instance.
+    /// </exception>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="name"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
+    /// </exception>
+    public IReadOnlyList<IReadOnlyList<string>> Trace(string name)
+    {
+        EvidenceNode currentRoot = GetRoot();
+        string validName = ArgumentValidation.Validate(name, nameof(name));
+        return DependencyQuery.Trace(currentRoot, validName);
     }
 
     /// <summary>
