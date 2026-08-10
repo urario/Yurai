@@ -33,7 +33,9 @@ public readonly struct Traced
     /// The value is an uninitialized <see cref="Traced"/> instance.
     /// </exception>
     /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><paramref name="name"/> is empty or consists only of white-space characters.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="name"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
+    /// </exception>
     public Traced As(string name)
     {
         EvidenceNode currentRoot = GetRoot();
@@ -54,7 +56,9 @@ public readonly struct Traced
     /// <paramref name="digits"/> is outside the range supported by decimal rounding.
     /// </exception>
     /// <exception cref="ArgumentNullException"><paramref name="reason"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><paramref name="reason"/> is empty or consists only of white-space characters.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="reason"/> is empty, consists only of white-space characters, or contains malformed UTF-16 text.
+    /// </exception>
     public Traced Round(int digits, string reason)
     {
         EvidenceNode currentRoot = GetRoot();
@@ -75,6 +79,19 @@ public readonly struct Traced
     public string Explain() => root is null
         ? "Uninitialized Traced"
         : ExplainFormatter.Render(root);
+
+    /// <summary>
+    /// Returns the complete derivation as version 1 of Yurai's stable JSON schema.
+    /// </summary>
+    /// <returns>
+    /// A dependency-free JSON document containing the normalized evidence node table.
+    /// Decimal values are invariant strings, and node identifiers are local to this document.
+    /// The document is material for an audit trail maintained by the caller, not an audit trail itself.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// The value is an uninitialized <see cref="Traced"/> instance.
+    /// </exception>
+    public string ToJson() => JsonFormatter.Render(GetRoot());
 
     /// <summary>
     /// Adds two traced decimal values using native decimal arithmetic.

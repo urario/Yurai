@@ -65,19 +65,6 @@ internal static class EvidenceTraversal
 
         internal int Depth { get; }
     }
-
-    private sealed class EvidenceNodeReferenceComparer : IEqualityComparer<EvidenceNode>
-    {
-        internal static readonly EvidenceNodeReferenceComparer Instance = new();
-
-        private EvidenceNodeReferenceComparer()
-        {
-        }
-
-        public bool Equals(EvidenceNode? x, EvidenceNode? y) => ReferenceEquals(x, y);
-
-        public int GetHashCode(EvidenceNode obj) => RuntimeHelpers.GetHashCode(obj);
-    }
 }
 
 internal readonly struct EvidenceVisit
@@ -97,4 +84,17 @@ internal readonly struct EvidenceVisit
     internal int Identifier { get; }
 
     internal bool IsReference { get; }
+}
+
+internal sealed class EvidenceNodeReferenceComparer : IEqualityComparer<EvidenceNode>
+{
+    internal static readonly EvidenceNodeReferenceComparer Instance = new();
+
+    private EvidenceNodeReferenceComparer()
+    {
+    }
+
+    public bool Equals(EvidenceNode? x, EvidenceNode? y) => ReferenceEquals(x, y);
+
+    public int GetHashCode(EvidenceNode obj) => RuntimeHelpers.GetHashCode(obj);
 }
