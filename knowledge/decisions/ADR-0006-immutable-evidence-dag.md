@@ -3,7 +3,7 @@ type: ADR
 title: Represent derivation evidence as an immutable evaluated DAG
 description: Evidence nodes keep evaluated values and immutable child references, with structural sharing and reference identity.
 tags: [evidence, dag, immutability, concurrency, adr]
-status: draft
+status: stable
 requirements: [RQ-005, RQ-007, RQ-008, RQ-010, RQ-011, RQ-012, RQ-013, RQ-014]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

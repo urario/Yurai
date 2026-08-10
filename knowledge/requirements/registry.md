@@ -3,7 +3,7 @@ type: Requirements Registry
 title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
-status: draft
+status: stable
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
   - id: issue-8
@@ -64,35 +64,35 @@ The identifier rules — three digits, never reused, split by supersession — a
 
 | ID | Requirement | Priority | Status | Verified by |
 |---|---|---|---|---|
-| RQ-001 | Value fidelity: results identical to native arithmetic (R1) | P0 | Draft | Property suite against plain `decimal` (#26); trait `RQ-001` |
-| RQ-002 | Explain output readable by a first-time developer in five minutes (R2) | P0 | Draft | First-look review of the README sample (#23, gate #29) |
-| RQ-003 | Trace means the dependency path of a value, nothing else (R3) | P0 | Draft | Vocabulary review of API, doc comments, docs (#25, gate #29) |
-| RQ-004 | Zero runtime dependencies, `netstandard2.0` (R4) | P0 | Draft | Zero-package-reference build check (#2, CI, gate #29) |
-| RQ-005 | Conditionals record the branch actually taken (R5) | P0 | Draft | Branch-recording tests (#22); trait `RQ-005` |
-| RQ-006 | README names related work and states the differences (R6) | P0 | Draft | README review (#15, gate #29) |
-| RQ-007 | Named inputs and named intermediate results | P0 | Draft | Unit tests (#19); trait `RQ-007` |
-| RQ-008 | Arithmetic composition with ordinary operators, plus Min/Max | P0 | Draft | Unit tests (#19, #20) and property suite (#26) |
-| RQ-009 | Mixed operations with plain, untraced values | P0 | Draft | Unit tests (#20) and property suite (#26) |
-| RQ-010 | Rounding is an explicit, recorded operation with a reason | P0 | Draft | Unit tests (#21) and property suite (#26) |
-| RQ-011 | Immutable derivation evidence with structure sharing | P0 | Draft | Structure and immutability tests (#19) |
-| RQ-012 | Human-readable derivation output | P0 | Draft | Output tests against sample expectations (#23) |
-| RQ-013 | Machine-readable derivation export | P0 | Draft | Serialization tests, all node kinds (#24) |
-| RQ-014 | Programmatic dependency queries | P0 | Draft | Path-query tests on shared structures (#25) |
-| RQ-015 | Minimal, coherent, and explicit public API | P0 | Draft | Purpose and surface review (#17, gate #29) |
-| RQ-016 | Non-goal: symbolic algebra | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-017 | Non-goal: sensitivity analysis and automatic differentiation | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-018 | Non-goal: attribution | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-019 | Non-goal: taint tracking and general-purpose provenance | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-020 | Non-goal: audit-platform features | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-021 | Non-goal: LaTeX or HTML rendering | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-022 | Non-goal: evaluating expressions supplied as strings | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-023 | MVP non-goal: value types other than `decimal` | P0 | Draft | Design review against non-goals (gate #29) |
-| RQ-024 | Banned phrases and replacement vocabulary | P0 | Draft | Vocabulary scan of prose and diffs (gate #29) |
-| RQ-025 | Novelty claim ceiling: the single proposal §6.4 sentence | P0 | Draft | README and documentation review (#15, gate #29) |
-| RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Draft | Deferred; tests when a post-MVP issue implements it |
-| RQ-027 | JSON export schema documented and versioned as a stable contract | P1 | Draft | Schema document review (#24, ADR-0013) |
-| RQ-028 | Value-type extensibility may be pursued later | P2 | Draft | No v1.0 criteria; registered as an open possibility |
-| RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Draft | Review of requirements, design, and API wording (#17, #18, this registry) |
+| RQ-001 | Value fidelity: results identical to native arithmetic (R1) | P0 | Accepted | Property suite against plain `decimal` (#26); trait `RQ-001` |
+| RQ-002 | Explain output readable by a first-time developer in five minutes (R2) | P0 | Accepted | First-look review of the README sample (#23, gate #29) |
+| RQ-003 | Trace means the dependency path of a value, nothing else (R3) | P0 | Accepted | Vocabulary review of API, doc comments, docs (#25, gate #29) |
+| RQ-004 | Zero runtime dependencies, `netstandard2.0` (R4) | P0 | Accepted | Zero-package-reference build check (#2, CI, gate #29) |
+| RQ-005 | Conditionals record the branch actually taken (R5) | P0 | Accepted | Branch-recording tests (#22); trait `RQ-005` |
+| RQ-006 | README names related work and states the differences (R6) | P0 | Accepted | README review (#15, gate #29) |
+| RQ-007 | Named inputs and named intermediate results | P0 | Accepted | Unit tests (#19); trait `RQ-007` |
+| RQ-008 | Arithmetic composition with ordinary operators, plus Min/Max | P0 | Accepted | Unit tests (#19, #20) and property suite (#26) |
+| RQ-009 | Mixed operations with plain, untraced values | P0 | Accepted | Unit tests (#20) and property suite (#26) |
+| RQ-010 | Rounding is an explicit, recorded operation with a reason | P0 | Accepted | Unit tests (#21) and property suite (#26) |
+| RQ-011 | Immutable derivation evidence with structure sharing | P0 | Accepted | Structure and immutability tests (#19) |
+| RQ-012 | Human-readable derivation output | P0 | Accepted | Output tests against sample expectations (#23) |
+| RQ-013 | Machine-readable derivation export | P0 | Accepted | Serialization tests, all node kinds (#24) |
+| RQ-014 | Programmatic dependency queries | P0 | Accepted | Path-query tests on shared structures (#25) |
+| RQ-015 | Minimal, coherent, and explicit public API | P0 | Accepted | Purpose and surface review (#17, gate #29) |
+| RQ-016 | Non-goal: symbolic algebra | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-017 | Non-goal: sensitivity analysis and automatic differentiation | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-018 | Non-goal: attribution | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-019 | Non-goal: taint tracking and general-purpose provenance | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-020 | Non-goal: audit-platform features | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-021 | Non-goal: LaTeX or HTML rendering | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-022 | Non-goal: evaluating expressions supplied as strings | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-023 | MVP non-goal: value types other than `decimal` | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-024 | Banned phrases and replacement vocabulary | P0 | Accepted | Vocabulary scan of prose and diffs (gate #29) |
+| RQ-025 | Novelty claim ceiling: the single proposal §6.4 sentence | P0 | Accepted | README and documentation review (#15, gate #29) |
+| RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Accepted | Deferred; tests when a post-MVP issue implements it |
+| RQ-027 | JSON export schema documented and versioned as a stable contract | P1 | Accepted | Schema document review (#24, ADR-0013) |
+| RQ-028 | Value-type extensibility may be pursued later | P2 | Accepted | No v1.0 criteria; registered as an open possibility |
+| RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Accepted | Review of requirements, design, and API wording (#17, #18, this registry) |
 
 - **Priority** — `P0` must ship in v1.0; `P1` and `P2` are wanted but do not block a
   release.

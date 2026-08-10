@@ -3,7 +3,7 @@ type: ADR
 title: Use explicit mixed decimal operator overloads
 description: Mixed arithmetic supports both operand orders without an implicit conversion into the traced region.
 tags: [api, decimal, operators, boundaries, adr]
-status: draft
+status: stable
 requirements: [RQ-008, RQ-009, RQ-015]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

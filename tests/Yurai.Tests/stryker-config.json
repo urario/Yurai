@@ -12,9 +12,9 @@
     ],
     "report-file-name": "mutation-report",
     "thresholds": {
-      "high": 80,
-      "low": 70,
-      "break": 0
+      "high": 95,
+      "low": 90,
+      "break": 90
     }
   }
 }

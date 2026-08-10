@@ -3,7 +3,7 @@ type: Design
 title: Yurai core architecture
 description: Architecture drivers, evidence model, runtime boundaries, and implementation seams for Yurai's decimal MVP.
 tags: [architecture, evidence, computation-lineage, decimal]
-status: draft
+status: stable
 requirements: [RQ-001, RQ-002, RQ-003, RQ-004, RQ-005, RQ-007, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-014, RQ-015, RQ-016, RQ-017, RQ-018, RQ-019, RQ-020, RQ-021, RQ-022, RQ-023, RQ-024, RQ-025, RQ-026, RQ-027, RQ-028, RQ-029]
 generated: { by: codex/2026-08, at: 2026-08-10T11:20:15+09:00 }
 sources:

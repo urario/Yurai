@@ -154,18 +154,27 @@ unfinished branch is noise. It runs in the [deep lane](#two-lanes).
 **Thresholds.** Stryker reads three: `high` and `low` colour the report, `break` fails
 the run.
 
-| Setting | Value now | At the P0 gate |
+| Setting | Value | Effect |
 |---|---|---|
-| `break` | `0` — the run never fails | Set by the maintainer at [#29](https://github.com/urario/Yurai/issues/29) |
-| `low` | `70` | `70` |
-| `high` | `80` | `80` |
+| `break` | `90` | Below this the mutation run fails |
+| `low` | `90` | Below this the report is red |
+| `high` | `95` | Above this the report is green |
 
-The target for `src/Yurai/` is **80%**, and it is deliberately not enforced yet. There is
-no implementation to measure — the number would be a guess dressed as a threshold. The
-cycle is: measure a baseline once the MVP exists
-([#28](https://github.com/urario/Yurai/issues/28)), then the maintainer sets `break` at
-the P0 gate ([#29](https://github.com/urario/Yurai/issues/29)) against what the baseline
-says is real. The number they choose lands as an ordinary pull request against the Stryker
+The cycle these came from: measure a baseline once the MVP exists
+([#28](https://github.com/urario/Yurai/issues/28)), then the maintainer sets `break`
+against what the baseline says is real rather than against a number chosen in advance. The
+baseline is the deep-lane mutation run on commit `7ca744b`
+([run 31366342869](https://github.com/urario/Yurai/actions/runs/31366342869)); `break` sits
+a margin below it rather than at it: a threshold that tracks the current number turns every
+equivalent mutant into a build failure, and the answer to an equivalent mutant is a
+reasoned suppression, not a threshold nudge. What the run measured is not repeated here —
+see the end of this section.
+
+Because the run is deep-lane only, `break` does not gate a merge. What it buys is that a
+merge which quietly weakens the tests turns the lane red instead of passing unnoticed,
+which is why the threshold is worth having before a change that touches the whole library.
+
+A later change to any of these three lands as an ordinary pull request against the Stryker
 configuration and this table, because a threshold is a convention that outlives the issue
 that produced it.
 
@@ -182,9 +191,10 @@ which one applies is a review judgement:
 
 **A score belongs to a run, not to this document.** The lane's report is the record. A
 pull request that moves the score says so in its description with both numbers; the
-running value is task state and lives on
-[#28](https://github.com/urario/Yurai/issues/28) and in the run's artifacts, not in
-`knowledge/` ([knowledge policy](knowledge-policy.md#what-does-not-belong-here)).
+running value is task state and lives in the run's artifacts and on the issue that is
+looking at it, not in `knowledge/`
+([knowledge policy](knowledge-policy.md#what-does-not-belong-here)). Only the threshold is
+a convention, which is why the table above carries three numbers and no score.
 
 ## Coverage
 
@@ -246,8 +256,8 @@ the rest is what this document adds.
 | Test-first evidence, in one of the [three accepted forms](#what-counts-as-evidence) | A pull request that changes behavior | **Yes** | Review |
 | A property, where the requirement's acceptance criterion is about every input rather than some | A pull request implementing a P0 requirement | **Yes** | Review |
 | A counterexample from a property failure landed as an example test | A pull request fixing a property failure | **Yes** | Review |
-| Mutation score | Changes under `src/Yurai/` | No — advisory until the P0 gate sets `break` | Deep lane, then review |
-| Benchmark numbers | Changes to a hot path | No — advisory until [#27](https://github.com/urario/Yurai/issues/27) | Deep lane, then review |
+| Mutation score | Changes under `src/Yurai/` | No — the deep lane fails below `break`, but it runs after merge | Deep lane, then review |
+| Benchmark numbers | Changes to a hot path | No — advisory, and no threshold is planned | Deep lane, then review |
 | Line coverage | — | **Never** | Diagnostic only |
 
 "Blocks merge: Review" means a human or an agent reviewer says so in the pull request,
@@ -286,5 +296,3 @@ property tests kept in files a filter can select. These are review judgements, n
 - **No integration or end-to-end tier.** Yurai is a library with no I/O. Everything is a
   unit test until something in it talks to the outside world, and nothing is planned that
   does.
-- **No mutation threshold before there is code to measure.** The number arrives with the
-  baseline, from [#28](https://github.com/urario/Yurai/issues/28).

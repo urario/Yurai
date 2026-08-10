@@ -3,7 +3,7 @@ type: ADR
 title: Encode decimal values as invariant JSON text
 description: JSON export preserves decimal value and scale using an invariant string rather than a JSON number.
 tags: [json, decimal, precision, serialization, adr]
-status: draft
+status: stable
 requirements: [RQ-001, RQ-013]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

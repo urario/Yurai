@@ -3,7 +3,7 @@ type: ADR
 title: Use document-local identities for shared evidence
 description: Deterministic numeric IDs identify shared nodes consistently in text and JSON output.
 tags: [evidence, identity, json, explain, traversal, adr]
-status: draft
+status: stable
 requirements: [RQ-011, RQ-012, RQ-013]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
