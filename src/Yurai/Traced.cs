@@ -92,7 +92,7 @@ public readonly struct Traced
     /// Gets the distinct names of recorded inputs on which this result depends.
     /// </summary>
     /// <value>
-    /// A read-only snapshot in deterministic root-first, left-to-right discovery order.
+    /// A read-only snapshot computed on every access in deterministic root-first, left-to-right discovery order.
     /// Duplicate names are returned once, and named intermediate results are not included.
     /// </value>
     /// <exception cref="InvalidOperationException">
@@ -108,6 +108,9 @@ public readonly struct Traced
     /// A read-only snapshot of all matching paths in deterministic root-first, left-to-right discovery order.
     /// Each path is projected as developer-supplied names from the match to this result; anonymous nodes are omitted.
     /// A trace is a dependency path only. It does not express sensitivity or attribution.
+    /// Because every path is retained, the result size can grow exponentially relative to the number of unique
+    /// evidence nodes in a heavily shared graph. <see cref="DependsOn(string)"/> and <see cref="Inputs"/> remain
+    /// linear in graph size.
     /// </returns>
     /// <exception cref="InvalidOperationException">
     /// The value is an uninitialized <see cref="Traced"/> instance.

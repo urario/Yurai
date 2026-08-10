@@ -109,6 +109,8 @@ Names use exact ordinal matching. `DependsOn` and `Trace` address both named inp
 results named with `As`; `Inputs` contains distinct input names only. `Trace` returns every
 matching path in deterministic order, projected from the matching name toward the result.
 Anonymous nodes remain part of dependency traversal but do not add a name to a path.
+`DependsOn` and `Inputs` are linear in graph size. Because `Trace` retains every path, its
+result can grow exponentially relative to the number of unique nodes in a heavily shared graph.
 
 Two worked examples, with their expected output:
 

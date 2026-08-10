@@ -176,6 +176,44 @@ public sealed class TracedDependencyQueryTests
         });
     }
 
+    [Fact]
+    public void PayrollQueryExampleMatchesPublishedPaths()
+    {
+        TracedValue baseSalary = YuraiApi.Of(300000m, "BaseSalary");
+        TracedValue overtimeHourlyRate = YuraiApi.Of(2500m, "OvertimeHourlyRate");
+        TracedValue overtimeHours = YuraiApi.Of(20m, "OvertimeHours");
+        TracedValue socialInsuranceRate = YuraiApi.Of(0.152345m, "SocialInsuranceRate");
+        TracedValue overtimePay = (overtimeHourlyRate * overtimeHours).As("OvertimePay");
+        TracedValue grossPay = (baseSalary + overtimePay).As("GrossPay");
+        TracedValue socialInsurance = (grossPay * socialInsuranceRate)
+            .Round(0, "Round social insurance to whole currency units")
+            .As("SocialInsurance");
+        TracedValue taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
+        TracedValue incomeTax = YuraiApi.If(
+                taxableIncome.Value <= 200000m,
+                () => taxableIncome * 0.10m,
+                () => YuraiApi.If(
+                    taxableIncome.Value <= 400000m,
+                    () => 20000m + (taxableIncome - 200000m) * 0.20m,
+                    () => 60000m + (taxableIncome - 400000m) * 0.30m,
+                    "TaxableIncomeAtMost400000"),
+                "TaxableIncomeAtMost200000")
+            .Round(0, "Round income tax to whole currency units")
+            .As("IncomeTax");
+        TracedValue totalDeductions = (socialInsurance + incomeTax).As("TotalDeductions");
+        TracedValue netPay = (grossPay - totalDeductions).As("NetPay");
+
+        Assert.Equal(
+            ["BaseSalary", "OvertimeHourlyRate", "OvertimeHours", "SocialInsuranceRate"],
+            netPay.Inputs);
+        AssertPaths(
+            netPay.Trace("GrossPay"),
+            ["GrossPay", "NetPay"],
+            ["GrossPay", "SocialInsurance", "TotalDeductions", "NetPay"],
+            ["GrossPay", "TaxableIncome", "IncomeTax", "TotalDeductions", "NetPay"],
+            ["GrossPay", "SocialInsurance", "TaxableIncome", "IncomeTax", "TotalDeductions", "NetPay"]);
+    }
+
     private static void AssertPaths(
         IReadOnlyList<IReadOnlyList<string>> actual,
         params string[][] expected)

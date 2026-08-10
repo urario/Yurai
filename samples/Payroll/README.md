@@ -36,6 +36,11 @@ var totalDeductions = (socialInsurance + incomeTax).As("TotalDeductions");
 var netPay = (grossPay - totalDeductions).As("NetPay");
 
 Console.WriteLine(netPay.Explain());
+Console.WriteLine($"Inputs: {string.Join(", ", netPay.Inputs)}");
+foreach (IReadOnlyList<string> path in netPay.Trace("GrossPay"))
+{
+    Console.WriteLine(string.Join(" -> ", path));
+}
 ```
 
 ## Expected explanation
@@ -85,6 +90,20 @@ The arithmetic output deliberately preserves native `decimal` scale, including
 `53320.750000` and `39335.80`. The conditions read `taxableIncome.Value`, so v1 does not
 retain a dependency edge from a value used only by the plain-Boolean condition.
 
+## Expected dependency queries
+
+```text
+Inputs: BaseSalary, OvertimeHourlyRate, OvertimeHours, SocialInsuranceRate
+GrossPay -> NetPay
+GrossPay -> SocialInsurance -> TotalDeductions -> NetPay
+GrossPay -> TaxableIncome -> IncomeTax -> TotalDeductions -> NetPay
+GrossPay -> SocialInsurance -> TaxableIncome -> IncomeTax -> TotalDeductions -> NetPay
+```
+
+`GrossPay` is shared by the final subtraction, social-insurance calculation, and taxable
+income calculation. `Trace` preserves all four routes rather than collapsing the shared
+node to its first occurrence.
+
 ## API ergonomics observations
 
 - Ordinary arithmetic keeps the payroll formula close to its domain wording.
@@ -92,3 +111,4 @@ retain a dependency edge from a value used only by the plain-Boolean condition.
   and taxable income.
 - Nested `Yurai.If` records only the selected branches.
 - `Round(digits, reason)` keeps the policy explanation beside the operation.
+- Dependency queries expose shared calculation routes without parsing the explanation.
