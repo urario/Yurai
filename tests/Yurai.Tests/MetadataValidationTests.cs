@@ -7,22 +7,23 @@ namespace Yurai.Tests;
 
 public sealed class MetadataValidationTests
 {
-    public static TheoryData<int, string> MalformedUtf16 => new()
+    public static TheoryData<int> MalformedUtf16Cases => new()
     {
-        { 0, "\ud800" },
-        { 1, "\udc00" },
-        { 2, "prefix\ud800" },
-        { 3, "\udc00suffix" },
-        { 4, "\ud800\ud800" },
-        { 5, "\udc00\udc00" },
-        { 6, "\ud800middle\udc00" },
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
     };
 
     [Theory]
-    [MemberData(nameof(MalformedUtf16))]
+    [MemberData(nameof(MalformedUtf16Cases))]
     [Trait("RQ", "RQ-013")]
-    public void MetadataEntryPointsRejectMalformedUtf16(int _, string metadata)
+    public void MetadataEntryPointsRejectMalformedUtf16(int caseId)
     {
+        string metadata = MalformedUtf16(caseId);
         TracedValue traced = YuraiApi.Of(1m, "Input");
         int alternativeInvocations = 0;
         Func<TracedValue> alternative = () =>
@@ -71,4 +72,16 @@ public sealed class MetadataValidationTests
 
         Assert.Equal(parameterName, exception.ParamName);
     }
+
+    private static string MalformedUtf16(int caseId) => caseId switch
+    {
+        0 => "\ud800",
+        1 => "\udc00",
+        2 => "prefix\ud800",
+        3 => "\udc00suffix",
+        4 => "\ud800\ud800",
+        5 => "\udc00\udc00",
+        6 => "\ud800middle\udc00",
+        _ => throw new ArgumentOutOfRangeException(nameof(caseId)),
+    };
 }
