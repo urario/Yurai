@@ -53,11 +53,6 @@ internal static class JsonFormatter
     private static string FormatDecimal(decimal value)
     {
         string text = value.ToString(CultureInfo.InvariantCulture);
-        if (value != decimal.Zero)
-        {
-            return text;
-        }
-
         int flags = decimal.GetBits(value)[3];
         bool isNegativeZero = (flags & int.MinValue) != 0;
         return isNegativeZero && !text.StartsWith("-", StringComparison.Ordinal) ? "-" + text : text;
@@ -92,6 +87,7 @@ internal static class JsonFormatter
                     builder.Append("\\t");
                     break;
                 default:
+                    // Stryker disable once Equality: Escaping U+0020 is equivalent after JSON parsing.
                     if (character < ' ' || char.IsSurrogate(character))
                     {
                         builder.Append("\\u")
