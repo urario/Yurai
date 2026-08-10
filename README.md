@@ -173,17 +173,23 @@ are worth stating up front.
 
 | Project | What it does | How Yurai differs |
 |---|---|---|
-| [Petit Poucet](https://github.com/liflab/petitpoucet) | Java library for fine-grained explainability: compose functions from primitives and ask which parts of the input produced a given part of the output ([CAV 2021](https://link.springer.com/chapter/10.1007/978-3-030-81688-9_24)) | .NET rather than Java, and narrower on purpose — arithmetic on domain values written as ordinary C#, rather than a general lineage relation over composed functions and arbitrary data |
+| [Petit Poucet](https://github.com/liflab/petitpoucet) | Java library for fine-grained explainability: compose functions from primitives and ask which parts of the input produced a given part of the output ([CAV 2021](https://link.springer.com/chapter/10.1007/978-3-030-81688-9_24)) | .NET rather than Java, and narrower on purpose — arithmetic on domain values written as ordinary C#, rather than a general lineage relation over composed functions and arbitrary data. No .NET port or fork of Petit Poucet was found as of this writing |
+| [Fluent.Calculations.Primitives](https://github.com/jitt-team/fluent-calculations-primitives) | .NET library (last released March 2024) for traceable business calculations: a `Number`/`Condition` value carries both an eagerly evaluated primitive and a captured expression via ordinary C# operators; its `EvaluationScope` adds named-calculation capture (readable source text) and cross-reference caching, with JSON export and optional DOT/Graphviz rendering | GPL-3.0-only, versus Yurai's MIT; targets .NET 8.0 only, versus Yurai's `netstandard2.0` reach back to .NET Framework 4.6.1; `EvaluationScope` is the library's higher-level capture/cache pattern, not a requirement for the underlying `Number` arithmetic — the sharper difference is that its structure is walked with a visitor a caller implements, versus Yurai's built-in `DependsOn`/`Trace`/`Inputs` queries |
+| [compprov-core](https://github.com/compprov/compprov-core) | Java framework (Apache-2.0) that wraps `BigDecimal`/`BigInteger` operations into a tracked Calculation Provenance Graph — a DAG of variables and data-flow edges — with snapshot, replay, diff, and input-substitution support | Different ecosystem: Java has no operator overloading, so computations go through explicit wrapper calls and an `env`/context object rather than `+ - * /`. It also depends on Jackson for serialization and ships snapshot/replay/diff/input-substitution features Yurai deliberately leaves out of scope. Listed as prior art for the same problem shape, not a .NET alternative |
+| [Appify.HumanReadableCalculationSteps](https://github.com/AppifySheets/human-readable-calculation-steps) | Small NuGet package (Unlicense, .NET 8.0) where captioned decimal values combined with ordinary C# operators produce a linear, human-readable calculation-steps trace, aimed at invoices and payroll | Produces formatted text, not a structure the program can query — no dependency-path API and no JSON export documented. Yurai's evidence is an immutable, structurally shared DAG that is queryable in code and exportable as JSON, not only printable |
 | [handcalcs](https://github.com/connorferster/handcalcs) | Python library that renders calculation code as LaTeX with symbolic substitution, for notebooks and printed reports | Produces a structure the running program can query and export, not a typeset document. Yurai renders no LaTeX and no HTML |
 | [Calcpad](https://calcpad.eu/) | Free program for mathematical and engineering worksheets, with its own scripting language and HTML report output | A library you call from an existing C# domain model, not a separate environment to author calculations in |
-| [NCalc](https://github.com/ncalc/ncalc) | .NET evaluator for expressions supplied as strings at runtime | Calculations stay compiled C# — type-checked, refactorable, reviewable. Yurai never parses an expression string, and it answers why a value is what it is rather than what an expression evaluates to |
+| [NCalc](https://github.com/ncalc/ncalc), [NTDLS.ExpressionParser](https://github.com/NTDLS/NTDLS.ExpressionParser), [MathParser.org-mXparser](https://mathparser.org/) | .NET expression evaluators: they parse and evaluate expressions supplied as strings (mXparser also does symbolic calculus) at runtime | Calculations stay compiled C# — type-checked, refactorable, reviewable. Yurai never parses an expression string, and it answers why a value is what it is rather than what a string expression evaluates to |
 | [Audit.NET](https://github.com/thepirat000/Audit.NET) | .NET framework for audit trails: records operations and data changes through pluggable data providers | Audit logging records *what happened* — which operation, when, by whom. Yurai answers *why this value* — the derivation inside a single calculation. Yurai also stores nothing; it returns the evidence and stops there |
 
-That leaves a specific gap, and it is the only claim this project makes for itself:
+None of them combines every one of Yurai's properties in one package, but stating that as an
+absence invites exactly the kind of narrow rebuttal the comparison above is meant to avoid —
+[issue #31](https://github.com/urario/Yurai/issues/31) found a zero-dependency NuGet package
+that gets close on several axes. Yurai's claim is only about itself:
 
-> No zero-dependency NuGet library exists that, using ordinary C# arithmetic syntax as-is in
-> a production application, provides eagerly evaluated domain values together with queryable
-> derivation evidence (a DAG) as one thing.
+> Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with immutable,
+> structurally shared derivation evidence and first-class dependency-path queries, in a
+> zero-runtime-dependency `netstandard2.0` library.
 
 ## Non-goals
 
