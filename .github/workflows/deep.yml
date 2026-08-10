@@ -6,6 +6,10 @@ on:
     paths:
       - src/**
       - tests/**
+      - benchmarks/**
+      - Directory.Packages.props
+      - global.json
+      - .github/workflows/deep.yml
   workflow_dispatch:
 
 permissions:
@@ -77,3 +81,41 @@ jobs:
 
       - name: Run long property tests
         run: dotnet test Yurai.sln --configuration Release --no-build --no-restore --filter "Category=Property"
+
+  benchmark:
+    name: .NET performance benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET from global.json
+        uses: actions/setup-dotnet@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Yurai.sln
+
+      - name: Run short benchmarks
+        run: >-
+          dotnet run --project benchmarks/Yurai.Benchmarks/Yurai.Benchmarks.csproj
+          --configuration Release --no-restore --
+          --job short --filter '*' --exporters json markdown
+          --artifacts artifacts/benchmarks
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: artifacts/benchmarks/**
+          if-no-files-found: warn
+          retention-days: 30
