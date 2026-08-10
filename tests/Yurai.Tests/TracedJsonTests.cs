@@ -136,7 +136,7 @@ public sealed class TracedJsonTests
         string exported = document.RootElement.GetProperty("nodes")[0].GetProperty("value").GetString()!;
         decimal parsed = decimal.Parse(exported, NumberStyles.Number, CultureInfo.InvariantCulture);
 
-        Assert.Equal(value.ToString(CultureInfo.InvariantCulture), exported);
+        Assert.Equal(valueText, exported);
         Assert.Equal(decimal.GetBits(value), decimal.GetBits(parsed));
     }
 
