@@ -1,10 +1,13 @@
 # Yurai プロジェクト実行計画
 
 Yurai(Explainable domain calculations for .NET — 軽量 computation-lineage ライブラリ)の実行計画書。
-提案書 Draft 1.0(Phase 0 完了・条件付きGo)に基づき、2026-08-08 に GitHub Issue #1〜#35 として起票した計画の正本ドキュメント。
+全体像・依存関係・体制ルールの参照用の正本ドキュメントであり、日々の作業状態は各 Issue とラベルで管理する。
 
 - 親Issue(Epic): [#35 Yurai 実行計画: 全体像・依存グラフ・役割分担](https://github.com/urario/Yurai/issues/35)
-- 日々の作業状態は各 Issue とラベルで管理し、本書は全体像・依存関係・体制ルールの参照用とする。
+- **現在地: Phase 2(MVP実装)完了。Phase 3(0.1.0 公開)進行中。**
+
+2026-08-10 の計画見直しで、本書はフェーズの列挙から**リリース列**に組み替えた。Phase 3 の
+先が存在しなかった状態を解消し、0.2.0 以降を明示している。
 
 ## 体制
 
@@ -18,112 +21,182 @@ Yurai(Explainable domain calculations for .NET — 軽量 computation-lineage �
 - **PR が品質ゲートキーパー**。main への直コミット・直push禁止(#4)。
 - 言語ポリシー: Issue=日本語基本(外部貢献者は英語可)/ PR=日本語基本・英語可(テンプレートは日英両方 #5)/ ソースコード・コメント・README・公開ドキュメント=英語。
 
-## フェーズ構成と Issue 一覧
+## 完了済みフェーズ
 
-### 基盤: 開発環境・ガバナンス(Phase 1 と並行で最優先)
+依存関係は既に解決済みのため再掲しない。結果だけを残す。
+
+### 基盤: 開発環境・ガバナンス(10/10 完了)
+
+| Issue | 結果 |
+|---|---|
+| [#1](https://github.com/urario/Yurai/issues/1) | AI協業ワークフローと言語ポリシー — `AGENTS.md` / `CLAUDE.md` / `CONTRIBUTING.md` |
+| [#2](https://github.com/urario/Yurai/issues/2) | .NETソリューション骨格 — `netstandard2.0`、依存0は `Directory.Build.targets` で機械的に強制 |
+| [#4](https://github.com/urario/Yurai/issues/4) | Git運用ポリシー — [`knowledge/process/git-policy.md`](../knowledge/process/git-policy.md) |
+| [#5](https://github.com/urario/Yurai/issues/5) | Issue・PRテンプレート(日英) |
+| [#6](https://github.com/urario/Yurai/issues/6) | CI — `.github/workflows/ci.yml`(build / test / format + OKF 整合性検査) |
+| [#7](https://github.com/urario/Yurai/issues/7) | テスト戦略・品質ゲート規約 — [`knowledge/process/testing-and-quality.md`](../knowledge/process/testing-and-quality.md) |
+| [#8](https://github.com/urario/Yurai/issues/8) | OKF軽量ナレッジ管理 — [`knowledge/`](../knowledge/index.md) |
+| [#9](https://github.com/urario/Yurai/issues/9) | Stryker.NET + CsCheck(ADR-0005)、deep レーン `.github/workflows/deep.yml` |
+| [#10](https://github.com/urario/Yurai/issues/10) | Claude Code用 agents / skills — `.claude/` |
+| [#11](https://github.com/urario/Yurai/issues/11) | Codex用 skills — `.codex/` |
+
+### Phase 1: 名称検証とポジショニング(6/6 完了)
+
+| Issue | 結果 |
+|---|---|
+| [#3](https://github.com/urario/Yurai/issues/3) | 名称衝突調査 — **Yurai を継続**。ブロッカー解消 |
+| [#12](https://github.com/urario/Yurai/issues/12) | 要求仕様書 — [`knowledge/requirements/registry.md`](../knowledge/requirements/registry.md)(RQ-001〜RQ-029) |
+| [#13](https://github.com/urario/Yurai/issues/13) | ドメインサンプル① 料金計算 — `samples/Pricing/` |
+| [#14](https://github.com/urario/Yurai/issues/14) | ドメインサンプル② 給与計算 — `samples/Payroll/` |
+| [#15](https://github.com/urario/Yurai/issues/15) | READMEドラフト(Related Work 含む) |
+| [#16](https://github.com/urario/Yurai/issues/16) | **Gate: 「5分で価値が分かる」判定** — 通過 |
+
+### Phase 2: MVP実装(13/13 完了)
+
+| Issue | 結果 |
+|---|---|
+| [#17](https://github.com/urario/Yurai/issues/17) | アーキテクチャ設計 — [`knowledge/design/core-architecture.md`](../knowledge/design/core-architecture.md)、ADR-0006〜0008 |
+| [#18](https://github.com/urario/Yurai/issues/18) | Open Questions Q2〜Q6 の設計判断 — ADR-0009〜0016 |
+| [#19](https://github.com/urario/Yurai/issues/19) | S1: 不変 evidence DAG + `Yurai.Of` / `.As` / `.Value` + 四則演算 |
+| [#20](https://github.com/urario/Yurai/issues/20) | S2: プレーン値との混在演算(明示オーバーロード)+ `Min` / `Max` |
+| [#21](https://github.com/urario/Yurai/issues/21) | S3: `Round(digits, reason)` |
+| [#22](https://github.com/urario/Yurai/issues/22) | S4: `Yurai.If` — 実行された分岐の記録 |
+| [#23](https://github.com/urario/Yurai/issues/23) | S5: `Explain()` テキスト出力 |
+| [#24](https://github.com/urario/Yurai/issues/24) | S6: `ToJson()` + [`docs/json-schema-v1.md`](json-schema-v1.md) |
+| [#25](https://github.com/urario/Yurai/issues/25) | S7: `DependsOn` / `Trace` / `Inputs` |
+| [#26](https://github.com/urario/Yurai/issues/26) | RQ-001 検証 — CsCheck によるプロパティベーステスト |
+| [#27](https://github.com/urario/Yurai/issues/27) | ベンチマーク・メモリ計測 — [`docs/performance.md`](performance.md) |
+| [#28](https://github.com/urario/Yurai/issues/28) | ミューテーションテスト・ベースライン(閾値の確定は #68 に持ち越し) |
+| [#29](https://github.com/urario/Yurai/issues/29) | **Gate: P0要件達成確認** — 通過 |
+
+到達点: 公開 API は静的クラス `Yurai` の5メソッドと `readonly struct Traced` のみ。
+`netstandard2.0`、実行時依存0。
+
+## リリース列
+
+Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
+
+| リリース | 内容 | 状態 |
+|---|---|---|
+| **0.1.0** | NuGet 初版 | 進行中 |
+| **0.2.0** | 第2の値型 — `Traced<T>` + 演算ポリシー抽象 | 設計中 |
+| 0.3.0 | ExplainOptions(深さ制限・カルチャ・出力形式)— RQ-026 | 未着手 |
+| 0.4.0 | traced predicate(条件の系譜) | 未着手 |
+| 0.5.0 | DAG 差分比較 + JSON import | 未着手 |
+| 1.0.0 | 公開 API 凍結の判断 | 未定 |
+
+### 0.1.0: NuGet 初版(Phase 3)
 
 | Issue | 内容 | 担当 | 依存 |
 |---|---|---|---|
-| [#1](https://github.com/urario/Yurai/issues/1) | AI協業ワークフローと言語ポリシー(CLAUDE.md / AGENTS.md / CONTRIBUTING) | Claude→Human承認 | なし |
-| [#4](https://github.com/urario/Yurai/issues/4) | Git運用ポリシーとブランチ保護 | Claude起案+Human設定 | #1 |
-| [#5](https://github.com/urario/Yurai/issues/5) | Issue・PRテンプレート整備(日英両言語) | Codex | #1 |
-| [#2](https://github.com/urario/Yurai/issues/2) | .NETソリューション骨格(netstandard2.0・依存0) | Codex | なし |
-| [#6](https://github.com/urario/Yurai/issues/6) | CI構築(build / test / format) | Codex | #2 |
-| [#7](https://github.com/urario/Yurai/issues/7) | テスト戦略・品質ゲート規約(TDD / PBT / ミューテーション) | Claude→Human承認 | #1 |
-| [#9](https://github.com/urario/Yurai/issues/9) | Stryker.NET+PBT基盤の導入とCI組込 | Codex | #6, #7 |
-| [#8](https://github.com/urario/Yurai/issues/8) | OKF軽量ナレッジ管理ブートストラップ | Claude | #1 |
-| [#10](https://github.com/urario/Yurai/issues/10) | Claude Code用 agents / skills | Claude | #1, #8 |
-| [#11](https://github.com/urario/Yurai/issues/11) | Codex用 skills / AGENTS.md | Codex | #1, #10 |
+| [#66](https://github.com/urario/Yurai/issues/66) | **README を実装に同期させる** | Claude | なし(最優先) |
+| [#30](https://github.com/urario/Yurai/issues/30) | NuGetパッケージング+リリースCI+0.1.0 publish | Codex → publish は Human | #31, #66 |
+| [#31](https://github.com/urario/Yurai/issues/31) | 公開前の NuGet 名称・キーワード再走査 | Claude | なし(publish 前に完了必須) |
+| [#32](https://github.com/urario/Yurai/issues/32) | ドキュメント最終化+ガイド「どの計算をYurai化すべきか」 | Claude → Human | #31 |
+| [#67](https://github.com/urario/Yurai/issues/67) | **【設計】`Traced<T>` と値型ポリシーの方式設計 + ADR** | Claude → Human決定 | なし(#30 と並行) |
 
-### Phase 1: 名称検証とポジショニング
+**初版を 0.1.0 とする**(SemVer 0.x — 公開 API を凍結しない)。直後の 0.2.0 で
+`Traced` → `Traced<T>` の破壊的変更が現実的な選択肢として残るため。1.0.0 で出すと、
+非ジェネリックな `Traced`、Explain のテキスト形式、JSON schema v1 がすべて互換性契約になる。
 
-| Issue | 内容 | 担当 | 依存 |
-|---|---|---|---|
-| [#3](https://github.com/urario/Yurai/issues/3) | **Q1': "Yurai" 名称衝突調査【ブロッキング】** | Claude調査→Human判断 | なし(最優先) |
-| [#12](https://github.com/urario/Yurai/issues/12) | 要求仕様書の作成(提案書 → RQ-xxx) | Claude→Human承認 | #1, #8 |
-| [#13](https://github.com/urario/Yurai/issues/13) | ドメインサンプル① 料金計算 | Codex | #2 |
-| [#14](https://github.com/urario/Yurai/issues/14) | ドメインサンプル② 給与計算 | Codex | #2(#13と並列可) |
-| [#15](https://github.com/urario/Yurai/issues/15) | READMEドラフト(コードより先、Related Work 含む) | Claude→Human | #13, #14 |
-| [#16](https://github.com/urario/Yurai/issues/16) | **Gate: Phase 1「5分で価値が分かる」判定** | Human | #15, #3 |
+#66 は publish のブロッカー。README は `.nupkg` に同梱されるため、実装と食い違ったまま
+配布されることになる。
 
-### Phase 2: MVP実装
+### 0.2.0: 第2の値型
 
-| Issue | 内容 | 担当 | 依存 |
-|---|---|---|---|
-| [#17](https://github.com/urario/Yurai/issues/17) | アーキテクチャ設計とADR(DAG / Traced\<decimal\> / スレッド安全性) | Claude→Human承認 | #12, #16 |
-| [#18](https://github.com/urario/Yurai/issues/18) | **ADR: Open Questions Q2〜Q6 の設計判断** | Claude提案→Human決定 | #17 |
-| [#19](https://github.com/urario/Yurai/issues/19) | 実装S1: DAGノード+Of / As / Value+四則演算(TDD) | Codex | #17, #18, #9 |
-| [#20](https://github.com/urario/Yurai/issues/20) | 実装S2: decimal混在演算+Min / Max | Codex | #19(S3/S4と並列可) |
-| [#21](https://github.com/urario/Yurai/issues/21) | 実装S3: Round(digits, reason) | Codex | #19(S2/S4と並列可) |
-| [#22](https://github.com/urario/Yurai/issues/22) | 実装S4: Yurai.If 分岐記録(R5) | Codex | #19(S2/S3と並列可) |
-| [#23](https://github.com/urario/Yurai/issues/23) | 実装S5: Explain() テキスト出力(R2) | Codex | #20〜#22(S6/S7と並列可) |
-| [#24](https://github.com/urario/Yurai/issues/24) | 実装S6: ToJson()+スキーマ文書化 | Codex | #20〜#22(S5/S7と並列可) |
-| [#25](https://github.com/urario/Yurai/issues/25) | 実装S7: DependsOn / Trace / Inputs(R3) | Codex | #20〜#22(S5/S6と並列可) |
-| [#26](https://github.com/urario/Yurai/issues/26) | R1検証: PBTによるdecimal完全互換 | Codex | #19〜#22 |
-| [#28](https://github.com/urario/Yurai/issues/28) | ミューテーションテスト・ベースライン | Codex | #23〜#26 |
-| [#27](https://github.com/urario/Yurai/issues/27) | ベンチマーク・メモリ計測(ノード1万超) | Codex | #23〜#25 |
-| [#29](https://github.com/urario/Yurai/issues/29) | **Gate: P0要件(R1〜R6)達成確認** | Claude review→Human close | #23〜#26, #28 |
+`decimal` 以外の値型を導入する。**需要待ちではなく、初版直後の次マイルストーンとして日程に固定**
+した(maintainer 判断)。対象候補は次の3系統すべて:
 
-### Phase 3: NuGet公開・告知
+- `long` / `int` — 最小通貨単位、件数
+- ドメイン値オブジェクト(Money 等のユーザー定義型)
+- `double` / `float`
+
+実現方式は **`netstandard2.0` 単一ターゲット + 演算ポリシー抽象**。多ターゲット化も
+`INumber<T>` も採らない。`INumber<T>` はユーザー定義 Money に向かず(`Money × Money` は
+無意味で、Money 側に汎用数値型としての重い実装を強いる)、Yurai が必要とする演算だけを
+定義するポリシー抽象の方が3系統を素直に覆う。加えて RQ-004 を一切崩さない。
 
 | Issue | 内容 | 担当 | 依存 |
 |---|---|---|---|
-| [#30](https://github.com/urario/Yurai/issues/30) | NuGetパッケージング+リリースCI | Codex | #29 |
-| [#31](https://github.com/urario/Yurai/issues/31) | v1.0告知前の名称・キーワード再走査 | Claude | #29(#30のpublish前に完了必須) |
-| [#32](https://github.com/urario/Yurai/issues/32) | README・ドキュメント最終化+ガイド | Claude→Human | #29, #31 |
-| [#33](https://github.com/urario/Yurai/issues/33) | 公開・告知とフィードバック収集体制 | Human+Claude | #30〜#32 |
-| [#34](https://github.com/urario/Yurai/issues/34) | **Gate: 30日指標レビューと継続判断** | Human | #33 の30日後 |
+| [#67](https://github.com/urario/Yurai/issues/67) | 方式設計 + ADR-0017 | Claude → Human決定 | なし |
+| [#68](https://github.com/urario/Yurai/issues/68) | ミューテーションスコアのベースラインと `break` 閾値の確定 | Codex → Human決定 | #67 承認後、実装着手前 |
+| 未起票 | 実装スライス(S8 以降) | Codex | #67 の ADR 承認後に分割起票 |
+
+#68 を実装前に置く理由: 0.2.0 の移行はノード階層・フォーマッタ・JSON・依存クエリ・テスト
+全域に及ぶ。閾値が立っていない状態で全域リファクタに入ると、テスト強度が下がっても CI が
+気づかない。
+
+この決定は **ADR-0009**(多型ターゲティングの延期)と **ADR-0016**(carrier を非ジェネリックな
+`Traced` と命名)を supersede する。**ADR-0014**(decimal を不変文化テキストで符号化)の
+一般化に伴い JSON schema v2 が必要になり、`docs/json-schema-v1.md` は v1 のまま凍結する。
+**RQ-028** の昇格と **RQ-023** の scope 見直しも伴う。これらの書き換えは ADR-0017 の PR で
+行う — 本書が先に要求を書き換えると正本が二重化する。
+
+### 0.3.0 以降
+
+順序の根拠: **ジェネリック化の前に足した機能は、すべてジェネリックで書き直しになる。**
+機能を先に入れるほど二重コストが増えるため、0.2.0 を先に通し、以降を新しい基盤の上に1回だけ書く。
+
+| リリース | 内容 | 出典 |
+|---|---|---|
+| 0.3.0 | ExplainOptions — 深さ制限、カルチャ、出力形式 | RQ-026(P1)。8,192葉で `Explain()` が 6.9MB / `ToJson()` が 11.5MB という実測(`docs/performance.md`)があり、深さ制限がないのは実害のある足元の穴 |
+| 0.4.0 | traced predicate(条件の系譜) | ADR-0011 が「将来の別 capability として提案され得る」と明示的に残した領域。現在は `Yurai.If` の条件に使った値が依存クエリに現れない |
+| 0.5.0 | DAG 差分比較 + JSON import | 「先月と今月で何が変わったか」に答える。前提として JSON 逆シリアライズが必要(RQ-013 は現在 export のみ) |
+| 1.0.0 | 公開 API 凍結の判断 | — |
+
+## バックログ
+
+リリースに紐付かない既知の負債。優先度は低いが実在する。
+
+- **`knowledge/` の status が実態と合っていない。** ADR-0006〜0016 の11本が `status: draft`、
+  要求レジストリ29件が全て `Draft`、`core-architecture.md` が `draft` のまま。
+  [`knowledge/process/knowledge-policy.md`](../knowledge/process/knowledge-policy.md) は
+  「マージのコミットで `stable` に上げる」と定めており、現状は規約違反。
+- **`samples/Pricing` / `samples/Payroll` が Markdown のみでコンパイルされない。** 出力自体は
+  `tests/Yurai.Tests/TracedExplainTests.cs` が固定しているため壊れてはいないが、実行可能な
+  プロジェクトにはなっていない。
+- 安定した外部ノードID(ADR-0006 は document-local に限定)。
+- テキスト・クエリ結果のキャッシュ(`core-architecture.md` §4.6 — #27 が反復コストを示すまで導入しない)。
+- xUnit v3 移行(プロパティライブラリ・Stryker.NET・ランナーの対応待ち)。
+- ベンチマーク回帰閾値(安定したランナーでの反復計測が前提)。
+- 提案書 Draft 1.0 のリポジトリ収容(`knowledge/requirements/registry.md` の "The proposal" 節)。
 
 ## 依存グラフ
 
+GitHub Mermaid の互換性を優先し、複数ノードを `&` で束ねる構文は使用しない。
+
+### 0.1.0
+
 ```mermaid
-graph TD
-    subgraph Foundation
-    I1[#1 協業ワークフロー] --> I4[#4 Git方針]
-    I1 --> I5[#5 テンプレート]
-    I1 --> I7[#7 テスト戦略]
-    I1 --> I8[#8 OKF]
-    I2[#2 ソリューション骨格] --> I6[#6 CI]
-    I6 --> I9[#9 Stryker+PBT基盤]
-    I7 --> I9
-    I8 --> I10[#10 Claude資産]
-    I10 --> I11[#11 Codex資産]
-    end
-    subgraph Phase1
-    I3[#3 名称調査 BLOCKING]
-    I8 --> I12[#12 要求仕様書]
-    I2 --> I13[#13 サンプル料金]
-    I2 --> I14[#14 サンプル給与]
-    I13 --> I15[#15 READMEドラフト]
-    I14 --> I15
-    I15 --> I16[#16 Gate: 5分判定]
-    I3 --> I16
-    end
-    subgraph Phase2
-    I12 --> I17[#17 アーキテクチャ設計]
-    I16 --> I17
-    I17 --> I18[#18 ADR Q2-Q6]
-    I18 --> I19[#19 S1 コア]
-    I9 --> I19
-    I19 --> I20[#20 S2] & I21[#21 S3] & I22[#22 S4]
-    I20 & I21 & I22 --> I23[#23 S5 Explain] & I24[#24 S6 ToJson] & I25[#25 S7 Trace]
-    I20 & I21 & I22 --> I26[#26 R1 PBT]
-    I23 & I24 & I25 --> I27[#27 ベンチマーク]
-    I26 --> I28[#28 ミューテーション]
-    I23 & I24 & I25 & I26 & I28 --> I29[#29 Gate: P0達成]
-    end
-    subgraph Phase3
-    I29 --> I30[#30 パッケージング] & I31[#31 名称再走査] & I32[#32 ドキュメント最終化]
-    I30 & I31 & I32 --> I33[#33 公開・告知]
-    I33 --> I34[#34 Gate: 30日指標]
-    end
+flowchart LR
+    I29["#29 Phase 2 Gate ✅"] --> I66["#66 README 同期"]
+    I29 --> I31["#31 名称・競合再走査"]
+    I29 --> I32["#32 Docs最終化"]
+    I29 --> I67["#67 値型ポリシー方式設計"]
+
+    I31 --> I30["#30 Package / Release CI / publish"]
+    I66 --> I30
+    I32 --> I30
+```
+
+### 0.2.0 以降
+
+```mermaid
+flowchart LR
+    I30["#30 0.1.0 publish"] --> R2["0.2.0 第2の値型"]
+    I67["#67 方式設計 + ADR-0017"] --> I68["#68 mutation break 閾値"]
+    I68 --> R2
+    R2 --> R3["0.3.0 ExplainOptions"]
+    R3 --> R4["0.4.0 traced predicate"]
+    R4 --> R5["0.5.0 DAG 差分 + JSON import"]
+    R5 --> R10["1.0.0 API 凍結判断"]
 ```
 
 ## ラベル体系
 
 | 種類 | ラベル |
 |---|---|
-| フェーズ | `phase:0-foundation` `phase:1-positioning` `phase:2-mvp` `phase:3-release` |
+| フェーズ | `phase:0-foundation` `phase:1-positioning` `phase:2-mvp` `phase:3-release` `phase:4-value-types` |
 | 次アクション担当 | `owner:human` `owner:claude` `owner:codex`(「今の次アクションを取る主体」。進行に応じて付け替える) |
 | 種別 | `type:governance` `type:env` `type:research` `type:design` `type:impl` `type:test` `type:docs` `type:release` |
 | 特殊 | `gate`(Human の明示的 close が必要な節目) `blocking`(下流を止める) `epic` |
@@ -132,16 +205,21 @@ Milestone / GitHub Project は使わず、ラベル+Epic のチェックリス�
 
 ## 運用ルール
 
-- **#3(名称衝突調査)が最優先ブロッカー**。決着まで Phase 2 実装に着手しない。基盤・Phase 1 は名称仮置きで並行可。
-- プロセスは Surveyor リポジトリの運用資産を **OSSライブラリ規模に軽量化** して移植する(RQ-ID・OKF・TDD/ミューテーション・PR品質ゲートは維持、フルの成果物ID体系は採用しない)。
-- **永続的な判断は `knowledge/` に置く**(#8 で構成確立)。Issue=作業状態 / PR=変更差分と検証 / `knowledge/`=Issue と PR を越えて残る要求・判断・規約、という三分割。`knowledge/` は [OKF(Open Knowledge Format)v0.2](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) 準拠のバンドルとして維持する(判断は ADR-0003)。規約は [`knowledge/process/knowledge-policy.md`](../knowledge/process/knowledge-policy.md)、RQ-ID 運用は [`knowledge/process/traceability.md`](../knowledge/process/traceability.md)。
-- 提案書の制約(新規性主張の上限 §6.4 / 禁止文言 §9.2 / 非目標 §7.2)の正本は #12 の要求仕様書
-  ([knowledge/requirements/registry.md](../knowledge/requirements/registry.md) の RQ-024・RQ-025・RQ-016〜023)
-  に転記済み。個々の禁止語をこの計画書に再掲しない — 複製は正本と食い違う。
-- 完了条件: 全子Issueが close され、#34 で継続判断が記録されていること。
+- プロセスは Surveyor リポジトリの運用資産を **OSSライブラリ規模に軽量化** して移植している(RQ-ID・OKF・TDD/ミューテーション・PR品質ゲートは維持、フルの成果物ID体系は採用しない)。
+- **永続的な判断は `knowledge/` に置く**。Issue=作業状態 / PR=変更差分と検証 / `knowledge/`=Issue と PR を越えて残る要求・判断・規約、という三分割。`knowledge/` は [OKF(Open Knowledge Format)v0.2](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) 準拠のバンドルとして維持する(判断は ADR-0003)。規約は [`knowledge/process/knowledge-policy.md`](../knowledge/process/knowledge-policy.md)、RQ-ID 運用は [`knowledge/process/traceability.md`](../knowledge/process/traceability.md)。
+- 提案書の制約(新規性主張の上限 / 禁止文言 / 非目標)の正本は要求仕様書
+  ([knowledge/requirements/registry.md](../knowledge/requirements/registry.md) の RQ-024・RQ-025・RQ-016〜023)。
+  個々の禁止語をこの計画書に再掲しない — 複製は正本と食い違う。
+- 対外的な告知・指標管理は本リポジトリの Issue では扱わない(#33 / #34 を close した際の判断)。
 
 ## 手動作業(Human)
 
 - main の branch protection 設定(#4)
-- NuGet アカウント・API キー準備と publish 実行(#30, #33)
-- 各 `gate` Issue の判定と close(#16, #18, #29, #34)
+- NuGet アカウント・API キー準備と publish 実行(#30)
+- 各 `gate` Issue の判定と close
+- 予約判断(AGENTS.md §2)の決定 — 直近では #67 の方式選択と #68 の `break` 閾値
+
+## 完了条件
+
+各リリースについて、そのリリースを構成する Issue が close され、次のリリースの範囲が
+本書とEpic #35 に記録されていること。
