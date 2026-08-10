@@ -3,7 +3,7 @@ type: ADR
 title: Exclude plain boolean control dependencies from the v1 graph
 description: A plain bool condition records its outcome but cannot create an evidence edge to values used to compute it.
 tags: [branching, dependency, semantics, scope, adr]
-status: draft
+status: stable
 requirements: [RQ-003, RQ-005, RQ-014, RQ-019]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

@@ -3,7 +3,7 @@ type: ADR
 title: Defer multi-type targeting until a second value type is approved
 description: The decimal MVP remains netstandard2.0-only while inexpensive internal boundaries preserve future options.
 tags: [types, decimal, portability, extensibility, adr]
-status: draft
+status: stable
 requirements: [RQ-004, RQ-023, RQ-028, RQ-029]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

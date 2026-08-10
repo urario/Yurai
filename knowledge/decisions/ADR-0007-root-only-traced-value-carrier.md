@@ -3,7 +3,7 @@ type: ADR
 title: Use a root-only traced value carrier
 description: A readonly value carrier keeps one evidence root as the single source of its evaluated value and derivation.
 tags: [value, evidence, memory, api-boundary, adr]
-status: draft
+status: stable
 requirements: [RQ-011, RQ-015, RQ-023, RQ-028, RQ-029]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

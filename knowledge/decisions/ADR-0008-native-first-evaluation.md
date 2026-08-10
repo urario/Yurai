@@ -3,7 +3,7 @@ type: ADR
 title: Evaluate native values before creating derivation evidence
 description: Each operation executes the native decimal operation once and creates evidence only after successful evaluation.
 tags: [decimal, semantics, correctness, evidence, adr]
-status: draft
+status: stable
 requirements: [RQ-001, RQ-004, RQ-008, RQ-009, RQ-010, RQ-015, RQ-023, RQ-029]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

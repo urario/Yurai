@@ -3,7 +3,7 @@ type: ADR
 title: Name the non-generic v1 carrier Traced
 description: The decimal MVP exposes a type-neutral non-generic Traced carrier without promising generic behavior.
 tags: [api, naming, decimal, extensibility, adr]
-status: draft
+status: stable
 requirements: [RQ-015, RQ-023, RQ-028, RQ-029]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

@@ -3,7 +3,7 @@ type: ADR
 title: Publish a versioned stable JSON schema
 description: JSON export is a compatibility contract whose breaking changes require a new schema version.
 tags: [json, compatibility, schema, api, adr]
-status: draft
+status: stable
 requirements: [RQ-004, RQ-013, RQ-027]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:

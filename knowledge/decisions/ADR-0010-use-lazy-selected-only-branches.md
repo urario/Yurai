@@ -3,7 +3,7 @@ type: ADR
 title: Evaluate only the selected conditional alternative
 description: Conditional operations accept lazy alternatives and record only the selected derivation.
 tags: [branching, semantics, evidence, api, adr]
-status: draft
+status: stable
 requirements: [RQ-001, RQ-005, RQ-014]
 generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
 sources:
