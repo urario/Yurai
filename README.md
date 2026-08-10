@@ -90,7 +90,7 @@ Three ways out of the evidence:
 | | |
 |---|---|
 | `Explain()` | The human-readable derivation above — for a code review, a ticket, or a conversation with a domain expert |
-| `ToJson()` | The same evidence as JSON, for systems outside the process. It is *material* for an audit trail kept by your systems, not an audit trail in itself |
+| [`ToJson()`](docs/json-schema-v1.md) | The same evidence as versioned JSON, for systems outside the process. It is *material* for an audit trail kept by your systems, not an audit trail in itself |
 | `DependsOn`, `Trace`, `Inputs` | The same evidence queried in code — assert in a test that a calculation still uses an input, or route a question by what a value depends on |
 
 Two worked examples, with their expected output:
