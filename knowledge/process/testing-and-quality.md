@@ -165,18 +165,14 @@ The cycle these came from: measure a baseline once the MVP exists
 against what the baseline says is real rather than against a number chosen in advance. The
 baseline is the deep-lane mutation run on commit `7ca744b`
 ([run 31366342869](https://github.com/urario/Yurai/actions/runs/31366342869)); `break` sits
-a margin below it, far enough that ordinary work does not trip it and close enough to
-notice a real regression. The score that run measured is not repeated here, for the reason
-given at the end of this section.
+a margin below it rather than at it: a threshold that tracks the current number turns every
+equivalent mutant into a build failure, and the answer to an equivalent mutant is a
+reasoned suppression, not a threshold nudge. What the run measured is not repeated here —
+see the end of this section.
 
-`break` is deliberately not set at the measured score. A threshold that tracks the current
-number turns every equivalent mutant into a build failure, and the answer to an equivalent
-mutant is a reasoned suppression, not a threshold nudge.
-
-`break` failing the run does **not** block a pull request: the mutation run is deep-lane
-only, and the deep lane runs on pushes to `main`. What it buys is that a merge which
-quietly weakens the tests turns the lane red instead of passing unnoticed — the reason the
-threshold is wanted before a change that touches the whole library.
+Because the run is deep-lane only, `break` does not gate a merge. What it buys is that a
+merge which quietly weakens the tests turns the lane red instead of passing unnoticed,
+which is why the threshold is worth having before a change that touches the whole library.
 
 A later change to any of these three lands as an ordinary pull request against the Stryker
 configuration and this table, because a threshold is a convention that outlives the issue
