@@ -1,7 +1,8 @@
 # Design
 
 * [Yurai core architecture](core-architecture.md) - Architecture drivers, evidence model,
-  runtime boundaries, approved design directions, and implementation seams for the decimal MVP.
+  runtime boundaries, approved design directions, and implementation seams for the 0.1.x
+  decimal surface and the approved 0.2.0 decimal-plus-Int64 carrier.
 
 # Related
 

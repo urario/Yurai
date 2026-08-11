@@ -3,9 +3,10 @@ type: ADR
 title: Name the non-generic v1 carrier Traced
 description: The decimal MVP exposes a type-neutral non-generic Traced carrier without promising generic behavior.
 tags: [api, naming, decimal, extensibility, adr]
-status: stable
+status: deprecated
+superseded_by: ADR-0018
 requirements: [RQ-015, RQ-023, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-11T15:32:43+09:00 }
 sources:
   - id: issue-18
     resource: https://github.com/urario/Yurai/issues/18
@@ -16,6 +17,10 @@ sources:
 ---
 
 # ADR-0016: Name the non-generic v1 carrier Traced
+
+> **Superseded by [ADR-0018](ADR-0018-introduce-closed-set-generic-traced-carrier.md).**
+> In 0.2.0 the carrier becomes `Traced<T>`, while the non-generic name becomes a static
+> inference companion. The original v1 naming reasoning remains below.
 
 ## Context
 

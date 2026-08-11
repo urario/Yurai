@@ -108,16 +108,20 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 ### 0.2.0: 第2の値型
 
 `decimal` 以外の値型を導入する。**需要待ちではなく、初版直後の次マイルストーンとして日程に固定**
-した(maintainer 判断)。対象候補は次の3系統すべて:
+した(maintainer 判断)。#67 の設計調査と architecture review により、0.2.0 の supported set は
+**`decimal + System.Int64(long)`** に確定した。浮動小数点とユーザー定義値オブジェクトは、同じ
+policy で安全に一般化できないため後続 ADR へ延期する。
 
-- `long` / `int` — 最小通貨単位、件数
-- ドメイン値オブジェクト(Money 等のユーザー定義型)
-- `double` / `float`
+公開 carrier は `Traced<T>`、non-generic `Traced` は carrier ではなく型推論用 static companion
+とする。decimal は `Traced.Of(...)` の綴りを維持し、Int64 は既存呼び出しの意味を変えない
+`Traced.OfInt64(...)` から明示的に導入する。public generic factory、public policy/profile、mutable
+registry、consumer registration は導入しない。
 
-実現方式は **`netstandard2.0` 単一ターゲット + 演算ポリシー抽象**。多ターゲット化も
-`INumber<T>` も採らない。`INumber<T>` はユーザー定義 Money に向かず(`Money × Money` は
-無意味で、Money 側に汎用数値型としての重い実装を強いる)、Yurai が必要とする演算だけを
-定義するポリシー抽象の方が3系統を素直に覆う。加えて RQ-004 を一切崩さない。
+実装は **`netstandard2.0` 単一ターゲット + closed type ごとの immutable internal binding**。
+多ターゲット化も `INumber<T>` も採らず、runtime dependency 0 を維持する。evidence は
+homogeneous `EvidenceNode<T>` DAG とし、heterogeneous graph や `object Value` は導入しない。
+generic JSON export は schema v2、schema v1 は凍結し、decimal の v1 emitter だけを 0.2.x の
+migration bridge として残す。
 
 | Issue | 内容 | 担当 | 依存 |
 |---|---|---|---|
@@ -131,11 +135,11 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 気づけない — それを避けるために公開前に設定した。#68 には、その計測で生存していた
 ミュータントの棚卸しだけが残っている。
 
-この決定は **ADR-0009**(多型ターゲティングの延期)と **ADR-0016**(carrier を非ジェネリックな
-`Traced` と命名)を supersede する。**ADR-0014**(decimal を不変文化テキストで符号化)の
-一般化に伴い JSON schema v2 が必要になり、`docs/json-schema-v1.md` は v1 のまま凍結する。
-**RQ-028** の昇格と **RQ-023** の scope 見直しも伴う。これらの書き換えは #67 の ADR の PR で
-行う — 本書が先に要求を書き換えると正本が二重化する。
+この決定は **ADR-0009**(多型ターゲティングの延期)、**ADR-0016**(carrier を非ジェネリックな
+`Traced` と命名)、**ADR-0017**(生成メソッドを carrier に置く)を supersede する。ただし
+ADR-0017 の namespace-name collision を再導入しない原則は維持する。**ADR-0014** の decimal
+schema v1 は変更せず、型中立な export は JSON schema v2 として追加する。**RQ-023** は 0.1.x
+の decimal-only bound、**RQ-028** は Int64 を最初の承認済み拡張として同期する。
 
 ### 0.3.0 以降
 

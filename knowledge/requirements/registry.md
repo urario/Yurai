@@ -3,8 +3,8 @@ type: Requirements Registry
 title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
-status: stable
-generated: { by: claude-code/2.1.226, at: 2026-08-10T22:40:29+09:00 }
+status: draft
+generated: { by: codex/2026-08, at: 2026-08-11T15:32:43+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -24,6 +24,9 @@ sources:
   - id: issue-31
     resource: https://github.com/urario/Yurai/issues/31
     title: "Issue #31: pre-0.1.0 NuGet name/keyword rescan — Related Work update and §6.4 correction"
+  - id: issue-67
+    resource: https://github.com/urario/Yurai/issues/67
+    title: "Issue #67: Traced<T> and value-type policy architecture"
   - id: pr-54
     resource: https://github.com/urario/Yurai/pull/54
     title: "Pull request #54: Yurai core architecture review"
@@ -54,11 +57,11 @@ Two phrasing rules hold throughout:
   ([#17](https://github.com/urario/Yurai/issues/17),
   [#18](https://github.com/urario/Yurai/issues/18)), not here.
 - **Requirements are phrased against "the underlying value type".** Yurai traces
-  computations over some value type; in the MVP that type is `decimal` and no other
-  (RQ-023). Where a requirement is essential to Yurai it names the underlying type;
-  where it is an MVP bound it names `decimal`. Keeping the two apart is itself a
-  requirement, checked now (RQ-029) so that a future extension (RQ-028) stays realistic
-  rather than merely promised.
+  computations over a supported value type. The 0.1.x surface supports only `decimal`
+  (RQ-023); 0.2.0 supports `decimal` and Int64 through separately stated fidelity
+  contracts (RQ-001, RQ-028). Where a requirement is essential to Yurai it names the
+  underlying type; where behavior is type-specific it names the supported type and its
+  recorded reason (RQ-029).
 
 The identifier rules — three digits, never reused, split by supersession — are in
 [traceability](../process/traceability.md).
@@ -67,7 +70,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 
 | ID | Requirement | Priority | Status | Verified by |
 |---|---|---|---|---|
-| RQ-001 | Value fidelity: results identical to native arithmetic (R1) | P0 | Accepted | Property suite against plain `decimal` (#26); trait `RQ-001` |
+| RQ-001 | Value fidelity: results match the supported type's recorded native semantics (R1) | P0 | Accepted | Decimal property suite (#26); Int64 contract in ADR-0018, implementation tests pending |
 | RQ-002 | Explain output readable by a first-time developer in five minutes (R2) | P0 | Accepted | First-look review of the README sample (#23, gate #29) |
 | RQ-003 | Trace means the dependency path of a value, nothing else (R3) | P0 | Accepted | Vocabulary review of API, doc comments, docs (#25, gate #29) |
 | RQ-004 | Zero runtime dependencies, `netstandard2.0` (R4) | P0 | Accepted | Zero-package-reference build check (#2, CI, gate #29) |
@@ -89,12 +92,12 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-020 | Non-goal: audit-platform features | P0 | Accepted | Design review against non-goals (gate #29) |
 | RQ-021 | Non-goal: LaTeX or HTML rendering | P0 | Accepted | Design review against non-goals (gate #29) |
 | RQ-022 | Non-goal: evaluating expressions supplied as strings | P0 | Accepted | Design review against non-goals (gate #29) |
-| RQ-023 | MVP non-goal: value types other than `decimal` | P0 | Accepted | Design review against non-goals (gate #29) |
+| RQ-023 | 0.1.x release bound: value types other than `decimal` | P0 | Accepted | Design review against non-goals (gate #29); scope transition in ADR-0018 |
 | RQ-024 | Banned phrases and replacement vocabulary | P0 | Accepted | Vocabulary scan of prose and diffs (gate #29) |
 | RQ-025 | Novelty claim ceiling: one positioning sentence about Yurai itself, no existence-negation claim | P0 | Accepted | README and documentation review (#31, PR #72; #15 for the original ceiling mechanism) |
 | RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Accepted | Deferred; tests when a post-MVP issue implements it |
 | RQ-027 | JSON export schema documented and versioned as a stable contract | P1 | Accepted | Schema document review (#24, ADR-0013) |
-| RQ-028 | Value-type extensibility may be pursued later | P2 | Accepted | No v1.0 criteria; registered as an open possibility |
+| RQ-028 | Introduce additional value types through explicit fidelity decisions | P2 | Accepted | Int64 decision in ADR-0018; implementation verification pending |
 | RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Accepted | Review of requirements, design, and API wording (#17, #18, this registry) |
 
 - **Priority** — `P0` must ship in v1.0; `P1` and `P2` are wanted but do not block a
@@ -114,17 +117,19 @@ holds.
 
 What Yurai is, independent of any release — the proposal's six P0 requirements, R1–R6.
 Where they concern values (RQ-001, RQ-005) they are phrased against the underlying value
-type, which the MVP instantiates as `decimal` (RQ-023); the rest concern the library's
+type, which 0.1.x instantiates as `decimal` and 0.2.0 extends to Int64 (RQ-023, RQ-028);
+the rest concern the library's
 behavior, its packaging, or how it is documented, and have no value type at all.
 
 ### RQ-001 — Value fidelity (R1)
 
 - **Priority**: P0
-- **What**: Every result produced through Yurai is identical to the result of the same
-  computation performed directly on the underlying value type. For the MVP this means:
-  bit-identical to plain `decimal` arithmetic in all cases, including rounding
-  behavior, scale preservation, and the exceptions native arithmetic throws (overflow,
-  division by zero) — thrown under the same conditions with the same exception types.
+- **What**: Every result produced through Yurai matches the recorded native semantics
+  for its supported underlying value type. For `decimal`, this means bit-identical to
+  plain decimal arithmetic, including rounding behavior, scale preservation, and native
+  exception behavior. For Int64 in 0.2.0, addition, subtraction, and multiplication are
+  checked; division is native Int64 division truncating toward zero; overflow and
+  division-by-zero exceptions propagate unchanged; Min/Max equal ties select left.
   The proposal states the bar plainly: this does not ship until it passes (§8).
 - **Why / user value**: Yurai asks to sit in the middle of business-critical
   calculations. A developer can only accept that if adopting Yurai changes no result,
@@ -138,14 +143,15 @@ behavior, its packaging, or how it is documented, and have no value type at all.
     ([#26](https://github.com/urario/Yurai/issues/26), ADR-0005).
   - Cases where native arithmetic throws are covered: the same exception type under
     the same conditions.
+  - Int64 example and property tests compare against the explicitly checked/native
+    operations above, including `5 / 2`, both overflow edges, division by zero, mixed
+    operands, and equal Min/Max ties, before Int64 support ships.
   - Any discovered divergence is fixed, or explicitly accepted by the maintainer as a
     known limitation recorded here.
-- **Constraints and notes**: "Identical" is defined by the underlying type. For
-  `decimal` it is bit-identity including scale. Other value types define equality and
-  edge cases differently (`double` has NaN and signed zeros; integers overflow by
-  wrapping or throwing depending on context) — if a type beyond `decimal` is ever
-  adopted (RQ-028), fidelity must be restated for that type first. The requirement
-  itself — never disagree with the native computation — is type-neutral.
+- **Constraints and notes**: "Identical" is defined by the supported type's recorded
+  contract. For `decimal` it is bit-identity including scale. Int64 uses the checked
+  arithmetic contract above. Any later type defines equality and edge cases separately
+  before adoption; floating-point and user-defined values remain deferred by ADR-0018.
 - **Source**: §8 R1, §5.3; [#26](https://github.com/urario/Yurai/issues/26),
   [#29](https://github.com/urario/Yurai/issues/29).
 
@@ -628,17 +634,18 @@ requirement's *Why*, and reclassifying one is a maintainer decision.
 - **Acceptance criteria**: No public API accepts an expression string for evaluation.
 - **Source**: §7.2.
 
-### RQ-023 — MVP non-goal: value types other than decimal
+### RQ-023 — 0.1.x release bound: value types other than decimal
 
-- **Priority**: P0 · **Scope**: MVP-bounded — see RQ-028, RQ-029
-- **What**: In v1.0, the *public API surface* supports `decimal` and no other value
+- **Priority**: P0 · **Scope**: 0.1.x-bounded — see RQ-028, RQ-029
+- **What**: In 0.1.x, the *public API surface* supports `decimal` and no other value
   type: no public entry point accepts or produces an integer, floating-point, or
   user-defined value type in place of `decimal`, and the public surface exposes no
-  generic abstraction over value types. **This bounds what v1.0 exposes; it does not
+  generic abstraction over value types. **This bounds what 0.1.x exposes; it does not
   define the library, and it does not constrain internal implementation** — whether
   the implementation behind that surface uses a generic abstraction internally is an
   [#17](https://github.com/urario/Yurai/issues/17)/[#18](https://github.com/urario/Yurai/issues/18)
-  design decision, not fixed here (RQ-029). Yurai is a computation-lineage library
+  design decision, not fixed here (RQ-029). ADR-0018 ends this bound in 0.2.0 by adding
+  Int64 through a closed generic carrier. Yurai is a computation-lineage library
   whose first shipped value type is `decimal` — not a `decimal` library.
 - **Why**: The MVP's user is doing money and rate arithmetic, where `decimal` is the
   correct and idiomatic .NET type — one type covers the entire first audience.
@@ -647,13 +654,14 @@ requirement's *Why*, and reclassifying one is a maintainer decision.
   `netstandard2.0`, [#18](https://github.com/urario/Yurai/issues/18) Q4) that would
   delay shipping the value that is already provable.
 - **Acceptance criteria**:
-  - The v1.0 public surface exposes `decimal` as the only underlying value type.
+  - The 0.1.x public surface exposes `decimal` as the only underlying value type.
   - Documentation describes the `decimal` bound as the MVP's scope, not as Yurai's
     definition — the distinction this section states.
-  - The extension mechanism remains open per RQ-028. ADR-0009 defers multi-targeting and
-    generic numeric design until a second value type is approved, while requiring cheap
-    option-preserving boundaries now.
-- **Source**: §7.2, §8 (P2), §13 Q4; [#18](https://github.com/urario/Yurai/issues/18).
+  - 0.2.0 transitions to the decimal + Int64 closed set under ADR-0018; floating-point
+    and user-defined values remain outside the supported set.
+- **Source**: §7.2, §8 (P2), §13 Q4;
+  [#18](https://github.com/urario/Yurai/issues/18),
+  [#67](https://github.com/urario/Yurai/issues/67), ADR-0018.
 
 ## Documentation and positioning constraints
 
@@ -793,43 +801,41 @@ here because it exists to keep RQ-028 reachable rather than because it waits for
 - **Source**: §8 (P1); [#24](https://github.com/urario/Yurai/issues/24),
   [#18](https://github.com/urario/Yurai/issues/18).
 
-### RQ-028 — Value-type extensibility may be pursued later
+### RQ-028 — Introduce additional value types through explicit fidelity decisions
 
 - **Priority**: P2
-- **What**: Yurai's model — named inputs, arithmetic composition, recorded decisions,
-  immutable shared evidence, explanation, export, and queries — may in the future
-  extend to value types other than `decimal`: integers, floating point, or domain
-  value objects. Whether and when that happens remains undecided and is not required by
-  v1.0. ADR-0009 also defers how it happens — generic math, multi-targeting beyond
-  `netstandard2.0`, or another extension architecture — until a second value type is
-  approved, while preserving inexpensive internal options now.
+- **What**: Yurai extends its model to an additional value type only after that type's
+  fidelity, capability, representation, and compatibility contracts are explicitly
+  decided. ADR-0018 applies this rule to Int64 for 0.2.0 through a closed generic
+  carrier while retaining `netstandard2.0` and zero runtime dependencies. Floating-point
+  and user-defined values remain possible but require separate later decisions.
 - **Why / user value**: Domain calculations are not only money: quantities, indexes,
   and typed domain values ask the same "why this value" question. Registering the
-  possibility now, even fully unresolved, means a future proposal to pursue it is
-  evaluated as a scoping decision against a known intent, rather than rediscovered
-  from scratch and re-argued against RQ-023 as if it were a new idea.
+  rule before expansion means a future proposal is evaluated against known fidelity and
+  capability obligations rather than generalized from decimal or Int64 by analogy.
 - **Acceptance criteria**:
-  - No acceptance criteria here bind v1.0 — this requirement is satisfied by
-    remaining an open, registered possibility, not by any implementation.
-  - What actually keeps the extension realistic — that today's requirements, design,
-    and API wording do not close it off for free — is a separate, present-tense
-    requirement, checked now: RQ-029.
+  - Int64 support ships only after the ADR-0018 contract is covered by example and
+    property tests and its public API is reviewed.
+  - Floating-point or user-defined support requires a new reserved architecture
+    decision; neither is inferred from the public existence of `Traced<T>`.
+  - Type-neutral wording and explicit type-specific assumptions continue under RQ-029.
 - **Constraints and notes**: This is the P2, future-facing half of the type-
-  extensibility topic; RQ-029 is its P0, present-tense half. The two are deliberately
-  separate requirements, not one requirement with a mixed priority, because "may be
-  pursued later" and "must not be accidentally foreclosed now" are checked at
-  different times by different reviews.
-- **Source**: §8 (P2), §13 Q4; [#18](https://github.com/urario/Yurai/issues/18).
+  extensibility topic; RQ-029 remains its P0, present-tense wording and design-review
+  constraint. The requirements remain separate because shipping another type and
+  avoiding accidental type assumptions are checked by different evidence.
+- **Source**: §8 (P2), §13 Q4;
+  [#18](https://github.com/urario/Yurai/issues/18),
+  [#67](https://github.com/urario/Yurai/issues/67), ADR-0018.
 
 ### RQ-029 — Type-neutral wording, unless a reason is recorded
 
 - **Priority**: P0
 - **What**: Wherever a requirement, an architecture decision, or a public API choice
   can be stated in a way that is neutral to the underlying value type at no cost, it
-  is stated that way — `decimal` is named only where the MVP bound (RQ-023) or a
-  genuinely type-specific behavior (RQ-001's fidelity definition, and the other
-  type-sensitive assumptions below) requires it. Where a decision does lock in
-  `decimal`-specific behavior beyond the MVP bound, the design record
+  is stated that way. A supported type is named only where a release bound (RQ-023) or
+  genuinely type-specific behavior (RQ-001's fidelity definition and the other
+  type-sensitive assumptions below) requires it. Where a decision locks in
+  type-specific behavior, the design record
   ([#17](https://github.com/urario/Yurai/issues/17),
   [#18](https://github.com/urario/Yurai/issues/18)) states why a type-neutral
   alternative was not viable.
@@ -854,12 +860,9 @@ here because it exists to keep RQ-028 reachable rather than because it waits for
     design records a reason.
   - Unlike RQ-028, this requirement is checked now, at every requirements and design
     pull request — it does not wait for a second value type to be pursued.
-- **Constraints and notes**: This requirement commits to nothing about shipping,
-  designing, or sketching support for a second value type — that remains RQ-028, P2,
-  undecided. It commits only to not spending today's wording and decisions in a way
-  that would make RQ-028 harder later for no present benefit. It is the positive
-  counterpart of RQ-023: v1.0 ships `decimal` only, and the library stays defined by
-  its model rather than by that first type.
+- **Constraints and notes**: RQ-028 now approves Int64 for 0.2.0 but does not approve
+  other value families. This requirement keeps the library defined by its model rather
+  than by decimal or Int64 and requires every further type assumption to be explicit.
 - **Source**: §8 (P2), §13 Q4; [#17](https://github.com/urario/Yurai/issues/17),
   [#18](https://github.com/urario/Yurai/issues/18).
 

@@ -3,9 +3,10 @@ type: ADR
 title: Defer multi-type targeting until a second value type is approved
 description: The decimal MVP remains netstandard2.0-only while inexpensive internal boundaries preserve future options.
 tags: [types, decimal, portability, extensibility, adr]
-status: stable
+status: deprecated
+superseded_by: ADR-0018
 requirements: [RQ-004, RQ-023, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-09T20:23:48+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-11T15:32:43+09:00 }
 sources:
   - id: issue-18
     resource: https://github.com/urario/Yurai/issues/18
@@ -16,6 +17,10 @@ sources:
 ---
 
 # ADR-0009: Defer multi-type targeting until a second value type is approved
+
+> **Superseded by [ADR-0018](ADR-0018-introduce-closed-set-generic-traced-carrier.md).**
+> The approved second value type activates the generic migration this decision deferred.
+> The original reasoning remains below.
 
 ## Context
 
