@@ -6,7 +6,7 @@ tags: [api, naming, usability, adr]
 status: deprecated
 superseded_by: ADR-0018
 requirements: [RQ-002, RQ-015]
-generated: { by: codex/2026-08, at: 2026-08-11T15:32:43+09:00 }
+generated: { by: claude-code/2.0.76, at: 2026-08-11T15:32:43+09:00 }
 sources:
   - id: issue-66
     resource: https://github.com/urario/Yurai/issues/66
