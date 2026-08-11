@@ -30,7 +30,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.release_tag }}-${{ inputs.release_run_id }}
+  group: ${{ github.workflow }}-${{ inputs.release_tag }}
   cancel-in-progress: false
 
 jobs:
@@ -44,6 +44,21 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ github.workflow_sha }}
+          path: _release-tools
+
+      - name: Confirm publish workflow checkout
+        shell: pwsh
+        working-directory: _release-tools
+        env:
+          EXPECTED_WORKFLOW_COMMIT: ${{ github.workflow_sha }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:EXPECTED_WORKFLOW_COMMIT)) {
+            throw 'github.workflow_sha did not identify the workflow commit.'
+          }
+          $actualWorkflowCommit = git rev-parse HEAD
+          if ($actualWorkflowCommit -cne $env:EXPECTED_WORKFLOW_COMMIT) {
+            throw "Publish workflow checkout '$actualWorkflowCommit' does not match workflow commit '$env:EXPECTED_WORKFLOW_COMMIT'."
+          }
 
       - name: Validate release run
         id: release
@@ -63,15 +78,31 @@ jobs:
           $tagRefJson = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$env:RELEASE_TAG"
           if ($LASTEXITCODE -ne 0) { throw "Unable to read release tag '$env:RELEASE_TAG'." }
           $tagRef = $tagRefJson | ConvertFrom-Json
-          ./eng/release/Assert-ReleaseTagCommit.ps1 -TagObject $tagRef.object -ExpectedCommit $run.headSha -ResolveAnnotatedTag {
-            param($TagObjectSha)
-            $tagJson = gh api "repos/$env:GITHUB_REPOSITORY/git/tags/$TagObjectSha"
-            if ($LASTEXITCODE -ne 0) { throw "Unable to read annotated tag object '$TagObjectSha'." }
-            $tagJson | ConvertFrom-Json
+          $verifiedCommits = @(
+            ./_release-tools/eng/release/Assert-ReleaseTagCommit.ps1 -TagObject $tagRef.object -ExpectedCommit $run.headSha -ResolveAnnotatedTag {
+              param($TagObjectSha)
+              $tagJson = gh api "repos/$env:GITHUB_REPOSITORY/git/tags/$TagObjectSha"
+              if ($LASTEXITCODE -ne 0) { throw "Unable to read annotated tag object '$TagObjectSha'." }
+              $tagJson | ConvertFrom-Json
+            }
+          )
+          if ($verifiedCommits.Count -ne 1) {
+            throw "Release tag verification returned $($verifiedCommits.Count) commit values instead of exactly one."
+          }
+          $verifiedCommit = [string]$verifiedCommits[0]
+          if ($verifiedCommit -cne $run.headSha) {
+            throw "Verified release commit '$verifiedCommit' does not match selected run head SHA '$($run.headSha)'."
           }
 
-          "head_sha=$($run.headSha)" >> $env:GITHUB_OUTPUT
-          "artifact_name=yurai-package-$env:RELEASE_TAG-$($run.headSha)" >> $env:GITHUB_OUTPUT
+          $comparisonJson = gh api "repos/$env:GITHUB_REPOSITORY/compare/main...$verifiedCommit"
+          if ($LASTEXITCODE -ne 0) { throw "Unable to compare release commit '$verifiedCommit' with main." }
+          $comparison = $comparisonJson | ConvertFrom-Json
+          if ($comparison.status -notin @('identical', 'behind')) {
+            throw "Verified release commit '$verifiedCommit' is not reachable from main (comparison status: '$($comparison.status)')."
+          }
+
+          "head_sha=$verifiedCommit" >> $env:GITHUB_OUTPUT
+          "artifact_name=yurai-package-$env:RELEASE_TAG-$verifiedCommit" >> $env:GITHUB_OUTPUT
 
       - name: Checkout verified release commit
         uses: actions/checkout@v5

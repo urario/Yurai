@@ -56,10 +56,16 @@ while ($true) {
 
     $seenTagObjects[$objectSha] = $true
     $annotatedTag = & $ResolveAnnotatedTag $objectSha
-    if ($null -eq $annotatedTag -or $null -eq $annotatedTag.object) {
+    $objectProperty = if ($null -eq $annotatedTag) {
+        $null
+    }
+    else {
+        $annotatedTag.PSObject.Properties['object']
+    }
+    if ($null -eq $objectProperty -or $null -eq $objectProperty.Value) {
         throw "Annotated tag object '$objectSha' did not identify another Git object."
     }
 
-    $currentObject = $annotatedTag.object
+    $currentObject = $objectProperty.Value
     $tagDepth++
 }
