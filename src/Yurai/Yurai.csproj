@@ -5,7 +5,7 @@
     <PackageId>Yurai</PackageId>
     <Version>0.1.0</Version>
     <Authors>urario</Authors>
-    <Description>Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with immutable, structurally shared derivation evidence and first-class dependency-path queries, in a zero-runtime-dependency netstandard2.0 library.</Description>
+    <Description>Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with immutable, structurally shared derivation evidence and first-class dependency-path queries, in a zero-runtime-dependency netstandard2.0 library. Pre-1.0: public API may change.</Description>
     <PackageTags>computation-lineage;explainable;derivation;dependency-graph;decimal;dotnet</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
