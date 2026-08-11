@@ -4,7 +4,7 @@ Yurai is for a bounded domain calculation whose result may need to be explained 
 It keeps an eagerly evaluated `decimal` value together with immutable derivation evidence,
 so the code can calculate normally and still answer questions about the recorded result.
 
-The useful boundary is usually a business calculation, not an entire application.
+The useful boundary is usually a domain calculation, not an entire application.
 Choose the calculation that has a domain name, a rule a person may question, or a result
 that needs a dependency or derivation query after it has been computed.
 
@@ -12,8 +12,8 @@ that needs a dependency or derivation query after it has been computed.
 
 Use Yurai when most of these statements are true:
 
-- The calculation represents a domain rule such as a price, deduction, tax, eligibility
-  amount, or other policy-driven result.
+- The calculation represents a domain rule such as a price, deduction, tax, benefit amount,
+  premium, score, or other policy-driven result.
 - Someone may need to understand which named inputs, intermediate results, rounding steps,
   or selected branches produced the result.
 - The calculation is a bounded region with a manageable number of domain steps. Yurai's
@@ -52,11 +52,15 @@ Keep input mapping and application orchestration in their existing types. Introd
 the plain `decimal` back out when the calculation is complete:
 
 ```csharp
+using System;
 using Yurai;
 
 public static class PricingCalculator
 {
-    public static decimal CalculateTotal(decimal basePriceValue, decimal discountValue)
+    public static decimal CalculateTotal(
+        decimal basePriceValue,
+        decimal discountValue,
+        Action<string> saveEvidence)
     {
         var basePrice = Traced.Of(basePriceValue, "BasePrice");
         var discount = Traced.Of(discountValue, "MemberDiscount");
@@ -64,6 +68,7 @@ public static class PricingCalculator
             .Round(0, "Round to whole currency unit")
             .As("Total");
 
+        saveEvidence(total.ToJson());
         return total.Value;
     }
 }
@@ -71,33 +76,39 @@ public static class PricingCalculator
 
 The traced region is now local to the domain calculation. Callers receive the same plain
 `decimal` type they used before, while code inside the boundary can call `Explain()`,
-`ToJson()`, or dependency queries when it has a reason to do so. If the evidence must be
-kept, the caller is responsible for deciding how to store the string returned by
-`ToJson()`; storage and integrity policy are outside Yurai.
+`ToJson()`, or dependency queries before the boundary is crossed. This example saves the
+JSON evidence before returning `total.Value`; if the evidence is not needed, omit that
+step. After `Value` has been returned as a plain `decimal`, the caller cannot recover the
+`Traced` evidence from that decimal. The callback and storage policy belong to the caller,
+not to Yurai.
 
 This boundary is intentional. Propagating `Traced` through every application layer would
-make unrelated APIs depend on evidence details, increase the size of graphs without a
-clear question to answer, and make it harder to see which calculation is being explained.
-Use a small, named region instead of treating tracing as a property that must spread
-through the whole object graph.
+make unrelated APIs depend on evidence details and can encourage unrelated traced
+operations, which may enlarge graphs without a clear question to answer. It also makes it
+harder to see which calculation is being explained. Use a small, named region instead of
+treating tracing as a property that must spread through the whole object graph.
 
 ## Branch conditions are an explicit boundary
 
 The current API accepts a plain `bool` in `Traced.If`. To form that condition, read the
-value at the point where the domain rule makes its decision:
+value at the point where the domain rule makes its decision. This minimal example uses
+`CustomerTier` only for the condition, not in either selected value calculation:
 
 ```csharp
-var taxableIncome = (grossPay - socialInsurance).As("TaxableIncome");
+var customerTier = Traced.Of(2m, "CustomerTier");
 
-var incomeTax = Traced.If(
-    taxableIncome.Value <= 200000m,
-    () => taxableIncome * 0.10m,
-    () => 20000m + (taxableIncome - 200000m) * 0.20m,
-    "TaxableIncomeAtMost200000");
+var discount = Traced.If(
+    customerTier.Value >= 2m,
+    () => Traced.Of(0.10m),
+    () => Traced.Of(0m),
+    "MemberDiscountRule");
+var total = (Traced.Of(100m, "BasePrice") * (1 - discount)).As("Total");
+
+bool hasCustomerTierDependency = total.DependsOn("CustomerTier"); // false
 ```
 
-The selected branch is recorded, but an input used only to produce the plain Boolean
-condition is not represented as a dependency edge in the current API. This is why the
+The selected branch is recorded, but `CustomerTier` is not represented as a dependency
+edge because it was used only to produce the plain Boolean condition. This is why the
 boundary should be explicit in the calculation design, and why a dependency query should
 be read as a query over recorded value derivation rather than over all control flow.
 

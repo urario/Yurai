@@ -13,6 +13,7 @@
 Fitting, since that is exactly what the library keeps attached to every value it touches.*
 
 ```csharp
+using System;
 using Yurai;
 
 var basePrice = Traced.Of(1000m, "BasePrice");
@@ -50,6 +51,9 @@ how it was reached, and that evidence can be printed, exported as JSON, or queri
 > test — the output above is what it prints, pinned by a test that reads this page. The
 > version is deliberately `0.x`: the public surface may still change, and a second value type
 > beside `decimal` is the change most likely to move it.
+
+**Try it:** [Follow the three-step Quick start](#quick-start) to run this example in a
+new console application.
 
 ## Why this exists
 
@@ -186,9 +190,9 @@ stating up front.
 | [NCalc](https://github.com/ncalc/ncalc), [NTDLS.ExpressionParser](https://github.com/NTDLS/NTDLS.ExpressionParser), [MathParser.org-mXparser](https://mathparser.org/) | .NET expression evaluators: they parse and evaluate expressions supplied as strings (mXparser also does symbolic calculus) at runtime | Calculations stay compiled C# — type-checked, refactorable, reviewable. Yurai never parses an expression string, and it answers why a value is what it is rather than what a string expression evaluates to |
 | [Audit.NET](https://github.com/thepirat000/Audit.NET) | .NET framework for audit trails: records operations and data changes through pluggable data providers | Audit logging records *what happened* — which operation, when, by whom. Yurai answers *why this value* — the derivation inside a single calculation. Yurai also stores nothing; it returns the evidence and stops there |
 
-These comparisons are intentionally about scope, ecosystem, license, runtime, and query
-model. They describe nearby tools without turning the table into a claim about what the
-wider ecosystem does or does not contain. Yurai's claim is only about itself:
+These comparisons are intentionally about each project's scope, ecosystem, license, runtime,
+and query model. They are limited observations about the entries listed here, not a
+uniqueness claim about Yurai. Yurai's claim is only about itself:
 
 > Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with immutable,
 > structurally shared derivation evidence and first-class dependency-path queries, in a
@@ -243,7 +247,21 @@ first explanation is:
    dotnet add package Yurai --version 0.1.0
    ```
 
-2. Replace `Program.cs` with the opening example above.
+2. Replace `Program.cs` with this complete example:
+
+   ```csharp
+   using System;
+   using Yurai;
+
+   var basePrice = Traced.Of(1000m, "BasePrice");
+   var discount = Traced.Of(0.10m, "MemberDiscount");
+   var taxRate = Traced.Of(0.10m, "TaxRate");
+   var total = (basePrice * (1 - discount) * (1 + taxRate))
+       .Round(0, "Round to whole currency unit")
+       .As("Total");
+
+   Console.WriteLine(total.Explain());
+   ```
 
 3. Run it:
 
