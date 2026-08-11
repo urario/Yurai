@@ -4,7 +4,7 @@ title: Traceability
 description: How a requirement stays connected to the design, code, and tests that satisfy it.
 tags: [process, requirements, traceability]
 status: stable
-generated: { by: claude-code/2.1.226, at: 2026-08-08T23:04:15Z }
+generated: { by: codex/2026-08, at: 2026-08-11T18:45:40+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -71,7 +71,7 @@ exist, and the registry is the only place an identifier is defined. Each entry c
 |---|---|
 | ID | `RQ-###` |
 | Statement | What is required, in one testable sentence |
-| Priority | `P0` (must ship in v1.0) / `P1` / `P2` |
+| Priority | `P0` (must ship in v1.0, or within an explicitly named release-line scope) / `P1` / `P2` |
 | Status | `Draft` / `Accepted` / `Withdrawn` / `Superseded by RQ-###` |
 | Acceptance criteria | How anyone can tell whether it holds |
 
@@ -115,7 +115,8 @@ tests, not through comment density.
 
 ## What "traceable" has to mean
 
-For every `P0` requirement, both directions have to work:
+For every `P0` requirement while it is within its declared scope, both directions have
+to work:
 
 - **Forward** — from the requirement to at least one test that would fail if the
   requirement were violated.
@@ -123,6 +124,13 @@ For every `P0` requirement, both directions have to work:
 
 `P1` and `P2` requirements are held to the same standard once implemented, but their
 absence does not block a release.
+
+An explicitly release-line-scoped requirement carries its priority while that line is
+current. When a recorded decision ends the scope, the requirement and its evidence stay
+in the registry as history, but they do not gate a later release line. Scope expiry does
+not reuse the identifier or silently replace the requirement's meaning; the withdrawal
+and supersession rules above still apply when the requirement itself is dropped or
+replaced.
 
 This is checked at the gate issues ([#29](https://github.com/urario/Yurai/issues/29) for
 the P0 requirements), not on every pull request. Two commands are enough to see the

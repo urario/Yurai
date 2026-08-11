@@ -4,7 +4,7 @@ title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
 status: draft
-generated: { by: codex/2026-08, at: 2026-08-11T18:35:01+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-11T18:45:40+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -101,7 +101,9 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Accepted | Review of requirements, design, and API wording (#17, #18, this registry) |
 
 - **Priority** — `P0` must ship in v1.0; `P1` and `P2` are wanted but do not block a
-  release.
+  release. A requirement whose **Scope** names a release line carries that priority
+  within that line: it binds while the line is current and stops gating later releases
+  when a recorded decision ends the scope, rather than surviving to v1.0.
 - **Status** — `Draft`, `Accepted`, `Withdrawn`, or `Superseded by RQ-NNN`. This column
   tracks the requirement; the document's own `status` in frontmatter tracks the registry.
 - **Verified by** — how the requirement is demonstrated: tests carrying its trait, a
