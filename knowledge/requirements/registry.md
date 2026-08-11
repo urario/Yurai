@@ -3,7 +3,7 @@ type: Requirements Registry
 title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
-status: draft
+status: stable
 generated: { by: codex/2026-08, at: 2026-08-11T18:45:40+09:00 }
 sources:
   - id: issue-8
