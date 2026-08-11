@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $scriptPath = Join-Path $PSScriptRoot '../../eng/release/Assert-ReleaseTagCommit.ps1'
-$expectedCommit = '1111111111111111111111111111111111111111'
+$resolvedCommit = '1111111111111111111111111111111111111111'
 $otherCommit = '2222222222222222222222222222222222222222'
 $outerTagSha = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 $innerTagSha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
@@ -54,11 +54,11 @@ $tests = @(
         Name = 'Lightweight tag resolves to the expected commit'
         Action = {
             $actual = & $scriptPath `
-                -TagObject (New-GitObject -Type commit -Sha $expectedCommit) `
-                -ExpectedCommit $expectedCommit `
+                -TagObject (New-GitObject -Type commit -Sha $resolvedCommit) `
+                -ExpectedCommit $resolvedCommit `
                 -ResolveAnnotatedTag { throw 'Resolver must not be called for a lightweight tag.' }
 
-            Assert-Equal $actual $expectedCommit
+            Assert-Equal $actual $resolvedCommit
         }
     },
     @{
@@ -66,14 +66,14 @@ $tests = @(
         Action = {
             $actual = & $scriptPath `
                 -TagObject (New-GitObject -Type tag -Sha $outerTagSha) `
-                -ExpectedCommit $expectedCommit `
+                -ExpectedCommit $resolvedCommit `
                 -ResolveAnnotatedTag {
                     param($Sha)
                     Assert-Equal $Sha $outerTagSha
-                    [pscustomobject]@{ object = New-GitObject -Type commit -Sha $expectedCommit }
+                    [pscustomobject]@{ object = New-GitObject -Type commit -Sha $resolvedCommit }
                 }
 
-            Assert-Equal $actual $expectedCommit
+            Assert-Equal $actual $resolvedCommit
         }
     },
     @{
@@ -84,7 +84,7 @@ $tests = @(
                     -TagObject (New-GitObject -Type tag -Sha $outerTagSha) `
                     -ExpectedCommit $otherCommit `
                     -ResolveAnnotatedTag {
-                        [pscustomobject]@{ object = New-GitObject -Type commit -Sha $expectedCommit }
+                        [pscustomobject]@{ object = New-GitObject -Type commit -Sha $resolvedCommit }
                     }
             }
         }
@@ -95,7 +95,7 @@ $tests = @(
             Assert-Throws -MessagePattern "Release tag resolved to unsupported object type 'blob'." -Action {
                 & $scriptPath `
                     -TagObject (New-GitObject -Type blob -Sha $outerTagSha) `
-                    -ExpectedCommit $expectedCommit `
+                    -ExpectedCommit $resolvedCommit `
                     -ResolveAnnotatedTag { throw 'Resolver must not be called for a blob.' }
             }
         }
@@ -105,20 +105,33 @@ $tests = @(
         Action = {
             $actual = & $scriptPath `
                 -TagObject (New-GitObject -Type tag -Sha $outerTagSha) `
-                -ExpectedCommit $expectedCommit `
+                -ExpectedCommit $resolvedCommit `
                 -ResolveAnnotatedTag {
                     param($Sha)
                     if ($Sha -ceq $outerTagSha) {
                         return [pscustomobject]@{ object = New-GitObject -Type tag -Sha $innerTagSha }
                     }
                     if ($Sha -ceq $innerTagSha) {
-                        return [pscustomobject]@{ object = New-GitObject -Type commit -Sha $expectedCommit }
+                        return [pscustomobject]@{ object = New-GitObject -Type commit -Sha $resolvedCommit }
                     }
 
                     throw "Unexpected tag object '$Sha'."
                 }
 
-            Assert-Equal $actual $expectedCommit
+            Assert-Equal $actual $resolvedCommit
+        }
+    },
+    @{
+        Name = 'Annotated tag cycle fails closed'
+        Action = {
+            Assert-Throws -MessagePattern 'Release tag contains a cycle at tag object*' -Action {
+                & $scriptPath `
+                    -TagObject (New-GitObject -Type tag -Sha $outerTagSha) `
+                    -ExpectedCommit $resolvedCommit `
+                    -ResolveAnnotatedTag {
+                        [pscustomobject]@{ object = New-GitObject -Type tag -Sha $outerTagSha }
+                    }
+            }
         }
     }
 )

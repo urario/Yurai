@@ -7,14 +7,21 @@ step.
 
 ## Normal release
 
-1. Run `Release package` on the `v0.1.0` tag and wait for the package, symbol package,
-   metadata, dependency, repository-commit, and SourceLink checks to pass.
-2. Record the successful run ID from that workflow. The artifact name contains both
-   `v0.1.0` and the verified commit SHA.
-3. Run `Publish package` with `release_tag=v0.1.0`, that run ID, `dry_run=false`, and
-   `symbols_only=false`. Approve the `release` Environment only after checking the
+1. Confirm that `v0.1.0` resolves to the intended reviewed release commit, then wait
+   for the tag-push `Release package` run to pass. Both lightweight and annotated tags
+   are supported. The run verifies the package, symbol package, metadata, dependencies,
+   repository commit, and SourceLink information.
+2. Record the ID of that successful `Release package` run. It must have event `push`,
+   head branch `v0.1.0`, and a head SHA equal to the commit currently resolved from the
+   tag. Confirm that its artifact name contains both `v0.1.0` and that SHA.
+3. Run the current `Publish package` workflow from `main` with `release_tag=v0.1.0`,
+   that run ID, `dry_run=true`, and `symbols_only=false`. The workflow stops before
+   artifact download if the tag no longer resolves to the selected run's exact head
+   SHA, including when an annotated tag must be dereferenced.
+4. After the dry run succeeds, repeat with the same tag and run ID, `dry_run=false`,
+   and `symbols_only=false`. Approve the `release` Environment only after checking the
    selected run and artifact.
-4. Confirm the package, README, license, and symbols on NuGet.org before closing
+5. Confirm the package, README, license, and symbols on NuGet.org before closing
    Issue #30.
 
 ## Symbols-only recovery
