@@ -1,0 +1,119 @@
+name: Publish package
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Verified release tag to promote
+        required: true
+        default: 'v0.1.0'
+        type: choice
+        options:
+          - 'v0.1.0'
+      release_run_id:
+        description: Successful release workflow run ID containing the verified artifact
+        required: true
+        type: string
+      dry_run:
+        description: Verify the package without publishing it
+        required: true
+        default: true
+        type: boolean
+      symbols_only:
+        description: Publish only the verified symbols package after a primary package succeeded
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.release_tag }}-${{ inputs.release_run_id }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify and optionally publish package
+    runs-on: ubuntu-latest
+    environment: release
+    timeout-minutes: 15
+    steps:
+      - name: Validate release run
+        id: release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_RUN_ID: ${{ inputs.release_run_id }}
+        run: |
+          if ($env:RELEASE_RUN_ID -notmatch '^[0-9]+$') { throw 'release_run_id must be numeric.' }
+          $run = gh run view $env:RELEASE_RUN_ID --repo $env:GITHUB_REPOSITORY --json event,headBranch,headSha,status,conclusion,workflowName | ConvertFrom-Json
+          if ($run.workflowName -ne 'Release package') { throw "The selected run is not the Release package workflow." }
+          if ($run.event -notmatch '^push$') { throw 'The selected release run was not triggered by a tag push.' }
+          if ($run.headBranch -ne $env:RELEASE_TAG) { throw 'The selected run tag does not match release_tag.' }
+          if ($run.status -ne 'completed' -or $run.conclusion -ne 'success') { throw 'The selected release run did not complete successfully.' }
+          $tagRef = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$env:RELEASE_TAG" | ConvertFrom-Json
+          $tagObject = $tagRef.object
+          if ($tagObject.type -eq 'tag') {
+            $tagObject = gh api "repos/$env:GITHUB_REPOSITORY/git/tags/$($tagObject.sha)" | ConvertFrom-Json
+          }
+          if ($tagObject.type -ne 'commit' -or $tagObject.sha -ne $run.headSha) { throw 'The current release tag does not point to the selected release run commit.' }
+          "head_sha=$($run.headSha)" >> $env:GITHUB_OUTPUT
+          "artifact_name=yurai-package-$env:RELEASE_TAG-$($run.headSha)" >> $env:GITHUB_OUTPUT
+
+      - name: Checkout verified release commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.release.outputs.head_sha }}
+
+      - name: Confirm checked out commit
+        shell: pwsh
+        env:
+          EXPECTED_COMMIT: ${{ steps.release.outputs.head_sha }}
+        run: |
+          $actualCommit = git rev-parse HEAD
+          if ($actualCommit -ne $env:EXPECTED_COMMIT) { throw "Checked out commit '$actualCommit' does not match verified release commit '$env:EXPECTED_COMMIT'." }
+
+      - name: Setup .NET SDK for NuGet publishing
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.301
+
+      - name: Download verified package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.release.outputs.artifact_name }}
+          path: artifacts/package
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.release_run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Verify package
+        shell: pwsh
+        run: >-
+          ./eng/release/Verify-NuGetPackage.ps1
+          -PackagePath artifacts/package/Yurai.0.1.0.nupkg
+          -SymbolsPackagePath artifacts/package/Yurai.0.1.0.snupkg
+          -ExpectedPackageId Yurai
+          -ExpectedVersion 0.1.0
+          -ExpectedRepositoryCommit ${{ steps.release.outputs.head_sha }}
+
+      - name: Publish package to NuGet.org
+        if: ${{ inputs.dry_run == false && inputs.symbols_only == false }}
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) { throw 'NUGET_API_KEY is not configured.' }
+          dotnet nuget push 'artifacts/package/Yurai.0.1.0.nupkg' --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+
+      - name: Publish symbols package to NuGet.org
+        if: ${{ inputs.dry_run == false }}
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) { throw 'NUGET_API_KEY is not configured.' }
+          dotnet nuget push 'artifacts/package/Yurai.0.1.0.snupkg' --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
