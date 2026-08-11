@@ -4,8 +4,8 @@ title: Introduce a closed-set generic Traced carrier for decimal and Int64
 description: Yurai 0.2.0 introduces Traced<T> for decimal and Int64 with library-owned type semantics, a homogeneous typed evidence DAG, and JSON schema v2.
 tags: [api, types, generics, evidence, json, compatibility, adr]
 status: draft
-requirements: [RQ-001, RQ-004, RQ-008, RQ-009, RQ-010, RQ-013, RQ-015, RQ-023, RQ-027, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-11T15:32:43+09:00 }
+requirements: [RQ-001, RQ-004, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-015, RQ-023, RQ-027, RQ-028, RQ-029]
+generated: { by: codex/2026-08, at: 2026-08-11T17:44:06+09:00 }
 sources:
   - id: issue-67
     resource: https://github.com/urario/Yurai/issues/67
@@ -38,10 +38,12 @@ The architecture review therefore triggered the issue's documented escape condit
 user-defined values and floating-point values require a separate later decision rather
 than forcing their semantics into the first generic carrier.
 
-0.2.0 may make a source and binary breaking change. The 0.1.0 package was still
-unpublished when ADR-0017 was accepted, so permanent compatibility carriers are not
-justified. Source ergonomics that can be preserved without adding a second carrier are
-preserved.
+0.2.0 may make a source and binary breaking change because the initial release is
+explicitly SemVer 0.x and the public API is not frozen before 1.0. The earlier decision
+was inexpensive while 0.1.0 was unpublished, but 0.2.0 still has a real migration cost
+for 0.1.x users; release documentation must account for it. Permanent compatibility
+carriers are not justified, while source ergonomics that can be preserved without a
+second carrier are preserved.
 
 ## Decision
 
@@ -92,7 +94,7 @@ public static class Traced
 }
 ```
 
-`Traced<T>` retains the type-independent provenance surface: `Value`, `As`,
+`Traced<T>` retains the type-independent evidence surface: `Value`, `As`,
 `DependsOn`, `Inputs`, `Trace`, `Explain`, and `ToJson`.
 
 No implicit or explicit conversion operators are added between `Traced<T>` and `T`.
@@ -178,7 +180,7 @@ Yurai distinguishes three layers:
 
 ```text
 Value          native runtime value
-Representation lossless provenance encoding of that native value
+Representation lossless evidence encoding of that native value
 Presentation   human-oriented formatting
 ```
 
@@ -186,7 +188,7 @@ Presentation   human-oriented formatting
 
 For decimal, representation preserves the native decimal representation relevant to the
 existing fidelity contract, including scale and signed zero. `1m` and `1.00m` therefore
-need not have the same provenance representation even though they are numerically equal.
+need not have the same evidence representation even though they are numerically equal.
 For Int64, the representation is an invariant base-10 integer string.
 
 Source-code lexical spelling is outside the fidelity boundary. Yurai records the runtime
@@ -256,6 +258,14 @@ model without pretending Yurai has solved arbitrary numeric or domain values. Th
 abstraction stays small: one generic carrier plus one inference companion, with no policy
 types or registration lifecycle exposed to consumers.
 
+The public CLR type-definition inventory nevertheless grows from one to two: the
+non-generic 0.1.x carrier is replaced by `Traced<T>` plus static `Traced`. The companion
+adds two explicit `OfInt64` overloads and one Int64 overload each for `Min` and `Max`;
+`Round` moves to an exact-receiver decimal extension, and `ToJsonV1` is a temporary
+schema-v1 migration route. These are additional declared members, but not an open policy
+surface: each route either selects one of the two approved type contracts or preserves a
+bounded compatibility exit. This is the accepted RQ-015 trade-off.
+
 The cost is an intentional closed-world generic API. C# still shows the generic carrier
 members for a syntactically nameable unsupported `T`; Yurai prevents supported
 initialized instances of such types by controlling all public construction. This
@@ -266,11 +276,26 @@ policy types into every consumer signature.
 `Traced<decimal>`. Code that explicitly names the old non-generic carrier, stores
 `Func<Traced>`, or depends on its binary identity must migrate to `Traced<decimal>`.
 This is an accepted 0.2.0 breaking change. No compatibility wrapper carrier is retained.
+Yurai does not ship a decimal alias type; consumers that want a domain-local shorthand
+may define a closed-type alias such as `using Money = Yurai.Traced<decimal>;`.
+
+Inferred `var` examples generally remain source-compatible, while explicit `Traced`
+declarations, fields, properties, delegate types, and generic arguments require the
+closed type. The compiler may report CS0723 or CS0718 because non-generic `Traced` is now
+static, without suggesting `Traced<decimal>`. Migration notes must map those diagnostics
+to the required type change.
 
 `Traced.Of(1, "Count")` continues to select the decimal factory by the existing
 implicit conversion. Int64 adoption is explicit through `Traced.OfInt64(...)`,
 preventing a source-compatible call from silently acquiring integer division and
 overflow semantics.
+
+That compatibility choice has a reverse hazard: passing a plain `long` or `int` to
+`Traced.Of(...)` still creates `Traced<decimal>` through implicit conversion. A caller
+who intended Int64 semantics must select `OfInt64` explicitly, and the compiler does not
+diagnose the omission. The `Of(decimal)` XML documentation, README, migration guide, and
+release notes must call out this behavior; an analyzer or another API mitigation would
+require a separate reserved decision.
 
 The non-generic companion means the assembly again contains two public CLR type
 definitions, `Traced` and `Traced<T>`. That is the accepted cost of retaining

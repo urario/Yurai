@@ -5,7 +5,7 @@ description: Architecture drivers, evidence model, runtime boundaries, and imple
 tags: [architecture, evidence, computation-lineage, decimal, int64, generics]
 status: draft
 requirements: [RQ-001, RQ-002, RQ-003, RQ-004, RQ-005, RQ-007, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-014, RQ-015, RQ-016, RQ-017, RQ-018, RQ-019, RQ-020, RQ-021, RQ-022, RQ-023, RQ-024, RQ-025, RQ-026, RQ-027, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-11T15:32:43+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-11T17:44:06+09:00 }
 sources:
   - id: issue-17
     resource: https://github.com/urario/Yurai/issues/17
@@ -177,7 +177,7 @@ is immutable. Thread safety is a property of the object graph, not a lock protoc
 - Each collapsing traversal costs `O(V + E)` time and `O(V)` temporary identity state.
   `Trace` is output-sensitive: its time and result size are proportional to the total
   returned path data, whose path count can be exponential in `V` for a heavily shared
-  DAG. No result is cached in the MVP: repeated calls recompute representations and
+  DAG. No result is cached in 0.1.x: repeated calls recompute representations and
   queries from immutable evidence rather than retaining large strings or synchronized
   caches.
 - Serialization writes directly to a `StringBuilder` or equivalent BCL buffer. It does
@@ -221,14 +221,30 @@ at an invisible conversion site, admit accidental entry into a traced region, an
 complicate overload resolution. `Traced.Of(1, ...)` continues to mean decimal; Int64
 entry is explicit through `Traced.OfInt64(...)`.
 
+For 0.2.0, the public CLR type-definition inventory grows from one to two:
+`Traced<T>` is the carrier and non-generic `Traced` is the inference companion. The
+companion adds two `OfInt64` overloads and one Int64 overload each for `Min` and `Max`;
+`Round` moves to an exact-receiver decimal extension and `ToJsonV1` is a temporary
+decimal migration route. The arithmetic, naming, selection, rendering, and query
+concepts do not multiply into public policy types. The additional declared members are
+accepted because they make Int64 semantics explicit or preserve the schema-v1 migration
+path without a second carrier.
+
 ### 3.6 Representation separation
+
+The exact text and schema-v1 contracts in this section describe the shipped 0.1.x
+decimal adapters. ADR-0018 owns the 0.2.0 `Value != Representation != Presentation`
+boundary and schema-v2 logical contract; its implementation and schema document must
+add type-specific output evidence without changing the shared traversal rules below.
 
 The traversal kernel exposes only internal node-kind and child access to internal
 consumers. Each consumer owns its own policy:
 
 - `Explain` owns indentation, number formatting, labels, and shared-node reference
   presentation.
-- `ToJson` owns schema fields, escaping, decimal encoding, and document-local IDs.
+- `ToJson` owns schema fields, escaping, value representation, and document-local IDs.
+  Schema v1 uses decimal encoding; schema v2 adds a document logical type and per-node
+  lossless representations as defined by ADR-0018.
 - `DependsOn`, `Trace`, and `Inputs` own name matching, path construction, ordering, and
   result projection.
 
@@ -250,7 +266,7 @@ silently discard paths through shared nodes. The closed node family exposes an i
 visitor seam so adding a node kind requires every representation adapter to handle it at
 compile time; adapters still own the content they produce for each kind.
 
-#### 3.6.1 MVP Explain text contract
+#### 3.6.1 0.1.x Explain text contract
 
 `Explain()` emits `Result`, the invariant decimal result indented by two spaces,
 `Derivation`, and then the complete evidence tree. Each derivation depth adds two spaces,
@@ -341,7 +357,7 @@ the syntactic existence of `Traced<T>` does not approve arbitrary `T`.
 
 ### 4.6 Caching
 
-- **Options:** cache text/query results on nodes; external weak cache; no MVP cache.
+- **Options:** cache text/query results on nodes; external weak cache; no 0.1.x cache.
 - **Evaluation axes:** repeated-call speed, retained memory, synchronization,
   complexity.
 - **Recommendation:** no cache until issue #27 demonstrates a material repeated-call
@@ -382,13 +398,18 @@ behavior stated here; exact signatures still receive the normal public-surface r
 | Q13 branch-condition dependency | Do not create a dependency edge from a plain `bool`; document and test that condition-only inputs are outside v1 dependency queries. | Control dependencies require a separately approved traced-predicate capability. |
 | Q14 shared-reference notation | Assign deterministic document-local numeric IDs; text uses a concise ID reference and JSON uses the same identity mapping. | IDs are unique within one output and explicitly unstable across outputs or graph revisions. |
 
-Q11 is folded into Q5 because decimal encoding is part of the JSON schema decision.
+For 0.1.x, Q11 is folded into Q5 because decimal encoding is part of the JSON schema
+v1 decision.
 The architecture-significant directions are separated into ADRs so that each can be
 revisited independently. Q2 and Q7-Q10 are public behavior contracts recorded here and
 in issue #18; their exact spellings and signatures remain reviewable implementation
 detail within the approved semantics.
 
-## 6. Implementation slices and test seams
+## 6. 0.1.x implementation slices and test seams
+
+The completed slices below describe the shipped decimal implementation. ADR-0018's
+0.2.0 carrier, Int64, schema-v2, and migration work are split into new slices only after
+the draft decision is approved.
 
 | Slice | Input contract | Output contract | Test seam and required scenarios |
 | --- | --- | --- | --- |
@@ -413,7 +434,7 @@ not yet visible through a public output slice.
 | --- | --- |
 | Correctness | Native operation is the oracle; example and property tests compare values, scale, and exception types. |
 | Explainability | Domain names and decision metadata survive independently of formatting; domain samples provide acceptance examples. |
-| Simplicity and usability | One eager value carrier, ordinary operators, no public graph API, and an explicit traced boundary. |
+| Simplicity and usability | One eager carrier per supported `T`, ordinary operators, no public graph API, and an explicit traced boundary. |
 | Maintainability and testability | Closed internal node kinds, representation adapters, friend-assembly structural seam, and RQ-tagged behavior tests. |
 | Extensibility | 0.1.x remains decimal-concrete; 0.2.0 exposes only the ADR-0018 closed generic contract and no open generic-math or registration framework. |
 | Performance and memory | One node per recorded action, fixed child fields, structural sharing, iterative `O(V+E)` walks; benchmark before optimization. |
@@ -433,7 +454,7 @@ not yet visible through a public output slice.
 | RQ-005 | Lazy selected-only branch evaluation and recorded outcome. |
 | RQ-008, RQ-009, RQ-010 | Native operators, anonymous inputs, selection metadata, and recorded native rounding. |
 | RQ-011 | Immutable DAG, reference sharing, linear node growth, iterative traversal, and Q14 reference identity. |
-| RQ-013, RQ-020, RQ-021, RQ-027 | Versioned JSON adapter with invariant decimal text, caller-owned export material, and no storage or rich renderer. |
+| RQ-013, RQ-020, RQ-021, RQ-027 | Versioned JSON adapters with schema-v1 invariant decimal text and schema-v2 type-specific lossless representation, caller-owned export material, and no storage or rich renderer. |
 | RQ-015 | Hidden graph model, explicit traced boundary, purpose-mapped logical operations, and transparent dual inventory. |
 | RQ-016, RQ-019, RQ-022 | Eager concrete calculation inside an explicit traced region only. |
 | RQ-023, RQ-028, RQ-029 | Decimal-only 0.1.x; closed decimal + Int64 0.2.0 carrier; explicit per-type contracts and no speculative open policy framework. |
