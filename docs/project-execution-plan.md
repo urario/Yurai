@@ -82,7 +82,7 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 | リリース | 内容 | 状態 |
 |---|---|---|
 | **0.1.0** | NuGet 初版 | 進行中 |
-| **0.2.0** | 第2の値型 — `Traced<T>` + 演算ポリシー抽象 | 設計中 |
+| **0.2.0** | 第2の値型 — closed `Traced<T>` + 型別 internal binding | 設計中 |
 | 0.3.0 | ExplainOptions(深さ制限・カルチャ・出力形式)— RQ-026 | 未着手 |
 | 0.4.0 | traced predicate(条件の系譜) | 未着手 |
 | 0.5.0 | DAG 差分比較 + JSON import | 未着手 |
@@ -108,22 +108,28 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 ### 0.2.0: 第2の値型
 
 `decimal` 以外の値型を導入する。**需要待ちではなく、初版直後の次マイルストーンとして日程に固定**
-した(maintainer 判断)。対象候補は次の3系統すべて:
+した(maintainer 判断)。#67 の設計調査と architecture review により、0.2.0 の supported set は
+**`decimal + System.Int64(long)`** に確定した。浮動小数点とユーザー定義値オブジェクトは、同じ
+policy で安全に一般化できないため後続 ADR へ延期する。
 
-- `long` / `int` — 最小通貨単位、件数
-- ドメイン値オブジェクト(Money 等のユーザー定義型)
-- `double` / `float`
+公開 carrier は `Traced<T>`、non-generic `Traced` は carrier ではなく型推論用 static companion
+とする。decimal は `Traced.Of(...)` の綴りを維持し、Int64 は既存呼び出しの意味を変えない
+`Traced.OfInt64(...)` から明示的に導入する。public generic factory、public policy/profile、mutable
+registry、consumer registration は導入しない。
 
-実現方式は **`netstandard2.0` 単一ターゲット + 演算ポリシー抽象**。多ターゲット化も
-`INumber<T>` も採らない。`INumber<T>` はユーザー定義 Money に向かず(`Money × Money` は
-無意味で、Money 側に汎用数値型としての重い実装を強いる)、Yurai が必要とする演算だけを
-定義するポリシー抽象の方が3系統を素直に覆う。加えて RQ-004 を一切崩さない。
+実装は **`netstandard2.0` 単一ターゲット + closed type ごとの immutable internal binding**。
+多ターゲット化も `INumber<T>` も採らず、runtime dependency 0 を維持する。evidence は
+homogeneous `EvidenceNode<T>` DAG とし、heterogeneous graph や `object Value` は導入しない。
+generic JSON export は schema v2、schema v1 は凍結し、decimal の v1 emitter だけを 0.2.x の
+migration bridge として残す。
 
 | Issue | 内容 | 担当 | 依存 |
 |---|---|---|---|
 | [#67](https://github.com/urario/Yurai/issues/67) | 方式設計 + ADR | Claude → Human決定 | なし |
 | [#68](https://github.com/urario/Yurai/issues/68) | 生存ミュータントの棚卸し | Codex → Claude レビュー | 実装着手前 |
-| 未起票 | 実装スライス(S8 以降) | Codex | #67 の ADR 承認後に分割起票 |
+| 未起票 | carrier / evidence generic化、Int64 API・忠実性テスト(S8 以降) | Codex → Claudeレビュー | #67 の ADR 承認後に分割起票 |
+| 未起票 | JSON schema v2 実装・schema文書・互換性テスト | Codex → Claudeレビュー | carrier / evidence 実装後 |
+| 未起票 | 移行ガイド、README、XML docs、リリースノート同期 | Claude → Human | 公開API・schema v2 実装後 |
 
 `break` 閾値は **90 に設定済み**(`low` 90 / `high` 95)。実測ベースラインは main HEAD
 `7ca744b` の deep レーン実行。0.2.0 の移行はノード階層・フォーマッタ・JSON・依存クエリ・
@@ -131,11 +137,17 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 気づけない — それを避けるために公開前に設定した。#68 には、その計測で生存していた
 ミュータントの棚卸しだけが残っている。
 
-この決定は **ADR-0009**(多型ターゲティングの延期)と **ADR-0016**(carrier を非ジェネリックな
-`Traced` と命名)を supersede する。**ADR-0014**(decimal を不変文化テキストで符号化)の
-一般化に伴い JSON schema v2 が必要になり、`docs/json-schema-v1.md` は v1 のまま凍結する。
-**RQ-028** の昇格と **RQ-023** の scope 見直しも伴う。これらの書き換えは #67 の ADR の PR で
-行う — 本書が先に要求を書き換えると正本が二重化する。
+この決定は **ADR-0009**(多型ターゲティングの延期)、**ADR-0016**(carrier を非ジェネリックな
+`Traced` と命名)、**ADR-0017**(生成メソッドを carrier に置く)を supersede する。ただし
+ADR-0017 の namespace-name collision を再導入しない原則は維持する。**ADR-0014** の decimal
+schema v1 は変更せず、型中立な export は JSON schema v2 として追加する。**RQ-023** は 0.1.x
+の decimal-only boundとして同期する。**RQ-028** は長期的な型拡張の選択肢を記録する P2 のまま
+維持し、Int64 を 0.2.0 の必須範囲にする根拠は ADR-0018 と本リリース計画が持つ。
+
+ライブラリ側に decimal の別名型は追加しない。移行ガイドでは必要に応じて利用者側の
+`using Money = Yurai.Traced<decimal>;` を案内する。`var` を使う既存例は概ね維持できる一方、
+明示的な `Traced` 型注釈、フィールド / プロパティ、`Func<Traced>`、型引数は
+`Traced<decimal>` へ変更が必要で、CS0723 / CS0718 と移行方法の対応を記載する。
 
 ### 0.3.0 以降
 

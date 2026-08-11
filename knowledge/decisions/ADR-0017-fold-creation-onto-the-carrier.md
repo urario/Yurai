@@ -3,9 +3,10 @@ type: ADR
 title: Fold the creation methods onto the carrier and remove the facade type
 description: A type named after its own namespace cannot be reached from a consumer's namespace, so Traced gains the creation methods and the Yurai facade is deleted.
 tags: [api, naming, usability, adr]
-status: stable
+status: deprecated
+superseded_by: ADR-0018
 requirements: [RQ-002, RQ-015]
-generated: { by: claude-code/2.0.76, at: 2026-08-10T20:45:00+09:00 }
+generated: { by: claude-code/2.0.76, at: 2026-08-11T15:32:43+09:00 }
 sources:
   - id: issue-66
     resource: https://github.com/urario/Yurai/issues/66
@@ -19,6 +20,11 @@ sources:
 ---
 
 # ADR-0017: Fold the creation methods onto the carrier and remove the facade type
+
+> **Superseded by [ADR-0018](ADR-0018-introduce-closed-set-generic-traced-carrier.md).**
+> The namespace-collision finding remains binding, but 0.2.0 places creation methods on
+> the arity-different non-generic inference companion rather than the generic carrier.
+> The original reasoning remains below.
 
 ## Context
 
