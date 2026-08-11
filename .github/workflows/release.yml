@@ -1,0 +1,95 @@
+name: Release package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Build and verify package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET from global.json
+        uses: actions/setup-dotnet@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Resolve and validate package version
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content src/Yurai/Yurai.csproj
+          $version = [string]$project.Project.PropertyGroup.Version
+          if ($version -notmatch '^0\.1\.0$') { throw "The project version must be 0.1.0, got '$version'." }
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            if ($env:GITHUB_REF_NAME -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw "Invalid release tag '$env:GITHUB_REF_NAME'." }
+            if ($env:GITHUB_REF_NAME.Substring(1) -ne $version) { throw "Tag version and project version do not match." }
+          }
+          "value=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore Yurai.sln
+
+      - name: Build
+        run: dotnet build Yurai.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Yurai.sln --configuration Release --no-build --no-restore
+
+      - name: Verify formatting
+        run: dotnet format Yurai.sln --verify-no-changes --no-restore
+
+      - name: Pack
+        run: dotnet pack src/Yurai/Yurai.csproj --configuration Release --no-build --no-restore --output artifacts/package
+
+      - name: Verify package
+        shell: pwsh
+        run: >-
+          ./eng/release/Verify-NuGetPackage.ps1
+          -PackagePath artifacts/package/Yurai.${{ steps.version.outputs.value }}.nupkg
+          -SymbolsPackagePath artifacts/package/Yurai.${{ steps.version.outputs.value }}.snupkg
+          -ExpectedPackageId Yurai
+          -ExpectedVersion ${{ steps.version.outputs.value }}
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: yurai-package-${{ steps.version.outputs.value }}
+          path: artifacts/package/*
+          if-no-files-found: error
+          retention-days: 30
+
+  draft-release:
+    name: Create draft GitHub release
+    if: github.ref_type == 'tag'
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" --draft --title "$RELEASE_TAG" --generate-notes

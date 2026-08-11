@@ -1,0 +1,75 @@
+name: Publish package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version to publish
+        required: true
+        default: '0.1.0'
+        type: string
+      dry_run:
+        description: Verify the package without publishing it
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify and optionally publish package
+    runs-on: ubuntu-latest
+    environment: release
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET from global.json
+        uses: actions/setup-dotnet@v4
+
+      - name: Restore
+        run: dotnet restore Yurai.sln
+
+      - name: Build
+        run: dotnet build Yurai.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Yurai.sln --configuration Release --no-build --no-restore
+
+      - name: Validate requested version
+        shell: pwsh
+        run: |
+          if ('${{ inputs.version }}' -ne '0.1.0') { throw "Only the planned 0.1.0 release may be published by this workflow." }
+
+      - name: Pack requested version
+        run: >-
+          dotnet pack src/Yurai/Yurai.csproj
+          --configuration Release --no-build --no-restore
+          --output artifacts/package
+          -p:PackageVersion=${{ inputs.version }}
+
+      - name: Verify package
+        shell: pwsh
+        run: >-
+          ./eng/release/Verify-NuGetPackage.ps1
+          -PackagePath artifacts/package/Yurai.${{ inputs.version }}.nupkg
+          -SymbolsPackagePath artifacts/package/Yurai.${{ inputs.version }}.snupkg
+          -ExpectedPackageId Yurai
+          -ExpectedVersion ${{ inputs.version }}
+
+      - name: Publish package to NuGet.org
+        if: ${{ inputs.dry_run == false }}
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) { throw 'NUGET_API_KEY is not configured.' }
+          dotnet nuget push "artifacts/package/Yurai.${{ inputs.version }}.nupkg" --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "artifacts/package/Yurai.${{ inputs.version }}.snupkg" --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate

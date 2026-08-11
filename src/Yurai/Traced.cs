@@ -270,6 +270,11 @@ public readonly struct Traced
         return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Subtract, (leftValue, rightValue) => leftValue - rightValue);
     }
 
+    /// <summary>
+    /// Subtracts a decimal value from a traced value using native decimal arithmetic.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The traced operand is uninitialized.</exception>
+    /// <exception cref="OverflowException">The native decimal operation overflows.</exception>
     public static Traced operator -(Traced left, decimal right)
     {
         EvidenceNode leftRoot = left.GetRoot();
@@ -277,6 +282,11 @@ public readonly struct Traced
         return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Subtract, (leftValue, rightValue) => leftValue - rightValue);
     }
 
+    /// <summary>
+    /// Subtracts a traced value from a decimal value using native decimal arithmetic.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The traced operand is uninitialized.</exception>
+    /// <exception cref="OverflowException">The native decimal operation overflows.</exception>
     public static Traced operator -(decimal left, Traced right)
     {
         EvidenceNode leftRoot = new InputEvidenceNode(left, null);
@@ -296,6 +306,11 @@ public readonly struct Traced
         return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Multiply, (leftValue, rightValue) => leftValue * rightValue);
     }
 
+    /// <summary>
+    /// Multiplies a traced value by a decimal value using native decimal arithmetic.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The traced operand is uninitialized.</exception>
+    /// <exception cref="OverflowException">The native decimal operation overflows.</exception>
     public static Traced operator *(Traced left, decimal right)
     {
         EvidenceNode leftRoot = left.GetRoot();
@@ -303,6 +318,11 @@ public readonly struct Traced
         return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Multiply, (leftValue, rightValue) => leftValue * rightValue);
     }
 
+    /// <summary>
+    /// Multiplies a decimal value by a traced value using native decimal arithmetic.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The traced operand is uninitialized.</exception>
+    /// <exception cref="OverflowException">The native decimal operation overflows.</exception>
     public static Traced operator *(decimal left, Traced right)
     {
         EvidenceNode leftRoot = new InputEvidenceNode(left, null);
@@ -323,6 +343,12 @@ public readonly struct Traced
         return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Divide, (leftValue, rightValue) => leftValue / rightValue);
     }
 
+    /// <summary>
+    /// Divides a traced value by a decimal value using native decimal arithmetic.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The traced operand is uninitialized.</exception>
+    /// <exception cref="DivideByZeroException">The decimal operand is zero.</exception>
+    /// <exception cref="OverflowException">The native decimal operation overflows.</exception>
     public static Traced operator /(Traced left, decimal right)
     {
         EvidenceNode leftRoot = left.GetRoot();
@@ -330,6 +356,12 @@ public readonly struct Traced
         return CreateBinary(leftRoot, rightRoot, BinaryOperationKind.Divide, (leftValue, rightValue) => leftValue / rightValue);
     }
 
+    /// <summary>
+    /// Divides a decimal value by a traced value using native decimal arithmetic.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The traced operand is uninitialized.</exception>
+    /// <exception cref="DivideByZeroException">The traced operand is zero.</exception>
+    /// <exception cref="OverflowException">The native decimal operation overflows.</exception>
     public static Traced operator /(decimal left, Traced right)
     {
         EvidenceNode leftRoot = new InputEvidenceNode(left, null);

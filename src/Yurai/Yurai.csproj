@@ -1,5 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <EnforceZeroDependencies>true</EnforceZeroDependencies>
+    <PackageId>Yurai</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>urario</Authors>
+    <Description>Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with immutable, structurally shared derivation evidence and first-class dependency-path queries, in a zero-runtime-dependency netstandard2.0 library.</Description>
+    <PackageTags>computation-lineage;explainable;derivation;dependency-graph;decimal;dotnet</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/urario/Yurai</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub"
+                      PrivateAssets="All"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>
