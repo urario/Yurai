@@ -3,10 +3,16 @@ name: Publish package
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: Package version to publish
+      release_tag:
+        description: Verified release tag to promote
         required: true
-        default: '0.1.0'
+        default: 'v0.1.0'
+        type: choice
+        options:
+          - 'v0.1.0'
+      release_run_id:
+        description: Successful release workflow run ID containing the verified artifact
+        required: true
         type: string
       dry_run:
         description: Verify the package without publishing it
@@ -18,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.version }}
+  group: ${{ github.workflow }}-${{ inputs.release_tag }}-${{ inputs.release_run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -30,39 +36,41 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.release_tag }}
 
-      - name: Setup .NET from global.json
-        uses: actions/setup-dotnet@v4
-
-      - name: Restore
-        run: dotnet restore Yurai.sln
-
-      - name: Build
-        run: dotnet build Yurai.sln --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test Yurai.sln --configuration Release --no-build --no-restore
-
-      - name: Validate requested version
+      - name: Validate release run
+        id: release
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_RUN_ID: ${{ inputs.release_run_id }}
         run: |
-          if ('${{ inputs.version }}' -ne '0.1.0') { throw "Only the planned 0.1.0 release may be published by this workflow." }
+          if ($env:RELEASE_RUN_ID -notmatch '^[0-9]+$') { throw 'release_run_id must be numeric.' }
+          $run = gh run view $env:RELEASE_RUN_ID --repo $env:GITHUB_REPOSITORY --json event,headBranch,headSha,status,conclusion,workflowName | ConvertFrom-Json
+          if ($run.workflowName -ne 'Release package') { throw "The selected run is not the Release package workflow." }
+          if ($run.event -notmatch '^push$') { throw 'The selected release run was not triggered by a tag push.' }
+          if ($run.headBranch -ne $env:RELEASE_TAG) { throw 'The selected run tag does not match release_tag.' }
+          if ($run.status -ne 'completed' -or $run.conclusion -ne 'success') { throw 'The selected release run did not complete successfully.' }
+          "artifact_name=yurai-package-$env:RELEASE_TAG-$($run.headSha)" >> $env:GITHUB_OUTPUT
 
-      - name: Pack requested version
-        run: >-
-          dotnet pack src/Yurai/Yurai.csproj
-          --configuration Release --no-build --no-restore
-          --output artifacts/package
-          -p:PackageVersion=${{ inputs.version }}
+      - name: Download verified package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.release.outputs.artifact_name }}
+          path: artifacts/package
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.release_run_id }}
+          github-token: ${{ github.token }}
 
       - name: Verify package
         shell: pwsh
         run: >-
           ./eng/release/Verify-NuGetPackage.ps1
-          -PackagePath artifacts/package/Yurai.${{ inputs.version }}.nupkg
-          -SymbolsPackagePath artifacts/package/Yurai.${{ inputs.version }}.snupkg
+          -PackagePath artifacts/package/Yurai.0.1.0.nupkg
+          -SymbolsPackagePath artifacts/package/Yurai.0.1.0.snupkg
           -ExpectedPackageId Yurai
-          -ExpectedVersion ${{ inputs.version }}
+          -ExpectedVersion 0.1.0
 
       - name: Publish package to NuGet.org
         if: ${{ inputs.dry_run == false }}
@@ -71,5 +79,5 @@ jobs:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) { throw 'NUGET_API_KEY is not configured.' }
-          dotnet nuget push "artifacts/package/Yurai.${{ inputs.version }}.nupkg" --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
-          dotnet nuget push "artifacts/package/Yurai.${{ inputs.version }}.snupkg" --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push 'artifacts/package/Yurai.0.1.0.nupkg' --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --no-symbols
+          dotnet nuget push 'artifacts/package/Yurai.0.1.0.snupkg' --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
