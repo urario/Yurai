@@ -1,9 +1,4 @@
 <Project>
-  <ItemGroup>
-    <!-- SourceLink contributes build-time metadata only and must not become a package dependency. -->
-    <ZeroDependencyAllowedPackage Include="Microsoft.SourceLink.GitHub" />
-  </ItemGroup>
-
   <!-- Explicitly listed packages are reviewed build-time exceptions and must not carry runtime assets. -->
   <Target
     Name="RejectExternalRuntimePackageReferences"

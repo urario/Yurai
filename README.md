@@ -2,10 +2,10 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/urario/Yurai/ci.yml?branch=main&label=CI)](https://github.com/urario/Yurai/actions/workflows/ci.yml)
 [![Deep quality](https://img.shields.io/github/actions/workflow/status/urario/Yurai/deep.yml?branch=main&label=deep%20quality)](https://github.com/urario/Yurai/actions/workflows/deep.yml)
-[![Mutation gate](https://img.shields.io/badge/mutation%20gate-%E2%89%A590%25-brightgreen)](https://github.com/urario/Yurai/blob/main/knowledge/process/testing-and-quality.md#mutation-testing)
+[![Mutation gate](https://img.shields.io/badge/mutation%20gate-%E2%89%A590%25-brightgreen)](https://github.com/urario/Yurai/blob/v0.1.0/knowledge/process/testing-and-quality.md#mutation-testing)
 [![netstandard2.0](https://img.shields.io/badge/netstandard-2.0-512BD4)](https://learn.microsoft.com/dotnet/standard/net-standard)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/urario/Yurai/blob/main/Directory.Build.targets)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/urario/Yurai/blob/main/LICENSE)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/urario/Yurai/blob/v0.1.0/Directory.Build.targets)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/urario/Yurai/blob/v0.1.0/LICENSE)
 
 **Yurai is a lightweight computation-lineage library for explainable domain calculations in .NET.**
 
@@ -106,7 +106,7 @@ Three ways out of the evidence:
 | | |
 |---|---|
 | `Explain()` | The human-readable derivation above — for a code review, a ticket, or a conversation with a domain expert |
-| [`ToJson()`](https://github.com/urario/Yurai/blob/main/docs/json-schema-v1.md) | The same evidence as versioned JSON, for systems outside the process. It is *material* for an audit trail kept by your systems, not an audit trail in itself |
+| [`ToJson()`](https://github.com/urario/Yurai/blob/v0.1.0/docs/json-schema-v1.md) | The same evidence as versioned JSON, for systems outside the process. It is *material* for an audit trail kept by your systems, not an audit trail in itself |
 | `DependsOn`, `Trace`, `Inputs` | The same evidence queried in code — assert in a test that a calculation still uses an input, or route a question by what a value depends on |
 
 ```csharp
@@ -130,8 +130,8 @@ result can grow exponentially relative to the number of unique nodes in a heavil
 
 Two worked examples, with their expected output:
 
-- [Pricing calculation](https://github.com/urario/Yurai/blob/main/samples/Pricing/README.md) — discount, tax, rounding.
-- [Payroll calculation](https://github.com/urario/Yurai/blob/main/samples/Payroll/README.md) — overtime, social insurance, progressive
+- [Pricing calculation](https://github.com/urario/Yurai/blob/v0.1.0/samples/Pricing/README.md) — discount, tax, rounding.
+- [Payroll calculation](https://github.com/urario/Yurai/blob/v0.1.0/samples/Payroll/README.md) — overtime, social insurance, progressive
   tax brackets, and a dependency query.
 
 ## Working with traced values
@@ -159,11 +159,11 @@ public decimal CalculateTotal(Order order)
 Isolating the calculation that has to be explained is a design decision, not a workaround:
 the traced region stays small enough to read, and everything around it keeps its own types.
 
-For help deciding where that boundary belongs, see [Which calculations should use Yurai?](https://github.com/urario/Yurai/blob/main/docs/which-calculations.md).
+For help deciding where that boundary belongs, see [Which calculations should use Yurai?](https://github.com/urario/Yurai/blob/v0.1.0/docs/which-calculations.md).
 
 Yurai is designed for explicitly bounded regions with tens of domain calculation steps,
 not for tracing every variable in an application. The published
-[performance baseline](https://github.com/urario/Yurai/blob/main/docs/performance.md) includes graphs beyond 10,000 evidence nodes as
+[performance baseline](https://github.com/urario/Yurai/blob/v0.1.0/docs/performance.md) includes graphs beyond 10,000 evidence nodes as
 stress cases and explains the time, allocation, and dependency-path scaling trade-offs.
 
 Boolean conditions are another explicit boundary in the current v1 design. Reading
@@ -279,14 +279,14 @@ when consuming .NET Standard 2.0 libraries.
 
 ## Project
 
-- [Contributing guide](https://github.com/urario/Yurai/blob/main/CONTRIBUTING.md) — how to propose a change, and what a pull request
+- [Contributing guide](https://github.com/urario/Yurai/blob/v0.1.0/CONTRIBUTING.md) — how to propose a change, and what a pull request
   needs.
-- [Collaboration contract](https://github.com/urario/Yurai/blob/main/AGENTS.md) — how humans and AI agents develop this repository
+- [Collaboration contract](https://github.com/urario/Yurai/blob/v0.1.0/AGENTS.md) — how humans and AI agents develop this repository
   together, and who decides what.
-- [Knowledge base](https://github.com/urario/Yurai/blob/main/knowledge/index.md) — requirements, architecture decision records, and
+- [Knowledge base](https://github.com/urario/Yurai/blob/v0.1.0/knowledge/index.md) — requirements, architecture decision records, and
   process conventions.
-- [Execution plan](https://github.com/urario/Yurai/blob/main/docs/project-execution-plan.md) — phases, issues, and their dependencies.
+- [Execution plan](https://github.com/urario/Yurai/blob/v0.1.0/docs/project-execution-plan.md) — phases, issues, and their dependencies.
 
 ## License
 
-[MIT](https://github.com/urario/Yurai/blob/main/LICENSE).
+[MIT](https://github.com/urario/Yurai/blob/v0.1.0/LICENSE).

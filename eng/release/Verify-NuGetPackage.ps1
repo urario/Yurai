@@ -10,7 +10,10 @@ param(
     [string]$ExpectedPackageId,
 
     [Parameter(Mandatory)]
-    [string]$ExpectedVersion
+    [string]$ExpectedVersion,
+
+    [Parameter(Mandatory)]
+    [string]$ExpectedRepositoryCommit
 )
 
 $ErrorActionPreference = 'Stop'
@@ -45,6 +48,8 @@ try {
     Assert-Condition ($metadata.id -eq $ExpectedPackageId) "Package ID '$($metadata.id)' does not match '$ExpectedPackageId'."
     Assert-Condition ($metadata.version -eq $ExpectedVersion) "Package version '$($metadata.version)' does not match '$ExpectedVersion'."
     Assert-Condition ($metadata.license.type -eq 'expression' -and $metadata.license.'#text' -eq 'MIT') 'Package license must be the MIT expression.'
+    Assert-Condition ($metadata.repository.url -eq 'https://github.com/urario/Yurai') 'Package repository URL is incorrect.'
+    Assert-Condition ($metadata.repository.commit -eq $ExpectedRepositoryCommit) 'Package repository commit does not match the verified release commit.'
     Assert-Condition (($metadata.dependencies.SelectNodes('.//*[local-name()="dependency"]') | Measure-Object).Count -eq 0) 'The package contains runtime dependencies.'
 
     $archive = [IO.Compression.ZipFile]::OpenRead($PackagePath)
@@ -78,6 +83,8 @@ try {
         $symbolsMetadata = $symbolsNuspec.package.metadata
         Assert-Condition ($symbolsMetadata.id -eq $ExpectedPackageId) 'The symbols package ID does not match the main package.'
         Assert-Condition ($symbolsMetadata.version -eq $ExpectedVersion) 'The symbols package version does not match the main package.'
+        Assert-Condition ($symbolsMetadata.repository.url -eq 'https://github.com/urario/Yurai') 'Symbols package repository URL is incorrect.'
+        Assert-Condition ($symbolsMetadata.repository.commit -eq $ExpectedRepositoryCommit) 'Symbols package repository commit does not match the verified release commit.'
         Assert-Condition ($null -ne ($symbolsMetadata.packageTypes.packageType | Where-Object { $_.name -eq 'SymbolsPackage' })) 'The symbols package type is missing.'
         Assert-Condition (($symbolsMetadata.dependencies.SelectNodes('.//*[local-name()="dependency"]') | Measure-Object).Count -eq 0) 'The symbols package contains dependencies.'
 
@@ -88,7 +95,7 @@ try {
             $pdbBytes = New-Object IO.MemoryStream
             $pdbStream.CopyTo($pdbBytes)
             $pdbText = [Text.Encoding]::ASCII.GetString($pdbBytes.ToArray())
-            Assert-Condition ($pdbText -match 'raw\.githubusercontent\.com/urario/Yurai/') 'The PDB does not contain SourceLink information for urario/Yurai.'
+            Assert-Condition ($pdbText -match "raw\.githubusercontent\.com/urario/Yurai/$ExpectedRepositoryCommit/") 'The PDB SourceLink URL does not point to the verified release commit.'
         }
         finally {
             $pdbStream.Dispose()

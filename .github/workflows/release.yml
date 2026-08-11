@@ -71,6 +71,7 @@ jobs:
           -SymbolsPackagePath artifacts/package/Yurai.${{ steps.version.outputs.value }}.snupkg
           -ExpectedPackageId Yurai
           -ExpectedVersion ${{ steps.version.outputs.value }}
+          -ExpectedRepositoryCommit ${{ github.sha }}
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
