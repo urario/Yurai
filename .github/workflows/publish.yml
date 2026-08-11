@@ -22,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.release_tag }}-${{ inputs.release_run_id }}
@@ -43,6 +44,7 @@ jobs:
         id: release
         shell: pwsh
         env:
+          GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
           RELEASE_RUN_ID: ${{ inputs.release_run_id }}
         run: |
