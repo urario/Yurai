@@ -13,6 +13,9 @@
 Fitting, since that is exactly what the library keeps attached to every value it touches.*
 
 ```csharp
+using System;
+using Yurai;
+
 var basePrice = Traced.Of(1000m, "BasePrice");
 var discount = Traced.Of(0.10m, "MemberDiscount");
 var taxRate = Traced.Of(0.10m, "TaxRate");
@@ -48,6 +51,9 @@ how it was reached, and that evidence can be printed, exported as JSON, or queri
 > test — the output above is what it prints, pinned by a test that reads this page. The
 > version is deliberately `0.x`: the public surface may still change, and a second value type
 > beside `decimal` is the change most likely to move it.
+
+**Try it:** [Follow the three-step Quick start](#quick-start) to run this example in a
+new console application.
 
 ## Why this exists
 
@@ -153,6 +159,8 @@ public decimal CalculateTotal(Order order)
 Isolating the calculation that has to be explained is a design decision, not a workaround:
 the traced region stays small enough to read, and everything around it keeps its own types.
 
+For help deciding where that boundary belongs, see [Which calculations should use Yurai?](docs/which-calculations.md).
+
 Yurai is designed for explicitly bounded regions with tens of domain calculation steps,
 not for tracing every variable in an application. The published
 [performance baseline](docs/performance.md) includes graphs beyond 10,000 evidence nodes as
@@ -168,8 +176,8 @@ dependency. A future traced-predicate API would be a separate capability.
 
 ## Related work
 
-Several projects answer nearby questions. None of them is what Yurai is, and the differences
-are worth stating up front.
+Several projects answer nearby questions. The differences in scope and model are worth
+stating up front.
 
 | Project | What it does | How Yurai differs |
 |---|---|---|
@@ -182,10 +190,9 @@ are worth stating up front.
 | [NCalc](https://github.com/ncalc/ncalc), [NTDLS.ExpressionParser](https://github.com/NTDLS/NTDLS.ExpressionParser), [MathParser.org-mXparser](https://mathparser.org/) | .NET expression evaluators: they parse and evaluate expressions supplied as strings (mXparser also does symbolic calculus) at runtime | Calculations stay compiled C# — type-checked, refactorable, reviewable. Yurai never parses an expression string, and it answers why a value is what it is rather than what a string expression evaluates to |
 | [Audit.NET](https://github.com/thepirat000/Audit.NET) | .NET framework for audit trails: records operations and data changes through pluggable data providers | Audit logging records *what happened* — which operation, when, by whom. Yurai answers *why this value* — the derivation inside a single calculation. Yurai also stores nothing; it returns the evidence and stops there |
 
-None of them combines every one of Yurai's properties in one package, but stating that as an
-absence invites exactly the kind of narrow rebuttal the comparison above is meant to avoid —
-[issue #31](https://github.com/urario/Yurai/issues/31) found a zero-dependency NuGet package
-that gets close on several axes. Yurai's claim is only about itself:
+These comparisons are intentionally about each project's scope, ecosystem, license, runtime,
+and query model. They are limited observations about the entries listed here, not a
+uniqueness claim about Yurai. Yurai's claim is only about itself:
 
 > Yurai combines ordinary C# arithmetic over eagerly evaluated domain values with immutable,
 > structurally shared derivation evidence and first-class dependency-path queries, in a
@@ -226,6 +233,44 @@ The package is not on NuGet yet. From the first release (`0.1.0`) onward:
 ```shell
 dotnet add package Yurai
 ```
+
+### Quick start
+
+After `0.1.0` is available, the shortest path from a new console application to the
+first explanation is:
+
+1. Create a console application and add Yurai:
+
+   ```shell
+   dotnet new console -n YuraiQuickstart
+   cd YuraiQuickstart
+   dotnet add package Yurai --version 0.1.0
+   ```
+
+2. Replace `Program.cs` with this complete example:
+
+   ```csharp
+   using System;
+   using Yurai;
+
+   var basePrice = Traced.Of(1000m, "BasePrice");
+   var discount = Traced.Of(0.10m, "MemberDiscount");
+   var taxRate = Traced.Of(0.10m, "TaxRate");
+   var total = (basePrice * (1 - discount) * (1 + taxRate))
+       .Round(0, "Round to whole currency unit")
+       .As("Total");
+
+   Console.WriteLine(total.Explain());
+   ```
+
+3. Run it:
+
+   ```shell
+   dotnet run
+   ```
+
+The first output is the `Result` / `Derivation` explanation shown at the top of this
+page.
 
 Yurai targets `netstandard2.0` and has **zero runtime dependencies** — BCL only, including
 the JSON export. NuGet compatibility therefore includes .NET Framework 4.6.1+ and .NET Core
