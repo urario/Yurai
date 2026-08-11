@@ -23,6 +23,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Test release tag validation
+        shell: pwsh
+        run: ./tests/WorkflowTests/Assert-ReleaseTagCommit.Tests.ps1
+
       - name: Setup .NET from global.json
         uses: actions/setup-dotnet@v4
 

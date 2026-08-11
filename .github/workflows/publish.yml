@@ -30,7 +30,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.release_tag }}-${{ inputs.release_run_id }}
+  group: ${{ github.workflow }}-${{ inputs.release_tag }}
   cancel-in-progress: false
 
 jobs:
@@ -40,6 +40,26 @@ jobs:
     environment: release
     timeout-minutes: 15
     steps:
+      - name: Checkout publish workflow scripts
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: _release-tools
+
+      - name: Confirm publish workflow checkout
+        shell: pwsh
+        working-directory: _release-tools
+        env:
+          EXPECTED_WORKFLOW_COMMIT: ${{ github.workflow_sha }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:EXPECTED_WORKFLOW_COMMIT)) {
+            throw 'github.workflow_sha did not identify the workflow commit.'
+          }
+          $actualWorkflowCommit = git rev-parse HEAD
+          if ($actualWorkflowCommit -cne $env:EXPECTED_WORKFLOW_COMMIT) {
+            throw "Publish workflow checkout '$actualWorkflowCommit' does not match workflow commit '$env:EXPECTED_WORKFLOW_COMMIT'."
+          }
+
       - name: Validate release run
         id: release
         shell: pwsh
@@ -54,14 +74,35 @@ jobs:
           if ($run.event -notmatch '^push$') { throw 'The selected release run was not triggered by a tag push.' }
           if ($run.headBranch -ne $env:RELEASE_TAG) { throw 'The selected run tag does not match release_tag.' }
           if ($run.status -ne 'completed' -or $run.conclusion -ne 'success') { throw 'The selected release run did not complete successfully.' }
-          $tagRef = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$env:RELEASE_TAG" | ConvertFrom-Json
-          $tagObject = $tagRef.object
-          if ($tagObject.type -eq 'tag') {
-            $tagObject = gh api "repos/$env:GITHUB_REPOSITORY/git/tags/$($tagObject.sha)" | ConvertFrom-Json
+
+          $tagRefJson = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$env:RELEASE_TAG"
+          if ($LASTEXITCODE -ne 0) { throw "Unable to read release tag '$env:RELEASE_TAG'." }
+          $tagRef = $tagRefJson | ConvertFrom-Json
+          $verifiedCommits = @(
+            ./_release-tools/eng/release/Assert-ReleaseTagCommit.ps1 -TagObject $tagRef.object -ExpectedCommit $run.headSha -ResolveAnnotatedTag {
+              param($TagObjectSha)
+              $tagJson = gh api "repos/$env:GITHUB_REPOSITORY/git/tags/$TagObjectSha"
+              if ($LASTEXITCODE -ne 0) { throw "Unable to read annotated tag object '$TagObjectSha'." }
+              $tagJson | ConvertFrom-Json
+            }
+          )
+          if ($verifiedCommits.Count -ne 1) {
+            throw "Release tag verification returned $($verifiedCommits.Count) commit values instead of exactly one."
           }
-          if ($tagObject.type -ne 'commit' -or $tagObject.sha -ne $run.headSha) { throw 'The current release tag does not point to the selected release run commit.' }
-          "head_sha=$($run.headSha)" >> $env:GITHUB_OUTPUT
-          "artifact_name=yurai-package-$env:RELEASE_TAG-$($run.headSha)" >> $env:GITHUB_OUTPUT
+          $verifiedCommit = [string]$verifiedCommits[0]
+          if ($verifiedCommit -cne $run.headSha) {
+            throw "Verified release commit '$verifiedCommit' does not match selected run head SHA '$($run.headSha)'."
+          }
+
+          $comparisonJson = gh api "repos/$env:GITHUB_REPOSITORY/compare/main...$verifiedCommit"
+          if ($LASTEXITCODE -ne 0) { throw "Unable to compare release commit '$verifiedCommit' with main." }
+          $comparison = $comparisonJson | ConvertFrom-Json
+          if ($comparison.status -notin @('identical', 'behind')) {
+            throw "Verified release commit '$verifiedCommit' is not reachable from main (comparison status: '$($comparison.status)')."
+          }
+
+          "head_sha=$verifiedCommit" >> $env:GITHUB_OUTPUT
+          "artifact_name=yurai-package-$env:RELEASE_TAG-$verifiedCommit" >> $env:GITHUB_OUTPUT
 
       - name: Checkout verified release commit
         uses: actions/checkout@v5
