@@ -4,7 +4,7 @@ title: Requirements registry
 description: The single registry of Yurai's RQ-### requirement identifiers, with priorities, statuses, and acceptance criteria.
 tags: [requirements, traceability]
 status: draft
-generated: { by: codex/2026-08, at: 2026-08-11T17:44:06+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-11T18:35:01+09:00 }
 sources:
   - id: issue-8
     resource: https://github.com/urario/Yurai/issues/8
@@ -97,7 +97,7 @@ The identifier rules — three digits, never reused, split by supersession — a
 | RQ-025 | Novelty claim ceiling: one positioning sentence about Yurai itself, no existence-negation claim | P0 | Accepted | README and documentation review (#31, PR #72; #15 for the original ceiling mechanism) |
 | RQ-026 | Configurable explanation output (depth, culture, format) | P1 | Accepted | Deferred; tests when a post-MVP issue implements it |
 | RQ-027 | JSON export schema documented and versioned as a stable contract | P1 | Accepted | Schema document review (#24, ADR-0013) |
-| RQ-028 | Value-type extensibility may be pursued later | P2 | Accepted | No v1.0 criteria; ADR-0018 records the first approved activation |
+| RQ-028 | Value-type extensibility may be pursued later | P2 | Accepted | No v1.0 criteria; ADR-0018 records the first activation |
 | RQ-029 | Type-neutral wording, unless a reason is recorded | P0 | Accepted | Review of requirements, design, and API wording (#17, #18, this registry) |
 
 - **Priority** — `P0` must ship in v1.0; `P1` and `P2` are wanted but do not block a
@@ -817,8 +817,8 @@ here because it exists to keep RQ-028 reachable rather than because it waits for
   intent rather than rediscovered from scratch and re-argued against RQ-023 as if it
   were a new idea.
 - **Acceptance criteria**:
-  - ADR-0018 is the first approved activation, for Int64. Its fidelity contract and
-    implementation gate remain in that ADR rather than becoming a second copy here.
+  - ADR-0018 records the first activation, for Int64. Its fidelity contract and shipping
+    gate live in that ADR rather than becoming a second copy here.
   - What keeps further extension realistic — that today's requirements, design, and API
     wording do not close it off for free — remains the present-tense RQ-029.
 - **Constraints and notes**: This is the P2, future-facing half of the type-

@@ -5,7 +5,7 @@ description: Architecture drivers, evidence model, runtime boundaries, and imple
 tags: [architecture, evidence, computation-lineage, decimal, int64, generics]
 status: draft
 requirements: [RQ-001, RQ-002, RQ-003, RQ-004, RQ-005, RQ-007, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-014, RQ-015, RQ-016, RQ-017, RQ-018, RQ-019, RQ-020, RQ-021, RQ-022, RQ-023, RQ-024, RQ-025, RQ-026, RQ-027, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-11T17:44:06+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-11T18:35:01+09:00 }
 sources:
   - id: issue-17
     resource: https://github.com/urario/Yurai/issues/17
@@ -222,13 +222,10 @@ complicate overload resolution. `Traced.Of(1, ...)` continues to mean decimal; I
 entry is explicit through `Traced.OfInt64(...)`.
 
 For 0.2.0, the public CLR type-definition inventory grows from one to two:
-`Traced<T>` is the carrier and non-generic `Traced` is the inference companion. The
-companion adds two `OfInt64` overloads and one Int64 overload each for `Min` and `Max`;
-`Round` moves to an exact-receiver decimal extension and `ToJsonV1` is a temporary
-decimal migration route. The arithmetic, naming, selection, rendering, and query
-concepts do not multiply into public policy types. The additional declared members are
-accepted because they make Int64 semantics explicit or preserve the schema-v1 migration
-path without a second carrier.
+`Traced<T>` is the carrier and non-generic `Traced` is the inference companion. ADR-0018
+owns the member-level inventory and the RQ-015 trade-off it accepts; the architectural
+rule here is unchanged — arithmetic, naming, selection, rendering, and query concepts
+must not multiply into public policy types.
 
 ### 3.6 Representation separation
 

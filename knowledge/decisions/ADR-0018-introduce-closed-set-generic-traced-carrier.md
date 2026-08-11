@@ -5,7 +5,7 @@ description: Yurai 0.2.0 introduces Traced<T> for decimal and Int64 with library
 tags: [api, types, generics, evidence, json, compatibility, adr]
 status: draft
 requirements: [RQ-001, RQ-004, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-015, RQ-023, RQ-027, RQ-028, RQ-029]
-generated: { by: codex/2026-08, at: 2026-08-11T17:44:06+09:00 }
+generated: { by: codex/2026-08, at: 2026-08-11T18:35:01+09:00 }
 sources:
   - id: issue-67
     resource: https://github.com/urario/Yurai/issues/67
@@ -44,6 +44,10 @@ was inexpensive while 0.1.0 was unpublished, but 0.2.0 still has a real migratio
 for 0.1.x users; release documentation must account for it. Permanent compatibility
 carriers are not justified, while source ergonomics that can be preserved without a
 second carrier are preserved.
+
+The direction recorded here was settled with the maintainer in issue #67. The `draft`
+status means that this record and its synchronization changes have not yet completed
+pull-request review; it does not reopen the issue-level direction.
 
 ## Decision
 
@@ -142,6 +146,13 @@ For Int64 `Min` and `Max`, equal values select the left operand. Result value an
 a different selected value from the recorded result.
 
 `Round` is not an Int64 capability and is absent from the Int64 receiver surface.
+
+Int64 support ships only after example and property tests cover this contract: integer
+division (`5 / 2 == 2`), both overflow edges (`long.MaxValue + 1` and
+`long.MinValue / -1`), division by zero, mixed plain operands, equal `Min` and `Max`
+ties, and lossless invariant base-10 round-trip at `long.MinValue` and `long.MaxValue`.
+Issue #67 records measured evidence that native Int64 behaves as stated here; the
+shipping tests keep Yurai's implementation aligned with that contract.
 
 ### Native-first evaluation and failures
 
