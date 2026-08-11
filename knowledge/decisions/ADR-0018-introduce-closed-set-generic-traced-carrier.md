@@ -3,7 +3,7 @@ type: ADR
 title: Introduce a closed-set generic Traced carrier for decimal and Int64
 description: Yurai 0.2.0 introduces Traced<T> for decimal and Int64 with library-owned type semantics, a homogeneous typed evidence DAG, and JSON schema v2.
 tags: [api, types, generics, evidence, json, compatibility, adr]
-status: draft
+status: stable
 requirements: [RQ-001, RQ-004, RQ-008, RQ-009, RQ-010, RQ-011, RQ-012, RQ-013, RQ-015, RQ-023, RQ-027, RQ-028, RQ-029]
 generated: { by: codex/2026-08, at: 2026-08-11T18:35:01+09:00 }
 sources:
