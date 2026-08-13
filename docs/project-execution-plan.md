@@ -4,7 +4,7 @@ Yurai(Explainable domain calculations for .NET — 軽量 computation-lineage �
 全体像・依存関係・体制ルールの参照用の正本ドキュメントであり、日々の作業状態は各 Issue とラベルで管理する。
 
 - 親Issue(Epic): [#35 Yurai 実行計画: 全体像・依存グラフ・役割分担](https://github.com/urario/Yurai/issues/35)
-- **現在地: Phase 2(MVP実装)完了。Phase 3(0.1.0 公開)進行中。**
+- **現在地(2026-08-13 JST): 0.1.0 公開完了。0.2.0 は実装着手直前。**
 
 2026-08-10 の計画見直しで、本書はフェーズの列挙から**リリース列**に組み替えた。Phase 3 の
 先が存在しなかった状態を解消し、0.2.0 以降を明示している。
@@ -81,29 +81,26 @@ Phase 3 以降はフェーズ番号ではなくリリース番号で追う。
 
 | リリース | 内容 | 状態 |
 |---|---|---|
-| **0.1.0** | NuGet 初版 | 進行中 |
-| **0.2.0** | 第2の値型 — closed `Traced<T>` + 型別 internal binding | 設計中 |
+| **0.1.0** | NuGet 初版 | ✅ 完了 |
+| **0.2.0** | closed `Traced<T>` + Int64 + JSON schema v2 | 実行準備完了 |
 | 0.3.0 | ExplainOptions(深さ制限・カルチャ・出力形式)— RQ-026 | 未着手 |
 | 0.4.0 | traced predicate(条件の系譜) | 未着手 |
 | 0.5.0 | DAG 差分比較 + JSON import | 未着手 |
 | 1.0.0 | 公開 API 凍結の判断 | 未定 |
 
-### 0.1.0: NuGet 初版(Phase 3)
+### 0.1.0: NuGet 初版(Phase 3・完了)
 
-| Issue | 内容 | 担当 | 依存 |
-|---|---|---|---|
-| [#66](https://github.com/urario/Yurai/issues/66) | **README を実装に同期させる** | Claude | なし(最優先) |
-| [#30](https://github.com/urario/Yurai/issues/30) | NuGetパッケージング+リリースCI+0.1.0 publish | Codex → publish は Human | #31, #66 |
-| [#31](https://github.com/urario/Yurai/issues/31) | 公開前の NuGet 名称・キーワード再走査 | Claude | なし(publish 前に完了必須) |
-| [#32](https://github.com/urario/Yurai/issues/32) | ドキュメント最終化+ガイド「どの計算をYurai化すべきか」 | Claude → Human | #31 |
-| [#67](https://github.com/urario/Yurai/issues/67) | **【設計】`Traced<T>` と値型ポリシーの方式設計 + ADR** | Claude → Human決定 | なし(#30 と並行) |
+| Issue | 結果 |
+|---|---|
+| [#66](https://github.com/urario/Yurai/issues/66) | README と実装を同期 |
+| [#31](https://github.com/urario/Yurai/issues/31) | NuGet 名称・キーワード再走査を完了 |
+| [#32](https://github.com/urario/Yurai/issues/32) | README・公開ドキュメント・利用判断ガイドを最終化 |
+| [#30](https://github.com/urario/Yurai/issues/30) | パッケージング、リリースCI、0.1.0 publish を完了 |
+| [#67](https://github.com/urario/Yurai/issues/67) | 0.2.0 の方式設計を完了。ADR-0018 と関連文書を `stable` 化 |
 
-**初版を 0.1.0 とする**(SemVer 0.x — 公開 API を凍結しない)。直後の 0.2.0 で
-`Traced` → `Traced<T>` の破壊的変更が現実的な選択肢として残るため。1.0.0 で出すと、
-非ジェネリックな `Traced`、Explain のテキスト形式、JSON schema v1 がすべて互換性契約になる。
-
-#66 は publish のブロッカー。README は `.nupkg` に同梱されるため、実装と食い違ったまま
-配布されることになる。
+Yurai 0.1.0 は [NuGet.org](https://www.nuget.org/packages/Yurai) に公開済み。公開 API を
+1.0.0 まで凍結しない SemVer 0.x として出荷し、0.2.0 では ADR-0018 に従って
+`Traced` から `Traced<T>` への破壊的変更を行う。
 
 ### 0.2.0: 第2の値型
 
@@ -123,13 +120,25 @@ homogeneous `EvidenceNode<T>` DAG とし、heterogeneous graph や `object Value
 generic JSON export は schema v2、schema v1 は凍結し、decimal の v1 emitter だけを 0.2.x の
 migration bridge として残す。
 
-| Issue | 内容 | 担当 | 依存 |
-|---|---|---|---|
-| [#67](https://github.com/urario/Yurai/issues/67) | 方式設計 + ADR | Claude → Human決定 | なし |
-| [#68](https://github.com/urario/Yurai/issues/68) | 生存ミュータントの棚卸し | Codex → Claude レビュー | 実装着手前 |
-| 未起票 | carrier / evidence generic化、Int64 API・忠実性テスト(S8 以降) | Codex → Claudeレビュー | #67 の ADR 承認後に分割起票 |
-| 未起票 | JSON schema v2 実装・schema文書・互換性テスト | Codex → Claudeレビュー | carrier / evidence 実装後 |
-| 未起票 | 移行ガイド、README、XML docs、リリースノート同期 | Claude → Human | 公開API・schema v2 実装後 |
+設計は #67 と ADR-0018 で完了済み。production implementation を始める前に #68 と #79 を
+両方完了させる。#76 は独立したリリースパイプライン修正として並行できる。
+
+| 順序 | Issue | 内容 | 担当 | 状態・依存 |
+|---|---|---|---|---|
+| 0A | [#68](https://github.com/urario/Yurai/issues/68) | 生存ミュータントの棚卸しと移行前ベースライン | Codex → Claude | Ready。#80 より前 |
+| 0B | [#79](https://github.com/urario/Yurai/issues/79) | generic operator・dispatch・boxing・allocation スパイク / Go-NoGo | Codex → Claude → Human | Ready。#68 と並行可 |
+| 0C | [#76](https://github.com/urario/Yurai/issues/76) | `.snupkg` 二重 push の修正 | Codex | Ready。実地受入は #86 |
+| S8 | [#80](https://github.com/urario/Yurai/issues/80) | generic evidence 基盤と decimal regression 保護 | Codex → Claude | #68 + #79 Go |
+| S9 | [#81](https://github.com/urario/Yurai/issues/81) | public `Traced<T>` + static `Traced` への移行 | Codex → Claude | #80 |
+| S10 | [#82](https://github.com/urario/Yurai/issues/82) | Int64 fidelity と property tests | Codex → Claude | #81 |
+| S11 | [#83](https://github.com/urario/Yurai/issues/83) | JSON schema v2 + decimal v1 bridge | Codex → Claude | #82 |
+| S12 | [#84](https://github.com/urario/Yurai/issues/84) | 移行ガイド・README・XML docs・release notes | Claude → Codex | #81 後にdraft、#83 後に最終化 |
+| Gate | [#85](https://github.com/urario/Yurai/issues/85) | 0.2.0 Release Readiness | Claude → Codex → Human | #68・#79・#80〜#84・#76修正 |
+| Release | [#86](https://github.com/urario/Yurai/issues/86) | NuGet publish・symbols実地検証 | Human | #85 close + #76修正merged |
+
+production code の主スライスは同時に1本とし、基本順序を
+`#80 → #81 → #82 → #83` とする。#84 のdraftと #76 は、同じproduction filesを競合編集しない
+範囲で並行可能。
 
 `break` 閾値は **90 に設定済み**(`low` 90 / `high` 95)。実測ベースラインは main HEAD
 `7ca744b` の deep レーン実行。0.2.0 の移行はノード階層・フォーマッタ・JSON・依存クエリ・
@@ -196,10 +205,19 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    I30["#30 0.1.0 publish"] --> R2["0.2.0 第2の値型"]
-    I67["#67 方式設計 + ADR"] --> R2
-    I68["#68 生存ミュータント棚卸し"] --> R2
-    R2 --> R3["0.3.0 ExplainOptions"]
+    I68["#68 Mutation baseline"] --> I80["#80 Generic evidence"]
+    I79["#79 Spike Gate"] --> I80
+    I80 --> I81["#81 Public Traced<T>"]
+    I81 --> I82["#82 Int64"]
+    I82 --> I83["#83 JSON v2"]
+    I81 --> I84["#84 Docs / migration"]
+    I83 --> I84
+    I83 --> I85["#85 Release Gate"]
+    I84 --> I85
+    I76["#76 Publish fix"] --> I85
+    I85 --> I86["#86 Publish 0.2.0"]
+    I76 --> I86
+    I86 --> R3["0.3.0 ExplainOptions"]
     R3 --> R4["0.4.0 traced predicate"]
     R4 --> R5["0.5.0 DAG 差分 + JSON import"]
     R5 --> R10["1.0.0 API 凍結判断"]
@@ -228,9 +246,18 @@ Milestone / GitHub Project は使わず、ラベル+Epic のチェックリス�
 ## 手動作業(Human)
 
 - main の branch protection 設定(#4)
-- NuGet アカウント・API キー準備と publish 実行(#30)
 - 各 `gate` Issue の判定と close
-- 予約判断(AGENTS.md §2)の決定 — 直近では #67 の方式選択
+- #79 のスパイク結果が No-Go の場合の予約判断
+- #85 通過後の 0.2.0 publish と、#86 の NuGet package / symbols 実地確認
+
+## 0.2.0 完了条件
+
+- #68 と #79 が完了し、production implementation の Go 条件を満たす
+- #76 のworkflow修正、#80〜#84の実装・文書変更がマージ済み
+- #85をHumanが承認してclose
+- #86で `v0.2.0`、NuGet package、symbolsの公開を確認
+- #76の実地受入を完了しclose
+- 本書とEpic #35を0.3.0の現在地へ更新
 
 ## 完了条件
 
