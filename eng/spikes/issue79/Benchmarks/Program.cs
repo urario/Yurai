@@ -1,0 +1,8 @@
+using BenchmarkDotNet.Running;
+
+namespace Issue79Spike.Benchmarks;
+
+public static class Program
+{
+    public static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+}
