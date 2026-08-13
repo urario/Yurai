@@ -70,6 +70,7 @@ public sealed class MetadataValidationTests
         var exception = Assert.Throws<ArgumentException>(action);
 
         Assert.Equal(parameterName, exception.ParamName);
+        Assert.Contains("well-formed UTF-16", exception.Message, StringComparison.Ordinal);
     }
 
     private static string MalformedUtf16(int caseId) => caseId switch

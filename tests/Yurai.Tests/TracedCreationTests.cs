@@ -52,6 +52,14 @@ public sealed class TracedCreationTests
         Assert.Equal("name", nullName.ParamName);
         Assert.Equal("name", emptyName.ParamName);
         Assert.Equal("name", whitespaceName.ParamName);
+        Assert.Contains(
+            "cannot be empty or consist only of white-space characters",
+            emptyName.Message,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "cannot be empty or consist only of white-space characters",
+            whitespaceName.Message,
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -73,8 +81,9 @@ public sealed class TracedCreationTests
     {
         TracedValue traced = default;
 
-        Assert.Throws<InvalidOperationException>(() => { _ = traced.Value; });
+        var valueException = Assert.Throws<InvalidOperationException>(() => { _ = traced.Value; });
         Assert.Throws<InvalidOperationException>(() => { traced.As("Name"); });
+        Assert.Contains("uninitialized", valueException.Message, StringComparison.Ordinal);
         Assert.Equal("Uninitialized Traced", traced.ToString());
     }
 

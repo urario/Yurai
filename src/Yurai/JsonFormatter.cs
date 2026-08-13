@@ -82,7 +82,7 @@ internal static class JsonFormatter
                     builder.Append("\\t");
                     break;
                 default:
-                    // Stryker disable once Equality: Escaping U+0020 is equivalent after JSON parsing.
+                    // Stryker disable once Equality: Schema v1 treats exact escape forms as non-semantic after JSON parsing.
                     if (character < ' ' || char.IsSurrogate(character))
                     {
                         builder.Append("\\u")
